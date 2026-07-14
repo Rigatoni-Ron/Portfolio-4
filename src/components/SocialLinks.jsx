@@ -1,8 +1,12 @@
 import { GitHub, LinkedIn, Mail } from './icons.jsx'
 
 const links = [
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/', Icon: LinkedIn },
-  { label: 'GitHub', href: 'https://github.com/', Icon: GitHub },
+  {
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/in/aaron-chartrand-495229217/',
+    Icon: LinkedIn,
+  },
+  { label: 'GitHub', href: 'https://github.com/Rigatoni-Ron', Icon: GitHub },
   { label: 'Email', href: 'mailto:aaronchartrand1@gmail.com', Icon: Mail },
 ]
 
