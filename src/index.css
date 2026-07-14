@@ -1,0 +1,517 @@
+/* ============================================================
+   Design tokens
+   Dark, outline-first (X-style). One typeface (Geist), 2 weights.
+   Spacing strictly on a 4 / 8 scale.
+   ============================================================ */
+:root {
+  /* surface + ink */
+  --bg: #0a0a0b;
+  --bg-raised: #0e0e10;
+  --text: #ededef;
+  --text-muted: #8a8f98;
+  --text-faint: #565a63;
+
+  /* outlines — the primary visual language */
+  --border: rgba(255, 255, 255, 0.09);
+  --border-hover: rgba(255, 255, 255, 0.18);
+  --border-strong: rgba(255, 255, 255, 0.24);
+
+  /* subtle fill used only on hover / active, never as a base surface */
+  --fill-hover: rgba(255, 255, 255, 0.04);
+
+  /* radii */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-pill: 999px;
+
+  /* spacing — 4 / 8 scale */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+  --s-10: 128px;
+
+  --maxw: 1312px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Geist', system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  font-feature-settings: 'ss01';
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ============================================================
+   Page shell
+   ============================================================ */
+.page {
+  min-height: 100vh;
+  width: 100%;
+  padding: var(--s-5) var(--s-5) var(--s-10);
+}
+
+.container {
+  max-width: var(--maxw);
+  margin: 0 auto;
+}
+
+/* ============================================================
+   Top bar — social links (top right)
+   ============================================================ */
+.topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--s-4);
+}
+
+.social-row {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--text-muted);
+  transition:
+    color 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    background-color 0.18s var(--ease),
+    transform 0.18s var(--ease);
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+  background: var(--fill-hover);
+  transform: translateY(-1px);
+}
+
+.icon-btn:active {
+  transform: translateY(0);
+}
+
+.icon-btn svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* ============================================================
+   Header
+   ============================================================ */
+.header {
+  text-align: center;
+  padding: var(--s-9) 0 var(--s-10);
+}
+
+.header h1 {
+  margin: 0;
+  font-weight: 600;
+  font-size: clamp(52px, 8.5vw, 104px);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.header-sub {
+  margin: var(--s-5) auto 0;
+  max-width: 620px;
+  font-size: clamp(15px, 1.6vw, 18px);
+  line-height: 1.7;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 var(--s-1);
+}
+
+.header-sub .inline-icon {
+  display: inline-flex;
+  color: var(--text-faint);
+  margin: 0 2px;
+}
+
+.header-sub .inline-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* inspo garden pill */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: var(--s-1) var(--s-2) var(--s-1) var(--s-3);
+  margin: 0 var(--s-1);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--r-pill);
+  color: var(--text);
+  font-size: 0.92em;
+  font-weight: 500;
+  line-height: 1;
+  transition:
+    background-color 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    color 0.18s var(--ease);
+}
+
+.pill svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.18s var(--ease);
+}
+
+.pill:hover {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+
+.pill:hover svg {
+  transform: translate(1px, -1px);
+}
+
+/* ============================================================
+   Section scaffolding
+   ============================================================ */
+.work {
+  display: grid;
+  grid-template-columns: 416px 1fr;
+  gap: var(--s-6);
+  align-items: start;
+}
+
+.section-title {
+  margin: 0 0 var(--s-5);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   Recently shipped — project cards
+   ============================================================ */
+.ship-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.card {
+  position: relative;
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-2);
+  transition:
+    border-color 0.2s var(--ease),
+    background-color 0.2s var(--ease),
+    transform 0.2s var(--ease);
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+  background: var(--fill-hover);
+  transform: translateY(-2px);
+}
+
+.card-media {
+  aspect-ratio: 384 / 176;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(255, 255, 255, 0.05), transparent 55%),
+    var(--bg-raised);
+  overflow: hidden;
+}
+
+.card-body {
+  padding: var(--s-4) var(--s-3) var(--s-3);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.card-desc {
+  margin: var(--s-1) 0 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   Playground — component grid
+   ============================================================ */
+.play-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2);
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  aspect-ratio: 428 / 218;
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  transition:
+    border-color 0.2s var(--ease),
+    background-color 0.2s var(--ease),
+    transform 0.2s var(--ease);
+}
+
+.tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    130% 100% at 0% 0%,
+    rgba(255, 255, 255, 0.045),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.25s var(--ease);
+  pointer-events: none;
+}
+
+.tile:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.tile:hover::before {
+  opacity: 1;
+}
+
+.tile-meta {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+
+.tile-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.tile-tag {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+.tile-arrow {
+  color: var(--text-faint);
+  transition:
+    color 0.2s var(--ease),
+    transform 0.2s var(--ease);
+}
+
+.tile:hover .tile-arrow {
+  color: var(--text-muted);
+  transform: translate(2px, -2px);
+}
+
+.tile-arrow svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* ============================================================
+   Modal
+   ============================================================ */
+/* Dark/blur layer — fades independently so it never hides the morph. */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Always-mounted, transparent, click-through centering layer.
+   Kept in the DOM at all times so the modal can be a direct AnimatePresence
+   child (required for the card <-> modal shared-layout handoff to fire). */
+.modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--s-5);
+  pointer-events: none;
+}
+
+.modal {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 560px;
+  max-height: min(88vh, 720px);
+  overflow-y: auto;
+  border: 1px solid var(--border-hover);
+  border-radius: var(--r-lg);
+  background: var(--bg-raised);
+  padding: var(--s-2);
+}
+
+.modal-media {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(255, 255, 255, 0.06), transparent 55%),
+    var(--bg);
+}
+
+.modal-body {
+  padding: var(--s-5) var(--s-4) var(--s-4);
+}
+
+.modal-eyebrow {
+  display: flex;
+  gap: var(--s-2);
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+.modal h2 {
+  margin: var(--s-3) 0 0;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.modal-desc {
+  margin: var(--s-3) 0 0;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.modal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: var(--s-5);
+}
+
+.tag {
+  padding: var(--s-1) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.modal-close {
+  position: fixed;
+  z-index: 60;
+  top: var(--s-5);
+  right: var(--s-5);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  color: var(--text-muted);
+  background: var(--bg-raised);
+  transition:
+    color 0.18s var(--ease),
+    border-color 0.18s var(--ease);
+}
+
+.modal-close:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
+.modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 900px) {
+  .work {
+    grid-template-columns: 1fr;
+    gap: var(--s-8);
+  }
+}
+
+@media (max-width: 560px) {
+  .play-grid {
+    grid-template-columns: 1fr;
+  }
+  .header {
+    padding: var(--s-8) 0 var(--s-9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
