@@ -642,33 +642,36 @@ a {
 .learn-block {
   display: flex;
   flex-direction: column;
-  gap: var(--s-4);
+  /* Matches the 24px below .section-title in the Work columns. */
+  gap: var(--s-5);
 }
 
+/* Same treatment as the Work section titles (.section-title). */
 .learn-heading {
   margin: 0;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-faint);
+  letter-spacing: -0.01em;
+  color: var(--text-muted);
 }
 
 .learn-chart {
   display: flex;
   flex-direction: column;
   gap: var(--s-3);
-  padding: var(--s-5);
+  padding: var(--s-4);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   transition:
     border-color 0.2s var(--ease),
-    background-color 0.2s var(--ease);
+    background-color 0.2s var(--ease),
+    transform 0.2s var(--ease);
 }
 
 .learn-chart:hover {
   border-color: var(--border-hover);
   background: var(--fill-hover);
+  transform: translateY(-2px);
 }
 
 /* Chart art is authored for light mode (light empty cells); invert it
@@ -682,43 +685,46 @@ a {
 }
 
 .learn-chart-foot {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-faint);
-  letter-spacing: 0.02em;
 }
 
+/* Same gap as the Playground grid (.play-grid). */
 .learn-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--s-3);
+  gap: var(--s-2);
 }
 
+/* Same border / radius / hover-lift pattern as the Playground tiles. */
 .learn-card {
   display: flex;
   flex-direction: column;
   gap: var(--s-1);
-  padding: var(--s-5);
+  padding: var(--s-4);
   border: 1px solid var(--border);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   transition:
     border-color 0.2s var(--ease),
-    background-color 0.2s var(--ease);
+    background-color 0.2s var(--ease),
+    transform 0.2s var(--ease);
 }
 
 .learn-card:hover {
   border-color: var(--border-hover);
   background: var(--fill-hover);
+  transform: translateY(-2px);
 }
 
 .learn-card-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--text);
   letter-spacing: -0.01em;
 }
 
 .learn-card-host {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-faint);
 }
 

@@ -12,19 +12,15 @@ const PODCASTS = [
   { title: 'Ryan Peterman', url: 'https://www.youtube.com/@RyanLPeterman', host: 'youtube.com/@RyanLPeterman' },
 ]
 
-const hoverLift = {
-  y: -4,
-  transition: { type: 'spring', stiffness: 420, damping: 24, mass: 0.5 },
-}
-
 function LinkCard({ item }) {
+  // Hover-lift is handled in CSS to match the Work tab cards/tiles exactly;
+  // whileTap mirrors the Playground tiles.
   return (
     <motion.a
       href={item.url}
       target="_blank"
       rel="noreferrer"
       className="learn-card"
-      whileHover={hoverLift}
       whileTap={{ scale: 0.99 }}
     >
       <span className="learn-card-title">{item.title}</span>
@@ -38,12 +34,11 @@ export default function Learnings() {
     <section className="learnings">
       <div className="learn-block">
         <h2 className="learn-heading">GitHub contributions</h2>
-        <motion.a
+        <a
           href="https://github.com/Rigatoni-Ron"
           target="_blank"
           rel="noreferrer"
           className="learn-chart"
-          whileHover={hoverLift}
         >
           <img
             className="learn-chart-img"
@@ -51,7 +46,7 @@ export default function Learnings() {
             alt="GitHub contribution chart for Rigatoni-Ron"
           />
           <span className="learn-chart-foot">github.com/Rigatoni-Ron</span>
-        </motion.a>
+        </a>
       </div>
 
       <div className="learn-block">
