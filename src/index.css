@@ -144,7 +144,7 @@ a {
    ============================================================ */
 .header {
   text-align: center;
-  padding: var(--s-9) 0 var(--s-10);
+  padding: var(--s-9) 0 var(--s-7);
 }
 
 .header h1 {
@@ -212,6 +212,73 @@ a {
 
 .pill:hover svg {
   transform: translate(1px, -1px);
+}
+
+/* ============================================================
+   Tabs — bouncy segmented control (Work / Learnings)
+   ============================================================ */
+.tabs-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--s-8);
+}
+
+.tabs {
+  display: inline-flex;
+  gap: var(--s-1);
+  padding: var(--s-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--s-2) var(--s-5);
+  border-radius: var(--r-pill);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color 0.2s var(--ease);
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab-active {
+  color: var(--text);
+}
+
+/* The sliding pill that animates between tabs. */
+.tab-indicator {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--r-pill);
+}
+
+.tab-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.tab-icon svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.tab-label {
+  position: relative;
+  z-index: 1;
 }
 
 /* ============================================================
@@ -562,6 +629,100 @@ a {
 }
 
 /* ============================================================
+   Learnings panel
+   ============================================================ */
+.learnings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-7);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.learn-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.learn-heading {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.learn-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  transition:
+    border-color 0.2s var(--ease),
+    background-color 0.2s var(--ease);
+}
+
+.learn-chart:hover {
+  border-color: var(--border-hover);
+  background: var(--fill-hover);
+}
+
+/* Chart art is authored for light mode (light empty cells); invert it
+   so empty cells recede into the dark card and activity reads as light. */
+.learn-chart-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: invert(1);
+  opacity: 0.9;
+}
+
+.learn-chart-foot {
+  font-size: 12px;
+  color: var(--text-faint);
+  letter-spacing: 0.02em;
+}
+
+.learn-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+}
+
+.learn-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  transition:
+    border-color 0.2s var(--ease),
+    background-color 0.2s var(--ease);
+}
+
+.learn-card:hover {
+  border-color: var(--border-hover);
+  background: var(--fill-hover);
+}
+
+.learn-card-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.learn-card-host {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+/* ============================================================
    Responsive
    ============================================================ */
 @media (max-width: 900px) {
@@ -572,7 +733,8 @@ a {
 }
 
 @media (max-width: 560px) {
-  .play-grid {
+  .play-grid,
+  .learn-grid {
     grid-template-columns: 1fr;
   }
   .header {

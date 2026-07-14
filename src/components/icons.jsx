@@ -68,3 +68,20 @@ export const Mail = (p) => (
     <path d="m4 7 8 6 8-6" />
   </svg>
 )
+
+/* Tab icons */
+export const Grid = (p) => (
+  <svg {...base} {...p}>
+    <rect x="3" y="3" width="7" height="7" rx="1.6" />
+    <rect x="14" y="3" width="7" height="7" rx="1.6" />
+    <rect x="3" y="14" width="7" height="7" rx="1.6" />
+    <rect x="14" y="14" width="7" height="7" rx="1.6" />
+  </svg>
+)
+
+export const Book = (p) => (
+  <svg {...base} {...p}>
+    <path d="M12 7v13" />
+    <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9a3 3 0 0 1 3 3 3 3 0 0 1 3-3h4.5A1.5 1.5 0 0 1 21 5.5v11a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 0 0-2 2 2 2 0 0 0-2-2H4.5A1.5 1.5 0 0 1 3 16.5z" />
+  </svg>
+)
