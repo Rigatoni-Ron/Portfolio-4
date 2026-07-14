@@ -674,14 +674,15 @@ a {
   transform: translateY(-2px);
 }
 
-/* Chart art is authored for light mode (light empty cells); invert it
-   so empty cells recede into the dark card and activity reads as light. */
+/* Chart art is authored for light mode (light empty cells). Inverting it
+   makes empty cells recede into the dark card; the source color is the
+   inverse of the target orange so it flips back to orange here. */
 .learn-chart-img {
   width: 100%;
   height: auto;
   display: block;
   filter: invert(1);
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 .learn-chart-foot {

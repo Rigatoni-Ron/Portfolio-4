@@ -40,9 +40,12 @@ export default function Learnings() {
           rel="noreferrer"
           className="learn-chart"
         >
+          {/* Color is the inverse of the target orange (#c97a3e): the CSS
+              invert(1) filter flips it back to orange while flipping the
+              light empty cells to dark so they recede into the card. */}
           <img
             className="learn-chart-img"
-            src="https://ghchart.rshah.org/8b8b8b/Rigatoni-Ron"
+            src="https://ghchart.rshah.org/3685c1/Rigatoni-Ron"
             alt="GitHub contribution chart for Rigatoni-Ron"
           />
           <span className="learn-chart-foot">github.com/Rigatoni-Ron</span>
