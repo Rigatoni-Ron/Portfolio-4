@@ -2,15 +2,28 @@
    Recently-shipped titles/descriptions come straight from the wireframe.
    Playground titles reference real builds so the tiles read as real work. */
 
+import collateralImg from './assets/collateral-management.png'
+
 export const projects = [
   {
     id: 'collateral',
     title: 'Collateral management',
     desc: 'Lending and borrowing of digital assets',
+    image: collateralImg,
     year: '2025',
     role: 'Product Design',
-    body: 'A workflow for posting and managing on-chain collateral across lending positions — margin health, liquidation thresholds, and asset selection surfaced without overwhelming the user. Prototyped the flows in code to pressure-test the interactions before hand-off.',
-    tags: ['DeFi', 'Web app', 'Prototyping', 'Design system'],
+    body: 'An institutional-grade collateral management experience for crypto-backed lending, part of Anchorage Digital’s Atlas platform. Lenders track loan health, loan-to-value (LTV), and margin thresholds in real time, so credit programs can scale through market volatility without losing visibility.',
+    highlights: [
+      'Real-time LTV and loan-health monitoring',
+      'Automated margin calls with 24/7 risk oversight',
+      'Assets held in federally regulated custody',
+      'APIs and reporting for continuous position visibility',
+    ],
+    link: {
+      label: 'Read the announcement',
+      href: 'https://www.anchorage.com/insights/expanding-atlas-anchorage-digital-launches-institutional-grade-collateral-management-offering',
+    },
+    tags: ['DeFi', 'Lending', 'Dashboard', 'Risk'],
   },
   {
     id: 'settlements',

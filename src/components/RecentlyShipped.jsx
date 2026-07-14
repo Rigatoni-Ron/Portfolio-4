@@ -30,7 +30,11 @@ export default function RecentlyShipped({ onOpen, activeId, closingId }) {
                 pointerEvents: isActive ? 'none' : 'auto',
               }}
             >
-              <motion.div className="card-media" layoutId={`media-${p.id}`} />
+              <motion.div className="card-media" layoutId={`media-${p.id}`}>
+                {p.image && (
+                  <img className="media-img" src={p.image} alt="" draggable="false" />
+                )}
+              </motion.div>
               <div className="card-body">
                 <h3 className="card-title">{p.title}</h3>
                 <p className="card-desc">{p.desc}</p>

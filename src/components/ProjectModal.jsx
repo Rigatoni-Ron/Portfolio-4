@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Close } from './icons.jsx'
+import { Close, ArrowUpRight } from './icons.jsx'
 import { morph } from '../motion.js'
 
 export default function ProjectModal({ project, onClose }) {
@@ -68,7 +68,16 @@ export default function ProjectModal({ project, onClose }) {
               aria-modal="true"
               aria-labelledby="modal-title"
             >
-              <motion.div className="modal-media" layoutId={`media-${project.id}`} />
+              <motion.div className="modal-media" layoutId={`media-${project.id}`}>
+                {project.image && (
+                  <img
+                    className="media-img"
+                    src={project.image}
+                    alt={`${project.title} interface`}
+                    draggable="false"
+                  />
+                )}
+              </motion.div>
 
               {/* Fades in on open. No exit animation on purpose: on close the
                   modal unmounts instantly so only the card's morph is visible,
@@ -89,6 +98,15 @@ export default function ProjectModal({ project, onClose }) {
                 </div>
                 <h2 id="modal-title">{project.title}</h2>
                 <p className="modal-desc">{project.body}</p>
+
+                {project.highlights && (
+                  <ul className="modal-highlights">
+                    {project.highlights.map((h) => (
+                      <li key={h}>{h}</li>
+                    ))}
+                  </ul>
+                )}
+
                 <div className="modal-tags">
                   {project.tags.map((t) => (
                     <span className="tag" key={t}>
@@ -96,6 +114,18 @@ export default function ProjectModal({ project, onClose }) {
                     </span>
                   ))}
                 </div>
+
+                {project.link && (
+                  <a
+                    className="modal-link"
+                    href={project.link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {project.link.label}
+                    <ArrowUpRight />
+                  </a>
+                )}
               </motion.div>
             </motion.div>
           )}
