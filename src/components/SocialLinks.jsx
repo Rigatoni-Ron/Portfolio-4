@@ -1,9 +1,8 @@
-import { GitHub, LinkedIn, XMark, Mail } from './icons.jsx'
+import { GitHub, LinkedIn, Mail } from './icons.jsx'
 
 const links = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/', Icon: LinkedIn },
   { label: 'GitHub', href: 'https://github.com/', Icon: GitHub },
-  { label: 'X', href: 'https://x.com/', Icon: XMark },
   { label: 'Email', href: 'mailto:aaronchartrand1@gmail.com', Icon: Mail },
 ]
 
