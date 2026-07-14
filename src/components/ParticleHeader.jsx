@@ -9,24 +9,45 @@ import { useEffect, useRef, useState } from 'react'
  * which is very slow when many beads glow at once (an active hover). Here the
  * glow is a pre-rendered radial sprite blitted additively ('lighter'), which
  * looks the same but costs a fraction as much.
+ *
+ * Values below were tuned live with DialKit, then baked in.
  */
+
+const PALETTE = {
+  text: '#ffffff', // rest bead / "I'm Aaron" color
+  glow: '#394565', // hover glow
+  spark: '#e0e7ff', // idle spark flash
+}
+
+const REST_ALPHA = 0.52
 
 const CFG = {
   step: 3, // sampling stride in css px (× dpr) — lower = denser beads
   beadSize: 1.5, // css px (× dpr)
-  mouseRadius: 90, // css px
-  force: 11,
   spring: 0.058,
   damping: 0.855,
-  sparkChance: 0.006, // per-frame chance of a lone spark
-  clusterChance: 0.0012, // per-frame chance of a 2–3 bead burst
+  sparkChance: 0.006, // per-frame base chance of a lone spark
+  clusterChance: 0.0012, // per-frame base chance of a 2–3 bead burst
   sparkDecay: 0.028,
+  // glow (hover)
+  glowAmount: 0.1, // brightness
+  glowRadius: 2, // size (halo)
+  glowSpread: 80, // px of displacement to reach full glow
+  // spark (idle)
+  sparkAmount: 0.2, // flash brightness
+  sparkSize: 2.4, // flash size
+  sparkFrequency: 0.7, // how often idle sparks fire
+  // cursor
+  cursorRadius: 200, // hover reach (css px)
+  cursorForce: 8, // repel strength
 }
 
-// Palette (cool "electro" glow, restrained to fit the dark UI).
-const REST = 'rgba(150,153,170,0.52)'
-const GLOW = [130, 165, 255] // displacement glow (periwinkle)
-const SPARK = [255, 252, 245] // spark flash (warm white)
+function hexToRgb(hex) {
+  const h = String(hex).replace('#', '')
+  const full = h.length === 3 ? h.replace(/./g, (c) => c + c) : h
+  const n = parseInt(full, 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
 
 function makeGlowSprite(rgb, size) {
   const c = document.createElement('canvas')
@@ -65,8 +86,12 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
     let raf = 0
     const mouse = { x: -1e4, y: -1e4 }
 
-    const glowBlue = makeGlowSprite(GLOW, 48)
-    const glowSpark = makeGlowSprite(SPARK, 48)
+    const textRgb = hexToRgb(PALETTE.text)
+    const glowRgb = hexToRgb(PALETTE.glow)
+    const sparkRgb = hexToRgb(PALETTE.spark)
+    const restFill = `rgba(${textRgb[0]},${textRgb[1]},${textRgb[2]},${REST_ALPHA})`
+    const glowSprite = makeGlowSprite(glowRgb, 48)
+    const sparkSprite = makeGlowSprite(sparkRgb, 48)
 
     function build() {
       dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -77,8 +102,6 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
       const wrect = wrap.getBoundingClientRect()
       PW = canvas.width = Math.max(1, Math.round(crect.width * dpr))
       PH = canvas.height = Math.max(1, Math.round(crect.height * dpr))
-      // Note: canvas display size is CSS-driven (100% / calc), so it stays
-      // responsive — we only set the backing-store resolution here.
 
       // Sample the text on an offscreen canvas.
       const off = document.createElement('canvas')
@@ -126,19 +149,19 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
       const rect = canvas.getBoundingClientRect()
       const rmx = (mouse.x - rect.left) * dpr
       const rmy = (mouse.y - rect.top) * dpr
-      const R = CFG.mouseRadius * dpr
-      const FORCE = CFG.force * dpr
+      const R = CFG.cursorRadius * dpr
+      const FORCE = CFG.cursorForce * dpr
       const SZ = CFG.beadSize * dpr
 
       // physics
       for (const p of particles) {
         const dx = p.x - rmx
         const dy = p.y - rmy
-        const d = Math.sqrt(dx * dx + dy * dy)
-        if (d < R && d > 0.1) {
-          const f = ((R - d) / R) ** 2
-          p.vx += (dx / d) * f * FORCE
-          p.vy += (dy / d) * f * FORCE
+        const dd = Math.sqrt(dx * dx + dy * dy)
+        if (dd < R && dd > 0.1) {
+          const f = ((R - dd) / R) ** 2
+          p.vx += (dx / dd) * f * FORCE
+          p.vy += (dy / dd) * f * FORCE
         }
         p.vx += (p.rx - p.x) * CFG.spring
         p.vy += (p.ry - p.y) * CFG.spring
@@ -151,14 +174,14 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
 
       // ambient sparks — the idle "electro" life
       if (particles.length) {
-        if (Math.random() < CFG.sparkChance) {
+        if (Math.random() < CFG.sparkChance * CFG.sparkFrequency) {
           const p = particles[(Math.random() * particles.length) | 0]
           const a = Math.random() * Math.PI * 2
           p.vx += Math.cos(a) * (4 + Math.random() * 5) * dpr
           p.vy += Math.sin(a) * (4 + Math.random() * 5) * dpr
           p.spark = 0.75 + Math.random() * 0.25
         }
-        if (Math.random() < CFG.clusterChance) {
+        if (Math.random() < CFG.clusterChance * CFG.sparkFrequency) {
           const n = 2 + ((Math.random() * 2) | 0)
           for (let i = 0; i < n; i++) {
             const p = particles[(Math.random() * particles.length) | 0]
@@ -172,7 +195,7 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
 
       // pass 1 — resting beads (cheap, no glow)
       ctx.globalCompositeOperation = 'source-over'
-      ctx.fillStyle = REST
+      ctx.fillStyle = restFill
       for (const p of particles) {
         const disp = (p.x - p.rx) ** 2 + (p.y - p.ry) ** 2
         if (disp < 25 && p.spark <= 0.05) {
@@ -185,15 +208,15 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
       for (const p of particles) {
         const disp = Math.sqrt((p.x - p.rx) ** 2 + (p.y - p.ry) ** 2)
         if (disp >= 5) {
-          const t = Math.min(disp / (45 * dpr), 1)
-          const g = (14 + t * 26) * dpr
-          ctx.globalAlpha = 0.35 + t * 0.5
-          ctx.drawImage(glowBlue, p.x - g / 2, p.y - g / 2, g, g)
+          const t = Math.min(disp / (CFG.glowSpread * dpr), 1)
+          const g = (14 + t * 26) * CFG.glowRadius * dpr
+          ctx.globalAlpha = Math.min((0.35 + t * 0.5) * CFG.glowAmount, 1)
+          ctx.drawImage(glowSprite, p.x - g / 2, p.y - g / 2, g, g)
         }
         if (p.spark > 0.05) {
-          const g = (18 + p.spark * 40) * dpr
-          ctx.globalAlpha = p.spark
-          ctx.drawImage(glowSpark, p.x - g / 2, p.y - g / 2, g, g)
+          const g = (18 + p.spark * 40) * CFG.sparkSize * dpr
+          ctx.globalAlpha = Math.min(p.spark * CFG.sparkAmount, 1)
+          ctx.drawImage(sparkSprite, p.x - g / 2, p.y - g / 2, g, g)
         }
       }
       ctx.globalAlpha = 1
@@ -204,13 +227,16 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
         const disp = Math.sqrt((p.x - p.rx) ** 2 + (p.y - p.ry) ** 2)
         if (p.spark > 0.05) {
           const sz = SZ * (1 + p.spark * 3)
-          ctx.fillStyle = `rgba(255,255,255,${Math.min(p.spark + 0.2, 1)})`
+          ctx.fillStyle = `rgba(${sparkRgb[0]},${sparkRgb[1]},${sparkRgb[2]},${Math.min(p.spark + 0.2, 1)})`
           ctx.fillRect(p.x - sz * 0.5, p.y - sz * 0.5, sz, sz)
         } else if (disp >= 5) {
-          const t = Math.min(disp / (45 * dpr), 1)
-          const r = Math.round(190 + t * 60)
-          const g = Math.round(200 + t * 50)
-          ctx.fillStyle = `rgba(${r},${g},255,${0.6 + t * 0.4})`
+          // core follows the glow color, brightened toward white by displacement
+          const t = Math.min(disp / (CFG.glowSpread * dpr), 1)
+          const mix = 0.45 + t * 0.45
+          const r = Math.round(glowRgb[0] + (255 - glowRgb[0]) * mix)
+          const g = Math.round(glowRgb[1] + (255 - glowRgb[1]) * mix)
+          const b = Math.round(glowRgb[2] + (255 - glowRgb[2]) * mix)
+          ctx.fillStyle = `rgba(${r},${g},${b},${0.6 + t * 0.4})`
           ctx.fillRect(p.x - SZ * 0.55, p.y - SZ * 0.55, SZ * 1.1, SZ * 1.1)
         }
       }
