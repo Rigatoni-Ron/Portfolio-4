@@ -46,10 +46,10 @@ export const projects = [
 ]
 
 export const playground = [
+  { id: 'portfolio-node-builder', title: 'Portfolio Node Builder', tag: 'React Flow' },
   { id: 'card-stacker', title: 'Card Stacker', tag: 'Gesture / stack' },
-  { id: 'audio-player', title: 'Audio Player', tag: 'Apple-style' },
-  { id: 'dynamic-clock', title: 'Dynamic Clock', tag: 'Motion' },
-  { id: 'crypto-widget', title: 'Crypto Glass Widget', tag: 'Material' },
+  { id: 'crypto-glass-widget', title: 'Crypto Glass Widget', tag: 'Material' },
+  { id: 'plan-your-trip-globe', title: 'Plan Your Trip Globe', tag: '3D globe' },
+  { id: '3d-shape-animator', title: '3D Shape Animator', tag: 'Three.js' },
   { id: 'animated-menu', title: 'Animated Menu', tag: 'Interaction' },
-  { id: 'shader-grid', title: 'Shader Wave Grid', tag: 'WebGL' },
 ]
