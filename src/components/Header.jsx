@@ -1,9 +1,10 @@
 import { Globe, Leaf, ArrowUpRight } from './icons.jsx'
+import ParticleHeader from './ParticleHeader.jsx'
 
 export default function Header() {
   return (
     <header className="header">
-      <h1>I&rsquo;m Aaron</h1>
+      <ParticleHeader />
       <p className="header-sub">
         <span>Passionate about DeFi</span>
         <span className="inline-icon">
