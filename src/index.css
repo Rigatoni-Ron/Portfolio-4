@@ -161,13 +161,20 @@ a {
 .particle-header {
   position: relative;
   width: 100%;
-  height: clamp(150px, 20vw, 240px);
+  /* Shorter layout slot. The canvas itself is taller and bleeds past this
+     (below) so beads pushed out of the name aren't clipped. */
+  height: clamp(96px, 12vw, 150px);
 }
 
 .particle-canvas {
-  display: block;
+  position: absolute;
+  left: 0;
+  top: -80px;
   width: 100%;
-  height: 100%;
+  height: calc(100% + 160px); /* vertical bleed for pushed beads */
+  display: block;
+  z-index: 0;
+  pointer-events: none; /* mouse is tracked on window; don't block links below */
 }
 
 /* The <h1> is screen-reader/SEO text while particles drive the visual. */
@@ -206,6 +213,8 @@ a {
 }
 
 .header-sub {
+  position: relative;
+  z-index: 1; /* stays above beads that bleed down into this area */
   margin: var(--s-5) auto 0;
   max-width: 620px;
   font-size: clamp(15px, 1.6vw, 18px);

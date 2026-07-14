@@ -69,12 +69,16 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
     const glowSpark = makeGlowSprite(SPARK, 48)
 
     function build() {
-      const rect = wrap.getBoundingClientRect()
       dpr = Math.min(window.devicePixelRatio || 1, 2)
-      PW = canvas.width = Math.max(1, Math.round(rect.width * dpr))
-      PH = canvas.height = Math.max(1, Math.round(rect.height * dpr))
-      canvas.style.width = `${rect.width}px`
-      canvas.style.height = `${rect.height}px`
+      // The canvas is taller than its layout slot (CSS bleed) so pushed beads
+      // aren't clipped. Draw across the whole canvas, but size the text to the
+      // shorter visual band (the wrapper), centered in the canvas.
+      const crect = canvas.getBoundingClientRect()
+      const wrect = wrap.getBoundingClientRect()
+      PW = canvas.width = Math.max(1, Math.round(crect.width * dpr))
+      PH = canvas.height = Math.max(1, Math.round(crect.height * dpr))
+      // Note: canvas display size is CSS-driven (100% / calc), so it stays
+      // responsive — we only set the backing-store resolution here.
 
       // Sample the text on an offscreen canvas.
       const off = document.createElement('canvas')
@@ -82,7 +86,7 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
       off.height = PH
       const o = off.getContext('2d')
       const family = getComputedStyle(document.body).fontFamily || 'sans-serif'
-      let fs = PH * 0.55
+      let fs = wrect.height * dpr * 0.66
       const setFont = () => (o.font = `600 ${fs}px ${family}`)
       setFont()
       const maxW = PW * 0.92
