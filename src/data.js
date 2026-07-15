@@ -49,7 +49,13 @@ export const projects = [
 // /public) or 'native' (a ported React component). Tiles without a mode are
 // not yet wired to open.
 export const playground = [
-  { id: 'portfolio-node-builder', title: 'Portfolio Node Builder', tag: 'React Flow' },
+  {
+    id: 'portfolio-node-builder',
+    title: 'Portfolio Node Builder',
+    tag: 'React Flow',
+    mode: 'iframe',
+    src: '/playground/portfolio-node-builder/index.html',
+  },
   { id: 'card-stacker', title: 'Card Stacker', tag: 'Gesture / stack' },
   { id: 'crypto-glass-widget', title: 'Crypto Glass Widget', tag: 'Material' },
   {
