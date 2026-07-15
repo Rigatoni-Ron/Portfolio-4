@@ -111,7 +111,10 @@ export default function PlaygroundViewer({ item, onClose }) {
 
               {item.mode === 'native' && morphDone && NativeComp && (
                 <Suspense fallback={<Spinner />}>
-                  <div className="pg-native">
+                  <div
+                    className="pg-native"
+                    style={item.bg ? { background: item.bg } : undefined}
+                  >
                     <NativeComp />
                   </div>
                 </Suspense>
