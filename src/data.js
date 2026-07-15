@@ -52,7 +52,13 @@ export const playground = [
   { id: 'portfolio-node-builder', title: 'Portfolio Node Builder', tag: 'React Flow' },
   { id: 'card-stacker', title: 'Card Stacker', tag: 'Gesture / stack' },
   { id: 'crypto-glass-widget', title: 'Crypto Glass Widget', tag: 'Material' },
-  { id: 'plan-your-trip-globe', title: 'Plan Your Trip Globe', tag: '3D globe' },
+  {
+    id: 'plan-your-trip-globe',
+    title: 'Plan Your Trip Globe',
+    tag: '3D globe',
+    mode: 'iframe',
+    src: '/playground/plan-your-trip-globe/index.html',
+  },
   {
     id: '3d-shape-animator',
     title: '3D Shape Animator',

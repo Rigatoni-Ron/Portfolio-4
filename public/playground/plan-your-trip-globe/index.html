@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan Your Trip — Globe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:     #D6D9DD;
+      --border: rgba(0,0,0,0.10);
+      --text:   #1A1D24;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+    }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    /* Connected two-panel wrapper */
+    .panels-wrapper {
+      display: flex;
+      align-self: center;
+      width: auto;
+      height: 640px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: width .6s cubic-bezier(.22,1,.36,1);
+    }
+
+    /* Art panel — globe */
+    .art-panel {
+      position: relative;
+      background: radial-gradient(ellipse at 50% 45%, #E4E7EB 0%, #C8CCD2 100%);
+      overflow: hidden;
+      flex: 0 0 640px;
+      height: 100%;
+    }
+    .panels-wrapper.has-trip .art-panel {
+      border-right: 1px solid var(--border);
+    }
+    #art-canvas {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+    }
+    .art-panel::after {
+      content:'';
+      position:absolute; inset:0;
+      background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(214,217,221,0.85) 100%);
+      pointer-events:none;
+    }
+
+    /* Side panel — flights */
+    .side-panel {
+      flex: 0 0 0;
+      width: 0;
+      display: flex;
+      flex-direction: column;
+      background: rgba(235,237,241,0.6);
+      min-width: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: flex-basis .6s cubic-bezier(.22,1,.36,1), width .6s cubic-bezier(.22,1,.36,1), opacity .35s ease .15s;
+    }
+    .side-panel.visible {
+      flex: 0 0 440px;
+      width: 440px;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .side-panel > .side-header,
+    .side-panel > .cards-list,
+    .side-panel > .side-footer {
+      transition: opacity .3s ease, transform .35s cubic-bezier(.4,0,.2,1);
+    }
+    .side-panel.evaporating > .side-header,
+    .side-panel.evaporating > .cards-list,
+    .side-panel.evaporating > .side-footer {
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+    }
+    .side-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .side-header-reset {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(30,45,80,0.55);
+      background: transparent;
+      border: 1px solid rgba(30,45,80,0.22);
+      border-radius: 6px;
+      padding: 4px 9px;
+      cursor: pointer;
+      transition: background .2s ease, color .2s ease, border-color .2s ease;
+    }
+    .side-header-reset:hover {
+      background: rgba(15,20,40,0.08);
+      color: rgba(15,20,40,0.85);
+      border-color: rgba(15,20,40,0.4);
+    }
+    .side-header-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(15,20,40,0.85);
+    }
+    .side-header-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .08em;
+      color: rgba(30,45,80,0.45);
+      text-transform: uppercase;
+    }
+    .cards-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .cards-list::-webkit-scrollbar { width: 4px; }
+    .cards-list::-webkit-scrollbar-track { background: transparent; }
+    .cards-list::-webkit-scrollbar-thumb { background: rgba(30,45,80,0.15); border-radius: 2px; }
+    .cards-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 100%;
+      color: rgba(30,45,80,0.3);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 20px;
+      line-height: 1.8;
+    }
+    .cards-empty svg { opacity: .25; }
+
+    /* Flight card */
+    .flight-card {
+      background: rgb(56, 59, 70);
+      border: none;
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      animation: cardIn .35s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity:0; transform:translateY(8px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .flight-card.removing {
+      overflow: hidden;
+      animation: none;
+      transition: opacity .25s ease, transform .25s ease, max-height .35s cubic-bezier(.4,0,.2,1) .05s, margin-bottom .35s cubic-bezier(.4,0,.2,1) .05s, padding .35s cubic-bezier(.4,0,.2,1) .05s;
+      opacity: 0;
+      transform: scale(0.96);
+      max-height: 0 !important;
+      margin-bottom: -8px;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    .fc-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .fc-send {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(235,238,245,0.55);
+      overflow: hidden;
+    }
+    .fc-to {
+      min-width: 0;
+      transition: opacity .4s ease, transform .5s cubic-bezier(.22,1,.36,1);
+    }
+    .flight-card.placeholder .fc-to {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    .fc-reveal {
+      overflow: hidden;
+      max-height: 60px;
+      opacity: 1;
+      transition: max-height .55s cubic-bezier(.22,1,.36,1),
+                  opacity .4s ease,
+                  margin-top .55s cubic-bezier(.22,1,.36,1),
+                  transform .55s cubic-bezier(.22,1,.36,1);
+    }
+    .flight-card.placeholder .fc-reveal {
+      max-height: 0;
+      opacity: 0;
+      margin-top: -9px;
+      transform: translateY(8px);
+    }
+    .flight-card.placeholder .fc-send { opacity: 0; }
+    .flight-card:not(.placeholder) .fc-send svg {
+      animation: fcSend 1.2s cubic-bezier(.5,0,.3,1) both;
+    }
+    @keyframes fcSend {
+      0%   { transform: translateX(-6px); opacity: 0; }
+      20%  { opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateX(6px); opacity: 0; }
+    }
+    .fc-row.fc-row-price {
+      margin: 4px -14px 0;
+      padding: 10px 14px 0;
+      border-top: 1px solid #E2E5E9;
+    }
+    .fc-city {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(235,238,245,0.95);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .fc-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .07em;
+      color: rgba(235,238,245,0.5);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .fc-time-group {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .fc-time {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(235,238,245,0.95);
+    }
+    .fc-date-wrap { position: relative; display: inline-flex; }
+    .fc-date {
+      position: relative;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .07em;
+      color: rgba(235,238,245,0.5);
+      background: transparent;
+      border: none;
+      padding: 0 0 2px;
+      cursor: pointer;
+      transition: color .2s ease;
+    }
+    .fc-date::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 1px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform .35s cubic-bezier(.22,1,.36,1);
+    }
+    .fc-date:hover { color: rgba(235,238,245,0.9); }
+    .fc-date:hover::after { transform: scaleX(1); }
+    /* Custom date picker */
+    .cal-pop {
+      position: fixed;
+      z-index: 100;
+      width: 244px;
+      padding: 14px;
+      background: rgba(245,247,250,0.98);
+      border: 1px solid rgba(15,20,40,0.18);
+      border-radius: 10px;
+      box-shadow: 0 14px 36px -12px rgba(15,20,40,0.3);
+      backdrop-filter: blur(14px);
+      font-family: 'Inter', sans-serif;
+      color: rgba(15,20,40,0.85);
+      opacity: 0;
+      transform: translateY(-4px) scale(.98);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .22s cubic-bezier(.22,1,.36,1);
+    }
+    .cal-pop.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    .cal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cal-title { font-size: 12px; font-weight: 500; letter-spacing: .01em; }
+    .cal-nav { display: flex; gap: 2px; }
+    .cal-nav button {
+      background: transparent; border: none; color: inherit; cursor: pointer;
+      padding: 4px 8px; border-radius: 5px; line-height: 1; font-size: 14px;
+      transition: background .15s ease;
+    }
+    .cal-nav button:hover { background: rgba(15,20,40,0.08); }
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+    }
+    .cal-dow {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: .06em;
+      text-align: center; padding: 4px 0;
+      color: rgba(15,20,40,0.4);
+    }
+    .cal-day {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      text-align: center; padding: 6px 0;
+      border: none; background: transparent; cursor: pointer;
+      color: rgba(15,20,40,0.78);
+      border-radius: 5px;
+      transition: background .15s ease, color .15s ease;
+    }
+    .cal-day:hover { background: rgba(15,20,40,0.08); }
+    .cal-day.other { color: rgba(15,20,40,0.25); }
+    .cal-day.today { box-shadow: inset 0 0 0 1px rgba(15,20,40,0.35); }
+    .cal-day.selected, .cal-day.selected:hover {
+      background: rgba(42,52,78,0.92);
+      color: rgba(235,238,245,0.95);
+    }
+    .fc-price {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(235,238,245,0.95);
+      text-align: right;
+    }
+
+    /* Clear button on flight card */
+    .fc-clear {
+      width: 0;
+      min-width: 0;
+      height: 22px;
+      border-radius: 6px;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      color: rgba(235,238,245,0.5);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: center;
+      opacity: 0;
+      overflow: hidden;
+      flex-shrink: 0;
+      padding: 0;
+      margin-left: -10px; /* collapse the flex gap */
+      transition: width .25s cubic-bezier(.22,1,.36,1), opacity .2s ease, background .15s ease, color .15s ease, padding .25s cubic-bezier(.22,1,.36,1), margin-left .25s cubic-bezier(.22,1,.36,1);
+      pointer-events: none;
+    }
+    .fc-clear svg {
+      flex-shrink: 0;
+    }
+    .flight-card:not(.placeholder) > .fc-row:first-child:hover .fc-clear {
+      width: 22px;
+      padding: 0 5px;
+      margin-left: 0;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .fc-clear:hover {
+      background: rgba(220,60,60,0.25);
+      color: rgba(255,180,180,0.95);
+    }
+
+
+    /* Country hover card on globe */
+    .country-card {
+      position: absolute;
+      z-index: 10;
+      background: rgba(46,50,60,0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 8px 12px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .18s ease, transform .22s cubic-bezier(.22,1,.36,1);
+      white-space: nowrap;
+    }
+    .country-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .cc-name {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(235,238,245,0.95);
+    }
+    .cc-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .06em;
+      color: rgba(235,238,245,0.45);
+      margin-top: 2px;
+    }
+
+    /* Total cost footer */
+    .side-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: rgba(228,231,235,0.5);
+    }
+    .side-footer-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(30,45,80,0.5);
+    }
+    .side-footer-total {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: rgba(10,15,35,0.9);
+      letter-spacing: -.01em;
+    }
+    .side-footer-total.hidden { color: rgba(30,45,80,0.25); font-weight: 400; font-size: 12px; }
+
+    /* Search bar (beneath panels) */
+    #globe-search {
+      position:relative;
+      width:100%; max-width:440px;
+      align-self: center;
+      display:flex; flex-direction:column-reverse; gap:6px;
+      z-index:5;
+    }
+    #globe-suggestions {
+      list-style:none; margin:0; padding:4px 0;
+      background:rgba(228,231,235,0.96); border:1px solid rgba(30,45,80,0.18);
+      border-radius:9px; overflow:hidden; overflow-y:auto;
+      max-height:148px; backdrop-filter:blur(14px);
+      position:absolute; left:0; right:0; bottom:calc(100% + 6px);
+    }
+    #globe-suggestions:empty { display:none; }
+    #globe-suggestions li {
+      padding:7px 14px;
+      font-family:'Space Mono',monospace; font-size:10px;
+      letter-spacing:.1em; text-transform:uppercase;
+      color:rgba(30,45,80,0.65); cursor:pointer;
+    }
+    #globe-suggestions li:hover,
+    #globe-suggestions li.active { background:rgba(30,45,80,0.08); color:rgba(15,20,40,0.95); }
+    #globe-search-bar {
+      display:flex; align-items:center; gap:8px;
+      background:rgba(228,231,235,0.6); border:1px solid rgba(30,45,80,0.22);
+      border-radius:10px; padding:8px 8px 8px 14px;
+      backdrop-filter:blur(14px);
+    }
+    #globe-search-bar.pulse {
+      animation: searchPulse 4.5s ease-in-out infinite;
+    }
+    @keyframes searchPulse {
+      0%, 100% { box-shadow: 0 0 10px 0 rgba(15,20,40,0.14); border-color: rgba(15,20,40,0.28); transform: scale(1);    }
+      50%      { box-shadow: 0 0 20px 4px rgba(15,20,40,0.28); border-color: rgba(15,20,40,0.5);  transform: scale(1.015); }
+    }
+    #globe-search-input {
+      flex:1; background:none; border:none; outline:none;
+      font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.08em;
+      color:#0F1428;
+    }
+    #globe-search-input::placeholder { color:rgba(30,45,80,0.4); }
+    #globe-search-btn {
+      background:rgba(15,20,40,0.88); border:1px solid rgba(15,20,40,0.95);
+      color:rgba(228,231,235,0.95); border-radius:7px; padding:7px 13px;
+      font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.07em;
+      display:flex; align-items:center; gap:0; overflow:hidden;
+      transition:background .3s, border-color .3s, color .3s, box-shadow .3s, padding .4s cubic-bezier(.4,0,.2,1);
+    }
+    #globe-search-btn:not(.off):hover { background:rgba(30,45,80,1); border-color:rgba(30,45,80,1); }
+
+    #globe-search-btn .btn-text {
+      display:inline-block; white-space:nowrap; overflow:hidden;
+      max-width:160px; padding-right:7px;
+      transition:max-width .4s cubic-bezier(.4,0,.2,1), padding-right .4s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+    }
+    #globe-search-btn .btn-icon {
+      display:flex; align-items:center; flex-shrink:0;
+      max-width:20px; overflow:hidden;
+      transition:max-width .4s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+    }
+    #globe-search-btn .btn-dots {
+      display:inline-flex; gap:1px; overflow:hidden;
+      max-width:0; opacity:0;
+      transition:max-width .4s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+    }
+
+    #globe-search-btn.off {
+      background:rgba(15,20,40,0.08); border-color:rgba(15,20,40,0.18);
+      color:rgba(15,20,40,0.35); pointer-events:none;
+    }
+    #globe-search-btn.loading .btn-text { max-width:0; padding-right:0; opacity:0; }
+    #globe-search-btn.loading .btn-icon { max-width:0; opacity:0; }
+    #globe-search-btn.loading .btn-dots { max-width:40px; opacity:1; }
+    #globe-search-btn.loading { padding:7px 11px; pointer-events:none;
+      background:rgba(15,20,40,0.55); border-color:rgba(15,20,40,0.65);
+      color:rgba(228,231,235,0.85); }
+
+    @keyframes dotFade { 0%,100%{opacity:.15} 50%{opacity:1} }
+    #globe-search-btn .ld { display:inline-block; animation:dotFade 1s ease-in-out infinite; }
+    #globe-search-btn .ld:nth-child(2){animation-delay:.18s}
+    #globe-search-btn .ld:nth-child(3){animation-delay:.36s}
+
+    @keyframes btnAwake {
+      0%   { box-shadow:0 0 0 0 rgba(30,45,80,0.55); }
+      60%  { box-shadow:0 0 0 7px rgba(30,45,80,0); }
+      100% { box-shadow:0 0 0 0 rgba(30,45,80,0); }
+    }
+    #globe-search-btn.awake { animation:btnAwake .55s ease-out forwards; }
+  </style>
+</head>
+<body>
+
+  <div class="stage">
+    <div class="panels-wrapper">
+      <!-- Globe -->
+      <div class="art-panel">
+        <canvas id="art-canvas"></canvas>
+      </div>
+      <!-- Flights side panel -->
+      <div class="side-panel">
+        <div class="side-header">
+          <span class="side-header-title">Your journey</span>
+          <button type="button" class="side-header-reset" id="side-reset">Reset</button>
+        </div>
+        <div class="cards-list" id="cards-list">
+          <div class="cards-empty" id="cards-empty">
+            <svg xmlns="http://www.w3.org/2000/svg" height="32" viewBox="0 -960 960 960" width="32" fill="currentColor"><path d="M440-80v-80H160v-80h280v-480L80-520v-100l360-200v-60q0-33 23.5-56.5T520-960q33 0 56.5 23.5T600-880v60l360 200v100L600-720v480h280v80H440Z"/></svg>
+            Plot your first trip to<br>see flights here
+          </div>
+        </div>
+        <div class="side-footer">
+          <span class="side-footer-label">Cheapest route</span>
+          <span class="side-footer-total hidden" id="side-total">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div id="globe-search">
+      <ul id="globe-suggestions"></ul>
+      <div id="globe-search-bar" class="pulse">
+        <input id="globe-search-input" type="text" placeholder="Search the city you live in" autocomplete="off" spellcheck="false" />
+        <button id="globe-search-btn" class="off">
+          <span class="btn-text">Plot home</span>
+          <span class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16" fill="currentColor"><path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z"/></svg></span>
+          <span class="btn-dots" aria-hidden="true"><span class="ld">·</span><span class="ld">·</span><span class="ld">·</span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ── Globe (Canvas 2D + real land data) ── */
+    (function () {
+      const canvas = document.getElementById('art-canvas');
+      const ctx    = canvas.getContext('2d');
+      let W = 0, H = 0;
+
+      function resizeCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const dpr  = devicePixelRatio;
+        W = canvas.width  = Math.round(rect.width  * dpr);
+        H = canvas.height = Math.round(rect.height * dpr);
+        canvas.style.width  = rect.width  + 'px';
+        canvas.style.height = rect.height + 'px';
+      }
+      window.addEventListener('resize', resizeCanvas);
+      if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(canvas.parentElement);
+      resizeCanvas();
+
+      /* ── Land texture (equirectangular map — same source as COBE) ── */
+      const LAND_B64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAACAAQAAAADMzoqnAAAECklEQVR42u3VsW4jRRzH8d94gzfF4Q0VQaC4vBLTRTp0mze4ggfAPAE5XQEFsGNAVIjwBrmW7h7gJE+giKjyABTZE4g06LKJETdRJvtD65kdz6yduKABiW+TVfzRf2bXYxtcE/59YJCz6YdbgQF6ACSRrwYKYImmh5PbwOewlV3wlQNbAN6SEExjUOO+BU0aCSnxReHABUlK4YFQeJeUT3da8IIkZ6NGoSnFY5KsMoVzMKfECUnqxgPYRArarmUCndHwzIEaQEpg5xVdBXROl8mpAQx5dUgPiHoYAAkg5w3JABR06byGAVgcRGAz5bznj6phBQNRFwyqgdxebH6gshJAesWoFhgYpApAFoG8BIZ/fEhSox5jDjQXmV0Ar5XJfAIrALi3URVs09gHIL4XJCkLC5LH9JWiArABFCSrQjdgkBzRJ0WJeUOSNyQAfJJwUSWUBRlJQ8oGHATACGlBynnzy2kEYLNjrxouigD8BZcgOeVPqh12RtufaCN5wCPVDpvQ9lsIrqndsJtDcWqBCpf4hWN7OdWHBw58FwIaNOU/n1TpMW2DFaD48cmr4185T8NHkpUFX749pQPVdgRKC/DGoQPVeAEKv+WHvY8OOWNTPRp5kHuwSf8wzXtVBKR7YwEH9H3lQUaypUfSATOALyVNu5vZJW31Bnx98nkLfDUWJaz6ixvm+RIQRdl3kmRxxiaDoGnZW4CpPfkaQadlcPim1xOSvETQo7Lv75enVAXJ3xGUlony4KQBBWUM1NiDc6qhyS8RgQs18OCMMtPDaAUIyg0PZkRWDqs+wnKJBTDI1Js6BolegOsKmUxNDBAAKqQyMQmidhegBlLZ+wwKYdv5M/8x1khkb1cgKqP2H+MKyV5vS+whrE8DQDgAlUAoRBX056EElJCjJVACeJBZgNfVp+iCCm4RBWCgKsRxASSA9KgDhDtCiTuMyfHsKXzhC6wNAIjjWb8LKAOA2ctk3FmCOlgKFy8f1N0JJtgsxinYnVAHt4t3gPzZXSCTyCWCQmBT91QE3B5yarSN40dNHYPka4TlDhTUI8zLvl0JSL3vZn6DsCFZOeB2yROEpR68sECQQA++xIGCR2X7DwlEoLRgUrZrqlUg50S1uy43YqDcN6UFBVkhAjWiCV2Q0jgQPdplMKxvBXodcOfAwJYvgdL+1etA1YJJfBcZlQV7sO1i2gHoNiyxtQ5sBsCgWyoxCHiFFd2L5nUTCqMAqGUgsQ9f5kCcCiZgRYkMgMTd5WsB1rTzj0Em14BE4r+QxN1lCEsVur2PoF5Wbg8RJXR4djgvBgauhLywoEZQrt1KKRdVS4CdlJ8qafyP+9KIj/nE/d7kKwH9jgS72e9DV+kvfTWgct4ZyP8Byb8BPG7MaaIIkAQAAAAASUVORK5CYII=';
+
+      /* Toronto coords */
+      const TOR_LAT = 43.65 * Math.PI / 180;
+      const TOR_LON = -79.38 * Math.PI / 180;
+      const toronto = [Math.cos(TOR_LAT)*Math.cos(TOR_LON), Math.sin(TOR_LAT), Math.cos(TOR_LAT)*Math.sin(TOR_LON)];
+
+      /* Rotation helpers */
+      function rY(v,a){ return [v[0]*Math.cos(a)+v[2]*Math.sin(a), v[1], -v[0]*Math.sin(a)+v[2]*Math.cos(a)]; }
+      function rX(v,a){ return [v[0], v[1]*Math.cos(a)-v[2]*Math.sin(a), v[1]*Math.sin(a)+v[2]*Math.cos(a)]; }
+      function orth(v,sc){ return [W/2-v[0]*sc, H/2-v[1]*sc]; }
+
+      const INIT_Y = -2.957;
+      const INIT_X = 0.42;
+      let t = 0;
+      let spinTarget   = null;
+      const TRIP_MS    = 1500;
+
+      /* Hover */
+      let mouseX = -9999, mouseY = -9999;
+      canvas.addEventListener('mousemove', e => {
+        const r = canvas.getBoundingClientRect(), dpr = devicePixelRatio;
+        mouseX = (e.clientX - r.left) * dpr;
+        mouseY = (e.clientY - r.top)  * dpr;
+      });
+      canvas.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
+
+      /* Noise particles */
+      const NOISE = Array.from({length:65}, () => ({x:0,y:0,vx:0,vy:0,life:0,maxLife:1,r:1}));
+
+      /* Satellites */
+      const SATS = [
+        { u:[1,0,0],         v:[0,0.5,0.866],  speed:1.80, phase:0.0, orb:1.22 },
+        { u:[0,1,0],         v:[0.866,0,0.5],  speed:2.50, phase:2.1, orb:1.28 },
+        { u:[0.707,0.707,0], v:[0,0,1],        speed:1.35, phase:4.2, orb:1.18 },
+      ];
+
+      /* ── Cities + flight paths ── */
+      function ll(lat, lon) {
+        const lr = lat * Math.PI / 180, lo = lon * Math.PI / 180;
+        return [Math.cos(lr)*Math.cos(lo), Math.sin(lr), Math.cos(lr)*Math.sin(lo)];
+      }
+      /* Plotted state — built up by the user via search */
+      let home  = null;        // { name, key, v, plottedAt }
+      let trips = [];          // [{ name, key, v, plottedAt }, …]
+      let plotMode = 'home';   // 'home' → first plot, then 'trip'
+
+      /* Spherical linear interpolation */
+      function slerp(a, b, t) {
+        const dot = Math.max(-1, Math.min(1, a[0]*b[0]+a[1]*b[1]+a[2]*b[2]));
+        const th  = Math.acos(dot);
+        if (th < 0.0001) return [a[0],a[1],a[2]];
+        const s = Math.sin(th);
+        const sa = Math.sin((1-t)*th)/s, sb = Math.sin(t*th)/s;
+        return [sa*a[0]+sb*b[0], sa*a[1]+sb*b[1], sa*a[2]+sb*b[2]];
+      }
+
+      /* ── City database (major world cities) ── */
+      function city(name, lat, lon) { return { name, key: name.toUpperCase(), v: ll(lat, lon) }; }
+      const CITY_LIST = [
+        city('Toronto',43.65,-79.38), city('Montreal',45.50,-73.57), city('Vancouver',49.28,-123.12),
+        city('Calgary',51.05,-114.07), city('Ottawa',45.42,-75.69), city('Edmonton',53.55,-113.49),
+        city('Quebec City',46.81,-71.21), city('Halifax',44.65,-63.58), city('Winnipeg',49.90,-97.14),
+        city('New York',40.71,-74.00), city('Los Angeles',34.05,-118.24), city('Chicago',41.88,-87.63),
+        city('San Francisco',37.77,-122.42), city('Seattle',47.61,-122.33), city('Boston',42.36,-71.06),
+        city('Miami',25.76,-80.19), city('Washington',38.91,-77.04), city('Houston',29.76,-95.37),
+        city('Dallas',32.78,-96.80), city('Austin',30.27,-97.74), city('Denver',39.74,-104.99),
+        city('Las Vegas',36.17,-115.14), city('Atlanta',33.75,-84.39), city('Philadelphia',39.95,-75.17),
+        city('Phoenix',33.45,-112.07), city('San Diego',32.72,-117.16), city('Portland',45.52,-122.68),
+        city('Honolulu',21.31,-157.86), city('New Orleans',29.95,-90.08), city('Detroit',42.33,-83.05),
+        city('Minneapolis',44.98,-93.27), city('Nashville',36.16,-86.78), city('Anchorage',61.22,-149.90),
+        city('Mexico City',19.43,-99.13), city('Cancun',21.16,-86.85), city('Guadalajara',20.66,-103.35),
+        city('Monterrey',25.69,-100.32), city('Tijuana',32.51,-117.04), city('Havana',23.13,-82.38),
+        city('Kingston',17.97,-76.79), city('Nassau',25.05,-77.35), city('Santo Domingo',18.49,-69.93),
+        city('San Juan',18.47,-66.10), city('Panama City',8.98,-79.52), city('San Jose',9.93,-84.08),
+        city('Guatemala City',14.63,-90.51), city('Tegucigalpa',14.07,-87.19), city('San Salvador',13.69,-89.22),
+        city('Managua',12.11,-86.24), city('Bridgetown',13.10,-59.62),
+        city('Bogota',4.71,-74.07), city('Medellin',6.24,-75.59), city('Cartagena',10.39,-75.51),
+        city('Lima',-12.05,-77.04), city('Cusco',-13.53,-71.97), city('Quito',-0.18,-78.47),
+        city('Caracas',10.49,-66.88), city('La Paz',-16.50,-68.15), city('Santiago',-33.45,-70.67),
+        city('Buenos Aires',-34.61,-58.38), city('Sao Paulo',-23.55,-46.63), city('Rio de Janeiro',-22.91,-43.17),
+        city('Brasilia',-15.83,-47.86), city('Salvador',-12.97,-38.51), city('Recife',-8.05,-34.88),
+        city('Montevideo',-34.90,-56.16), city('Asuncion',-25.26,-57.58),
+        city('London',51.51,-0.13), city('Paris',48.86,2.35), city('Madrid',40.42,-3.70),
+        city('Barcelona',41.39,2.17), city('Berlin',52.52,13.41), city('Munich',48.14,11.58),
+        city('Frankfurt',50.11,8.68), city('Hamburg',53.55,9.99), city('Cologne',50.94,6.96),
+        city('Rome',41.90,12.50), city('Milan',45.46,9.19), city('Naples',40.85,14.27),
+        city('Venice',45.44,12.32), city('Florence',43.77,11.26), city('Amsterdam',52.37,4.90),
+        city('Rotterdam',51.92,4.48), city('Brussels',50.85,4.35), city('Vienna',48.21,16.37),
+        city('Prague',50.08,14.44), city('Budapest',47.50,19.04), city('Warsaw',52.23,21.01),
+        city('Krakow',50.06,19.94), city('Stockholm',59.33,18.07), city('Oslo',59.91,10.75),
+        city('Copenhagen',55.68,12.57), city('Helsinki',60.17,24.94), city('Reykjavik',64.15,-21.94),
+        city('Dublin',53.35,-6.26), city('Edinburgh',55.95,-3.19), city('Glasgow',55.86,-4.25),
+        city('Manchester',53.48,-2.24), city('Lisbon',38.72,-9.14), city('Porto',41.15,-8.61),
+        city('Athens',37.98,23.73), city('Thessaloniki',40.64,22.94), city('Istanbul',41.01,28.98),
+        city('Ankara',39.93,32.86), city('Zurich',47.37,8.54), city('Geneva',46.20,6.15),
+        city('Bern',46.95,7.45), city('Nice',43.71,7.26), city('Marseille',43.30,5.37),
+        city('Lyon',45.76,4.84), city('Dubrovnik',42.65,18.09), city('Split',43.51,16.44),
+        city('Moscow',55.76,37.62), city('Saint Petersburg',59.93,30.34), city('Kyiv',50.45,30.52),
+        city('Minsk',53.90,27.57), city('Bucharest',44.43,26.10), city('Sofia',42.70,23.32),
+        city('Belgrade',44.79,20.45), city('Zagreb',45.81,15.98), city('Sarajevo',43.86,18.41),
+        city('Skopje',41.99,21.43), city('Tirana',41.33,19.82), city('Riga',56.95,24.11),
+        city('Vilnius',54.69,25.28), city('Tallinn',59.44,24.75),
+        city('Cairo',30.04,31.24), city('Alexandria',31.20,29.92), city('Casablanca',33.57,-7.59),
+        city('Marrakech',31.63,-7.99), city('Tangier',35.76,-5.83), city('Tunis',36.81,10.18),
+        city('Algiers',36.75,3.06), city('Tripoli',32.89,13.19), city('Lagos',6.45,3.40),
+        city('Abuja',9.05,7.49), city('Nairobi',-1.29,36.82), city('Mombasa',-4.04,39.66),
+        city('Cape Town',-33.92,18.42), city('Johannesburg',-26.20,28.04), city('Durban',-29.86,31.02),
+        city('Addis Ababa',9.03,38.74), city('Accra',5.60,-0.19), city('Dakar',14.69,-17.45),
+        city('Khartoum',15.50,32.56), city('Dar es Salaam',-6.79,39.21), city('Kampala',0.35,32.58),
+        city('Kigali',-1.94,30.06), city('Luanda',-8.83,13.24), city('Maputo',-25.97,32.57),
+        city('Antananarivo',-18.88,47.51),
+        city('Tel Aviv',32.08,34.78), city('Jerusalem',31.78,35.22), city('Amman',31.95,35.93),
+        city('Beirut',33.89,35.50), city('Damascus',33.51,36.29), city('Baghdad',33.32,44.36),
+        city('Tehran',35.69,51.39), city('Riyadh',24.71,46.68), city('Jeddah',21.49,39.19),
+        city('Mecca',21.39,39.86), city('Doha',25.29,51.53), city('Dubai',25.20,55.27),
+        city('Abu Dhabi',24.45,54.39), city('Muscat',23.59,58.41), city('Kuwait City',29.38,47.99),
+        city('Manama',26.23,50.59),
+        city('Mumbai',19.08,72.88), city('Delhi',28.61,77.21), city('Bangalore',12.97,77.59),
+        city('Chennai',13.08,80.27), city('Kolkata',22.57,88.36), city('Hyderabad',17.39,78.49),
+        city('Goa',15.30,74.12), city('Jaipur',26.91,75.79), city('Karachi',24.86,67.00),
+        city('Lahore',31.58,74.33), city('Islamabad',33.69,73.05), city('Dhaka',23.81,90.41),
+        city('Kathmandu',27.72,85.32), city('Colombo',6.93,79.86), city('Male',4.18,73.51),
+        city('Bangkok',13.76,100.50), city('Phuket',7.88,98.39), city('Chiang Mai',18.79,98.99),
+        city('Hanoi',21.03,105.85), city('Ho Chi Minh City',10.82,106.63), city('Phnom Penh',11.56,104.92),
+        city('Vientiane',17.97,102.60), city('Yangon',16.87,96.20), city('Kuala Lumpur',3.14,101.69),
+        city('Singapore',1.35,103.82), city('Jakarta',-6.21,106.85), city('Bali',-8.41,115.19),
+        city('Manila',14.60,120.98), city('Cebu',10.32,123.90),
+        city('Beijing',39.90,116.41), city('Shanghai',31.23,121.47), city('Hong Kong',22.32,114.17),
+        city('Macau',22.20,113.55), city('Guangzhou',23.13,113.26), city('Shenzhen',22.54,114.06),
+        city('Chengdu',30.57,104.07), city('Xian',34.34,108.94), city('Hangzhou',30.27,120.16),
+        city('Taipei',25.03,121.57), city('Seoul',37.57,126.98), city('Busan',35.18,129.08),
+        city('Pyongyang',39.04,125.76), city('Tokyo',35.68,139.69), city('Osaka',34.69,135.50),
+        city('Kyoto',35.01,135.77), city('Sapporo',43.07,141.35), city('Nagoya',35.18,136.91),
+        city('Okinawa',26.21,127.68), city('Ulaanbaatar',47.89,106.91), city('Tashkent',41.30,69.24),
+        city('Almaty',43.24,76.92), city('Baku',40.41,49.87), city('Tbilisi',41.72,44.78),
+        city('Yerevan',40.18,44.51),
+        city('Sydney',-33.87,151.21), city('Melbourne',-37.81,144.96), city('Brisbane',-27.47,153.03),
+        city('Perth',-31.95,115.86), city('Adelaide',-34.93,138.60), city('Darwin',-12.46,130.84),
+        city('Cairns',-16.92,145.78), city('Auckland',-36.85,174.76), city('Wellington',-41.29,174.78),
+        city('Christchurch',-43.53,172.64), city('Queenstown',-45.03,168.66), city('Suva',-18.13,178.43),
+        city('Papeete',-17.55,-149.57), city('Apia',-13.83,-171.77),
+      ];
+      const CITY_DB = Object.fromEntries(CITY_LIST.map(c => [c.key, c]));
+
+      /* IATA codes for common cities (fallback = first 3 letters of name) */
+      const IATA = {
+        'TORONTO':'YYZ','MONTREAL':'YUL','VANCOUVER':'YVR','CALGARY':'YYC','OTTAWA':'YOW',
+        'EDMONTON':'YEG','QUEBEC CITY':'YQB','HALIFAX':'YHZ','WINNIPEG':'YWG',
+        'NEW YORK':'JFK','LOS ANGELES':'LAX','CHICAGO':'ORD','SAN FRANCISCO':'SFO',
+        'SEATTLE':'SEA','BOSTON':'BOS','MIAMI':'MIA','WASHINGTON':'IAD','HOUSTON':'IAH',
+        'DALLAS':'DFW','AUSTIN':'AUS','DENVER':'DEN','LAS VEGAS':'LAS','ATLANTA':'ATL',
+        'PHILADELPHIA':'PHL','PHOENIX':'PHX','SAN DIEGO':'SAN','PORTLAND':'PDX',
+        'HONOLULU':'HNL','NEW ORLEANS':'MSY','DETROIT':'DTW','MINNEAPOLIS':'MSP',
+        'NASHVILLE':'BNA','ANCHORAGE':'ANC','MEXICO CITY':'MEX','CANCUN':'CUN',
+        'HAVANA':'HAV','NASSAU':'NAS','PANAMA CITY':'PTY','LONDON':'LHR','PARIS':'CDG',
+        'MADRID':'MAD','BARCELONA':'BCN','BERLIN':'BER','MUNICH':'MUC','FRANKFURT':'FRA',
+        'ROME':'FCO','MILAN':'MXP','AMSTERDAM':'AMS','BRUSSELS':'BRU','VIENNA':'VIE',
+        'PRAGUE':'PRG','BUDAPEST':'BUD','WARSAW':'WAW','STOCKHOLM':'ARN','OSLO':'OSL',
+        'COPENHAGEN':'CPH','HELSINKI':'HEL','REYKJAVIK':'KEF','DUBLIN':'DUB',
+        'LISBON':'LIS','ATHENS':'ATH','ISTANBUL':'IST','ZURICH':'ZRH','GENEVA':'GVA',
+        'MOSCOW':'SVO','CAIRO':'CAI','CASABLANCA':'CMN','LAGOS':'LOS','NAIROBI':'NBO',
+        'CAPE TOWN':'CPT','JOHANNESBURG':'JNB','TEL AVIV':'TLV','DUBAI':'DXB',
+        'ABU DHABI':'AUH','DOHA':'DOH','RIYADH':'RUH','MUMBAI':'BOM','DELHI':'DEL',
+        'BANGALORE':'BLR','CHENNAI':'MAA','KOLKATA':'CCU','BANGKOK':'BKK','SINGAPORE':'SIN',
+        'KUALA LUMPUR':'KUL','JAKARTA':'CGK','MANILA':'MNL','HONG KONG':'HKG',
+        'BEIJING':'PEK','SHANGHAI':'PVG','SEOUL':'ICN','TOKYO':'HND','OSAKA':'KIX',
+        'TAIPEI':'TPE','HO CHI MINH CITY':'SGN','HANOI':'HAN','SYDNEY':'SYD',
+        'MELBOURNE':'MEL','BRISBANE':'BNE','PERTH':'PER','AUCKLAND':'AKL',
+        'BUENOS AIRES':'EZE','SAO PAULO':'GRU','RIO DE JANEIRO':'GIG','LIMA':'LIM',
+        'SANTIAGO':'SCL','BOGOTA':'BOG',
+      };
+      function iataFor(name) {
+        return IATA[name.toUpperCase()] || name.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);
+      }
+
+      /* Deterministic "flight" data for a leg */
+      const AIRLINE_POOLS = {
+        canada:  [{name:'Air Canada',code:'AC'},{name:'WestJet',code:'WS'}],
+        usa:     [{name:'Delta',code:'DL'},{name:'United',code:'UA'},{name:'American',code:'AA'},{name:'JetBlue',code:'B6'}],
+        latam:   [{name:'LATAM',code:'LA'},{name:'Avianca',code:'AV'},{name:'Aeromexico',code:'AM'}],
+        europe:  [{name:'Lufthansa',code:'LH'},{name:'British Airways',code:'BA'},{name:'Air France',code:'AF'},{name:'KLM',code:'KL'},{name:'Iberia',code:'IB'}],
+        asia:    [{name:'Singapore Airlines',code:'SQ'},{name:'ANA',code:'NH'},{name:'Korean Air',code:'KE'},{name:'Cathay Pacific',code:'CX'}],
+        mideast: [{name:'Emirates',code:'EK'},{name:'Qatar Airways',code:'QR'},{name:'Turkish Airlines',code:'TK'}],
+        africa:  [{name:'Ethiopian Airlines',code:'ET'},{name:'South African Airways',code:'SA'},{name:'Kenya Airways',code:'KQ'}],
+        oceania: [{name:'Qantas',code:'QF'},{name:'Air New Zealand',code:'NZ'}],
+      };
+      function regionOf(v) {
+        const lat = Math.asin(v[1]) * 180 / Math.PI;
+        const lon = Math.atan2(v[2], v[0]) * 180 / Math.PI;
+        if (lat > 41 && lon < -50 && lon > -145) return 'canada';
+        if (lat > 15 && lat <= 41 && lon < -50 && lon > -130) return 'usa';
+        if (lat > 60 && lon < -10 && lon > -180) return 'canada'; // Alaska/northern
+        if (lat <= 15 && lat > -60 && lon < -30 && lon > -120) return 'latam';
+        if (lon >= -30 && lon < -10 && lat > 15) return 'europe'; // Portugal/Iceland side
+        if (lat > 35 && lon >= -15 && lon < 45) return 'europe';
+        if (lat > 55 && lon >= 25 && lon < 45) return 'europe'; // Scandinavia/Baltics
+        if (lat > -40 && lat < 40 && lon >= 15 && lon < 55) return lon < 45 && lat < 35 ? 'africa' : 'mideast';
+        if (lat < -10 && lon > 100) return 'oceania';
+        if (lon >= 55 || (lon < -130 && lat < 30)) return 'asia';
+        return 'europe';
+      }
+      function hash(str) {
+        let h = 2166136261;
+        for (let i=0;i<str.length;i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+        return (h >>> 0);
+      }
+      function fmtTime(mins) {
+        mins = ((mins % 1440) + 1440) % 1440;
+        const h = Math.floor(mins/60), m = mins%60;
+        return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+      }
+      function computeFlight(from, to) {
+        const dot = Math.max(-1, Math.min(1, from.v[0]*to.v[0]+from.v[1]*to.v[1]+from.v[2]*to.v[2]));
+        const distKm = Math.acos(dot) * 6371;
+        const durMin = Math.round(distKm / 820 * 60 + 45);
+        const h = hash(from.key + '→' + to.key);
+        /* Pick airline from departure region's pool */
+        const reg = regionOf(from.v);
+        const pool = AIRLINE_POOLS[reg] || AIRLINE_POOLS.europe;
+        const airline = pool[h % pool.length];
+        const flightNum = 100 + ((h >> 8) % 1899);
+        const takeoffMin = ((h >> 4) % 48) * 30; // half-hour increments
+        const landingMin = takeoffMin + durMin;
+        const dayOffset = Math.floor(landingMin / 1440);
+        const price = Math.round(140 + distKm * 0.11 + ((h >> 12) % 80));
+        return {
+          airline, flightNum, distKm, durMin,
+          takeoff: fmtTime(takeoffMin),
+          landing: fmtTime(landingMin),
+          dayOffset,
+          price,
+          fromIata: iataFor(from.name),
+          toIata:   iataFor(to.name),
+        };
+      }
+
+      /* Custom date picker singleton */
+      (function setupCalendar() {
+        const cal = document.createElement('div');
+        cal.className = 'cal-pop';
+        cal.innerHTML = `
+          <div class="cal-head">
+            <span class="cal-title"></span>
+            <span class="cal-nav">
+              <button type="button" class="cal-prev" aria-label="Previous month">‹</button>
+              <button type="button" class="cal-next" aria-label="Next month">›</button>
+            </span>
+          </div>
+          <div class="cal-grid cal-dows"></div>
+          <div class="cal-grid cal-days"></div>
+        `;
+        document.body.appendChild(cal);
+
+        const titleEl = cal.querySelector('.cal-title');
+        const dowsEl  = cal.querySelector('.cal-dows');
+        const daysEl  = cal.querySelector('.cal-days');
+        ['S','M','T','W','T','F','S'].forEach(d => {
+          const el = document.createElement('span');
+          el.className = 'cal-dow'; el.textContent = d;
+          dowsEl.appendChild(el);
+        });
+
+        const isoFromDate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const dateFromISO = iso => { const [y,m,d] = iso.split('-').map(Number); return new Date(y, m-1, d); };
+
+        let viewYear, viewMonth, selectedISO, callback, anchor;
+
+        function render() {
+          const first    = new Date(viewYear, viewMonth, 1);
+          const lastDay  = new Date(viewYear, viewMonth+1, 0).getDate();
+          const startDow = first.getDay();
+          const todayISO = isoFromDate(new Date());
+          titleEl.textContent = first.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+          daysEl.innerHTML = '';
+
+          const prevLast = new Date(viewYear, viewMonth, 0).getDate();
+          for (let i=startDow-1; i>=0; i--) addDay(new Date(viewYear, viewMonth-1, prevLast - i), true);
+          for (let d=1; d<=lastDay; d++)    addDay(new Date(viewYear, viewMonth,   d), false);
+          const trailing = (7 - ((startDow + lastDay) % 7)) % 7;
+          for (let d=1; d<=trailing; d++)   addDay(new Date(viewYear, viewMonth+1, d), true);
+
+          function addDay(dt, other) {
+            const iso = isoFromDate(dt);
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'cal-day' + (other?' other':'') + (iso===todayISO?' today':'') + (iso===selectedISO?' selected':'');
+            btn.textContent = dt.getDate();
+            btn.addEventListener('click', () => { callback(iso); close(); });
+            daysEl.appendChild(btn);
+          }
+        }
+
+        cal.querySelector('.cal-prev').addEventListener('click', () => { viewMonth--; if (viewMonth<0){viewMonth=11;viewYear--;} render(); reposition(); });
+        cal.querySelector('.cal-next').addEventListener('click', () => { viewMonth++; if (viewMonth>11){viewMonth=0;viewYear++;} render(); reposition(); });
+
+        function reposition() {
+          if (!anchor) return;
+          const r = anchor.getBoundingClientRect();
+          const w = cal.offsetWidth, h = cal.offsetHeight;
+          let left = r.left;
+          let top  = r.bottom + 6;
+          if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
+          if (left < 8) left = 8;
+          if (top + h > window.innerHeight - 8) top = r.top - h - 6;
+          cal.style.left = left + 'px';
+          cal.style.top  = top + 'px';
+        }
+
+        function close() {
+          cal.classList.remove('open');
+          anchor = null;
+          document.removeEventListener('mousedown', onDown, true);
+          document.removeEventListener('keydown', onKey);
+          window.removeEventListener('resize', reposition);
+        }
+        function onDown(e) { if (!cal.contains(e.target) && e.target !== anchor) close(); }
+        function onKey(e)  { if (e.key === 'Escape') close(); }
+
+        window.openCalendar = function(target, currentISO, onPick) {
+          callback = onPick;
+          selectedISO = currentISO;
+          anchor = target;
+          const dt = dateFromISO(currentISO);
+          viewYear = dt.getFullYear();
+          viewMonth = dt.getMonth();
+          render();
+          cal.classList.add('open');
+          reposition();
+          setTimeout(() => {
+            document.addEventListener('mousedown', onDown, true);
+            document.addEventListener('keydown', onKey);
+            window.addEventListener('resize', reposition);
+          }, 0);
+        };
+      })();
+
+      function priceForDate(basePrice, dateStr) {
+        let h = 2166136261;
+        for (let i=0; i<dateStr.length; i++) { h ^= dateStr.charCodeAt(i); h = Math.imul(h, 16777619); }
+        const variance = (((h >>> 0) % 41) - 20) / 100;
+        return Math.round(basePrice * (1 + variance));
+      }
+      function tweenNumber(el, from, to, duration, formatter) {
+        if (el._tweenRaf) cancelAnimationFrame(el._tweenRaf);
+        const start = performance.now();
+        function step(now) {
+          const p = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - p, 3);
+          const val = Math.round(from + (to - from) * eased);
+          el.textContent = formatter(val);
+          if (p < 1) el._tweenRaf = requestAnimationFrame(step);
+          else el._tweenRaf = null;
+        }
+        el._tweenRaf = requestAnimationFrame(step);
+      }
+      function recalcTotal(animate) {
+        const totalEl = document.getElementById('side-total');
+        const cards = document.querySelectorAll('.flight-card:not(.placeholder)');
+        let total = 0;
+        cards.forEach(c => total += Number(c.dataset.currentPrice || 0));
+        const prev = Number(totalEl.dataset.value || 0);
+        totalEl.dataset.value = total;
+        if (total > 0) {
+          totalEl.classList.remove('hidden');
+          if (animate) tweenNumber(totalEl, prev, total, 500, v => '$' + v.toLocaleString());
+          else totalEl.textContent = '$' + total.toLocaleString();
+        } else {
+          totalEl.textContent = '—';
+          totalEl.classList.add('hidden');
+          totalEl.dataset.value = 0;
+        }
+      }
+
+      /* Render flight cards in the side panel */
+      function renderFlights() {
+        const list   = document.getElementById('cards-list');
+        const empty  = document.getElementById('cards-empty');
+        const totalEl= document.getElementById('side-total');
+        const panel  = document.querySelector('.side-panel');
+        const wrap   = document.querySelector('.panels-wrapper');
+
+        const showPanel = !!home;
+        panel.classList.toggle('visible', showPanel);
+        wrap.classList.toggle('has-trip', showPanel);
+        if (showPanel) panel.classList.remove('evaporating');
+
+        if (!home) {
+          list.innerHTML = '';
+          if (empty) list.appendChild(empty);
+          totalEl.textContent = '—';
+          totalEl.classList.add('hidden');
+          return;
+        }
+
+        const emptyMsg = list.querySelector('.cards-empty');
+        if (emptyMsg) emptyMsg.remove();
+
+        const nodes = [home, ...trips];
+        const entries = [];
+        if (trips.length === 0) {
+          entries.push({ from: home, to: null, flight: null });
+        } else {
+          for (let i=0; i<nodes.length-1; i++) {
+            entries.push({ from: nodes[i], to: nodes[i+1], flight: computeFlight(nodes[i], nodes[i+1]) });
+          }
+        }
+
+        const existing = new Map();
+        list.querySelectorAll('.flight-card').forEach(el => existing.set(el.dataset.fromKey, el));
+        const wantedKeys = new Set();
+
+        entries.forEach((e, i) => {
+          wantedKeys.add(e.from.key);
+          let card = existing.get(e.from.key);
+          if (card) {
+            card.classList.remove('removing');
+            card.style.maxHeight = '';
+            card.style.animation = 'none';
+          } else {
+            card = document.createElement('div');
+            card.className = 'flight-card placeholder';
+            card.dataset.fromKey = e.from.key;
+            card.innerHTML = `
+              <div class="fc-row">
+                <span class="fc-city fc-from"></span>
+                <span class="fc-send" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.714 3.048a.498.498 0 0 0-.683.627l2.843 7.627a2 2 0 0 1 0 1.396l-2.842 7.627a.498.498 0 0 0 .682.627l18-8.5a.5.5 0 0 0 0-.904z"/><path d="M6 12h16"/></svg>
+                </span>
+                <span class="fc-city fc-to"></span>
+                <button type="button" class="fc-clear" aria-label="Remove leg">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <div class="fc-row fc-reveal">
+                <span class="fc-sub fc-airline"></span>
+                <span class="fc-sub fc-dur"></span>
+              </div>
+              <div class="fc-row fc-row-price fc-reveal">
+                <span class="fc-time-group">
+                  <span class="fc-time"></span>
+                  <button type="button" class="fc-date"></button>
+                </span>
+                <span class="fc-price"></span>
+              </div>
+            `;
+          }
+
+          const fromEl = card.querySelector('.fc-from');
+          fromEl.textContent = `${e.from.name} — ${iataFor(e.from.name)}`;
+          fromEl.title = e.from.name;
+
+          if (e.to && e.flight) {
+            card.classList.remove('placeholder');
+            const toEl = card.querySelector('.fc-to');
+            toEl.textContent = e.to.name;
+            toEl.title = e.to.name;
+            const durStr = `${Math.floor(e.flight.durMin/60)}h ${String(e.flight.durMin%60).padStart(2,'0')}m`;
+            card.querySelector('.fc-airline').textContent = `${e.flight.airline.name} — ${e.flight.airline.code} ${e.flight.flightNum}`;
+            card.querySelector('.fc-dur').textContent = durStr;
+            card.querySelector('.fc-time').textContent = e.flight.takeoff;
+            const dateBtn = card.querySelector('.fc-date');
+            const priceEl = card.querySelector('.fc-price');
+            if (!card.dataset.flightDate) {
+              const d = new Date(Date.now() + (i + 1) * 7 * 86400000);
+              card.dataset.flightDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            }
+            const formatDate = (iso) => {
+              const [y,m,d] = iso.split('-').map(Number);
+              return new Date(y, m-1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            };
+            dateBtn.textContent = formatDate(card.dataset.flightDate);
+
+            card.dataset.basePrice = String(e.flight.price);
+            const initialPrice = priceForDate(e.flight.price, card.dataset.flightDate);
+            card.dataset.currentPrice = String(initialPrice);
+            priceEl.textContent = `$${initialPrice.toLocaleString()}`;
+
+            if (!dateBtn.dataset.wired) {
+              dateBtn.dataset.wired = '1';
+              dateBtn.addEventListener('click', () => {
+                window.openCalendar(dateBtn, card.dataset.flightDate, (iso) => {
+                  card.dataset.flightDate = iso;
+                  dateBtn.textContent = formatDate(iso);
+                  const base = Number(card.dataset.basePrice);
+                  const prev = Number(card.dataset.currentPrice);
+                  const next = priceForDate(base, iso);
+                  card.dataset.currentPrice = String(next);
+                  tweenNumber(priceEl, prev, next, 500, v => '$' + v.toLocaleString());
+                  recalcTotal(true);
+                });
+              });
+            }
+
+            /* Clear button — remove this leg's destination */
+            card.dataset.toKey = e.to.key;
+            const clearBtn = card.querySelector('.fc-clear');
+            if (!clearBtn.dataset.wired) {
+              clearBtn.dataset.wired = '1';
+              clearBtn.addEventListener('click', () => {
+                const toKey = card.dataset.toKey;
+                const idx = trips.findIndex(tr => tr.key === toKey);
+                if (idx !== -1) {
+                  /* Capture current height then animate out */
+                  card.style.maxHeight = card.offsetHeight + 'px';
+                  void card.offsetWidth; /* force reflow */
+                  card.classList.add('removing');
+                  setTimeout(() => {
+                    trips.splice(idx, 1);
+                    renderFlights();
+                  }, 350);
+                }
+              });
+            }
+          } else {
+            card.classList.add('placeholder');
+          }
+
+          if (list.children[i] !== card) list.insertBefore(card, list.children[i] || null);
+        });
+
+        existing.forEach((el, key) => { if (!wantedKeys.has(key)) el.remove(); });
+
+        recalcTotal(true);
+      }
+
+      /* Search UI wiring */
+      (function () {
+        const input   = document.getElementById('globe-search-input');
+        const list    = document.getElementById('globe-suggestions');
+        const btn     = document.getElementById('globe-search-btn');
+        const btnText = btn.querySelector('.btn-text');
+        const keys    = Object.keys(CITY_DB);
+
+        function plottedKeys() {
+          const s = new Set();
+          if (home) s.add(home.key);
+          for (const t of trips) s.add(t.key);
+          return s;
+        }
+
+        function modePlaceholder() {
+          return plotMode === 'home' ? 'Search the city you live in' : 'Where do you want to go?';
+        }
+        function modeButtonText() {
+          return plotMode === 'home' ? 'Plot home' : 'Plot trip';
+        }
+
+        function refreshUiForMode() {
+          input.placeholder = modePlaceholder();
+          btnText.textContent = modeButtonText();
+        }
+
+        function setSuggestions(q) {
+          list.innerHTML = '';
+          if (!q) return;
+          const taken = plottedKeys();
+          const matches = keys
+            .filter(k => k.startsWith(q) && !taken.has(k))
+            .slice(0, 6);
+          matches.forEach(key => {
+            const display = CITY_DB[key].name;
+            const li = document.createElement('li');
+            li.textContent = display;
+            li.addEventListener('mousedown', e => {
+              e.preventDefault();
+              input.value = display;
+              list.innerHTML = '';
+              syncBtnState();
+            });
+            list.appendChild(li);
+          });
+        }
+
+        function isValidEntry() {
+          const key = input.value.trim().toUpperCase();
+          if (!CITY_DB[key]) return false;
+          return !plottedKeys().has(key);
+        }
+
+        function syncBtnState() {
+          const ok = isValidEntry();
+          const wasOff = btn.classList.contains('off');
+          if (ok) {
+            btn.classList.remove('off');
+            if (wasOff) {
+              btn.classList.remove('awake');
+              void btn.offsetWidth;
+              btn.classList.add('awake');
+            }
+          } else {
+            btn.classList.add('off');
+            btn.classList.remove('awake');
+          }
+        }
+
+        input.addEventListener('input', () => {
+          setSuggestions(input.value.trim().toUpperCase());
+          syncBtnState();
+        });
+        let _skipBlur = false;
+        input.addEventListener('blur', () => {
+          setTimeout(() => { if (!_skipBlur) list.innerHTML = ''; _skipBlur = false; }, 150);
+        });
+        list.addEventListener('mousedown', () => { setTimeout(syncBtnState, 0); });
+
+        btn.addEventListener('click', () => {
+          if (btn.classList.contains('off') || btn.classList.contains('loading')) return;
+          const key = input.value.trim().toUpperCase();
+          const c   = CITY_DB[key];
+          if (!c || plottedKeys().has(key)) {
+            input.style.color = 'rgba(190,30,30,0.85)';
+            setTimeout(() => { input.style.color = ''; }, 800);
+            return;
+          }
+          list.innerHTML = '';
+          input.value = '';
+          btn.classList.remove('awake');
+
+          const v = c.v;
+          const destLon   = Math.atan2(v[2], v[0]);
+          const angTarget = destLon - Math.PI / 2;
+          const tTarget   = angTarget - INIT_Y;
+          let   delta     = ((tTarget - t) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+          if (delta < 0.4) delta += Math.PI * 2;
+          const now2 = Date.now();
+          spinTarget = { from: t, to: t + delta, startMs: now2, duration: TRIP_MS };
+
+          const node = { name: c.name, key: c.key, v, plottedAt: now2 };
+          if (plotMode === 'home') {
+            home = node;
+            plotMode = 'trip';
+            document.getElementById('globe-search-bar').classList.remove('pulse');
+          } else {
+            trips.push(node);
+          }
+          renderFlights();
+
+          btn.classList.add('loading');
+          setTimeout(() => {
+            btn.classList.remove('loading');
+            btn.classList.add('off');
+            refreshUiForMode();
+          }, TRIP_MS + 100);
+        });
+
+        function setActive(idx) {
+          const items = list.querySelectorAll('li');
+          if (!items.length) return;
+          const n = items.length;
+          const next = ((idx % n) + n) % n;
+          items.forEach((el, i) => el.classList.toggle('active', i === next));
+          items[next].scrollIntoView({ block: 'nearest' });
+        }
+        function activeIndex() {
+          const items = Array.from(list.querySelectorAll('li'));
+          return items.findIndex(el => el.classList.contains('active'));
+        }
+
+        input.addEventListener('keydown', e => {
+          const items = list.querySelectorAll('li');
+          if (e.key === 'ArrowDown' && items.length) {
+            e.preventDefault();
+            const cur = activeIndex();
+            setActive(cur < 0 ? 0 : cur + 1);
+          } else if (e.key === 'ArrowUp' && items.length) {
+            e.preventDefault();
+            const cur = activeIndex();
+            setActive(cur < 0 ? items.length - 1 : cur - 1);
+          } else if (e.key === 'Enter') {
+            const cur = activeIndex();
+            if (items.length && cur >= 0) {
+              e.preventDefault();
+              input.value = items[cur].textContent;
+              list.innerHTML = '';
+              syncBtnState();
+              btn.click();
+            } else {
+              btn.click();
+            }
+          }
+        });
+
+        refreshUiForMode();
+
+        /* Expose function for globe click → show country-filtered suggestions */
+        window.showCountryCities = function(cities) {
+          _skipBlur = true;
+          list.innerHTML = '';
+          input.value = '';
+          input.focus();
+          const taken = plottedKeys();
+          cities.filter(c => !taken.has(c.key)).forEach(c => {
+            const li = document.createElement('li');
+            li.textContent = c.name;
+            li.addEventListener('mousedown', e => {
+              e.preventDefault();
+              input.value = c.name;
+              list.innerHTML = '';
+              syncBtnState();
+              btn.click();
+            });
+            list.appendChild(li);
+          });
+        };
+
+        /* Expose function to clear selected country when search loses focus */
+        window.clearSelectedCountry = function() {};
+
+        document.getElementById('side-reset').addEventListener('click', () => {
+          const panel = document.querySelector('.side-panel');
+          if (!home || panel.classList.contains('evaporating')) return;
+          panel.classList.add('evaporating');
+          setTimeout(() => {
+            home = null;
+            trips.length = 0;
+            plotMode = 'home';
+            spinTarget = null;
+            input.value = '';
+            list.innerHTML = '';
+            btn.classList.remove('awake','loading');
+            btn.classList.add('off');
+            document.getElementById('globe-search-bar').classList.add('pulse');
+            refreshUiForMode();
+            renderFlights();
+          }, 380);
+        });
+      })();
+
+      /* Load land texture → build globePts → start draw loop */
+      const img = new Image();
+      img.onload = function () {
+        const off = document.createElement('canvas');
+        off.width = img.width; off.height = img.height;
+        const octx = off.getContext('2d');
+        octx.drawImage(img, 0, 0);
+        const pix = octx.getImageData(0, 0, img.width, img.height).data;
+        const TW = img.width, TH = img.height;
+
+        const globePts = [];
+        for (let lat = -90; lat <= 90; lat += 1.8) {
+          const latR = lat * Math.PI / 180;
+          const cosL = Math.cos(latR);
+          const nLon = Math.max(1, Math.round(200 * Math.abs(cosL)));
+          for (let i = 0; i < nLon; i++) {
+            const lon  = (i / nLon) * 360 - 180;
+            const tx   = Math.min(TW - 1, Math.floor(((lon + 180) / 360) * TW));
+            const ty   = Math.min(TH - 1, Math.floor((1 - (lat + 90) / 180) * TH));
+            const brightness = pix[(ty * TW + tx) * 4];
+            if (brightness > 60) {
+              const lonR = lon * Math.PI / 180;
+              globePts.push([cosL * Math.cos(lonR), Math.sin(latR), cosL * Math.sin(lonR)]);
+            }
+          }
+        }
+
+        /* ── Country identification for hover highlighting ── */
+        // 1. Flood-fill connected components on the land texture
+        const landMask = new Uint8Array(TW * TH);
+        for (let i = 0; i < TW * TH; i++) landMask[i] = pix[i * 4] > 60 ? 1 : 0;
+
+        const compGrid = new Int16Array(TW * TH).fill(-1);
+        let numComp = 0;
+        for (let y = 0; y < TH; y++) {
+          for (let x = 0; x < TW; x++) {
+            const idx = y * TW + x;
+            if (!landMask[idx] || compGrid[idx] !== -1) continue;
+            const queue = [idx]; compGrid[idx] = numComp; let head = 0;
+            while (head < queue.length) {
+              const ci = queue[head++], cx = ci % TW, cy = (ci - cx) / TW;
+              const nb = [[cx > 0 ? cx-1 : TW-1, cy],[cx < TW-1 ? cx+1 : 0, cy],[cx, cy-1],[cx, cy+1]];
+              for (const [nx, ny] of nb) {
+                if (ny < 0 || ny >= TH) continue;
+                const ni = ny * TW + nx;
+                if (landMask[ni] && compGrid[ni] === -1) { compGrid[ni] = numComp; queue.push(ni); }
+              }
+            }
+            numComp++;
+          }
+        }
+
+        // 2. Country seed points — [countryId, lat, lon] (multiple seeds per large country)
+        const SEEDS = [
+          [1,56,-106],[1,62,-120],[1,50,-80],[1,68,-95],
+          [2,39,-98],[2,34,-118],[2,43,-72],[2,64,-153],[2,21,-157],
+          [3,24,-102],[3,19,-99],
+          [4,15,-90],[5,14,-87],[6,13,-85],[7,10,-84],[8,9,-80],
+          [9,22,-80],[10,18,-77],[11,19,-72],[12,19,-70],
+          [13,5,-74],[13,7,-73],[14,8,-66],
+          [15,5,-59],[16,4,-56],
+          [17,-1,-78],[18,-10,-76],[18,-6,-77],
+          [19,-17,-65],
+          [20,-8,-50],[20,-15,-48],[20,-22,-50],[20,-3,-60],
+          [21,-25,-58],[22,-33,-56],
+          [23,-35,-64],[23,-28,-65],
+          [24,-35,-71],[24,-45,-72],
+          [25,54,-2],[26,53,-8],
+          [27,65,14],[27,60,8],
+          [28,62,16],[28,58,15],
+          [29,64,26],[29,61,24],
+          [30,56,10],
+          [31,47,2],[31,44,1],
+          [32,40,-4],[32,38,-4],
+          [33,39,-8],
+          [34,51,10],[34,48,10],
+          [35,42,12],[35,44,11],
+          [36,52,5],
+          [37,47,8],
+          [38,50,15],[38,52,20],
+          [39,47,20],[40,46,25],[41,43,25],
+          [42,39,22],[43,44,20],[44,46,15],
+          [45,59,25],[46,57,24],[47,55,24],
+          [48,49,32],[48,48,37],
+          [49,54,28],
+          [50,56,38],[50,55,73],[50,56,93],[50,62,130],[50,64,40],[50,68,70],
+          [51,39,32],[51,39,36],
+          [52,33,44],[53,33,54],[53,36,52],
+          [54,25,45],[54,20,45],
+          [55,15,44],[56,23,57],
+          [57,35,39],[58,32,36],
+          [59,48,68],[59,43,77],
+          [60,41,60],[61,41,65],
+          [62,33,66],
+          [63,42,44],[64,40,50],
+          [65,32,-5],
+          [66,28,2],[66,35,3],
+          [67,34,9],
+          [68,28,17],[68,32,14],
+          [69,27,31],[69,29,31],
+          [70,15,32],[70,13,30],
+          [71,9,38],[71,7,40],
+          [72,1,37],[73,-7,35],[74,2,32],
+          [75,-3,24],[75,0,22],
+          [76,-9,18],[77,-15,28],[78,-20,30],
+          [79,-29,25],[79,-32,23],
+          [80,-22,17],
+          [81,-15,35],[82,-19,47],
+          [83,10,8],[83,8,4],
+          [84,17,-2],[84,20,0],
+          [85,15,19],[85,13,16],
+          [86,7,12],[87,6,-2],[87,8,-5],
+          [88,14,-14],[89,22,-10],
+          [90,5,32],[91,2,45],
+          [92,30,70],[92,26,68],
+          [93,22,80],[93,16,77],[93,28,77],
+          [94,28,84],[95,24,90],[96,8,81],
+          [97,20,96],
+          [98,15,101],[98,8,99],
+          [99,19,103],
+          [100,16,106],[100,11,107],
+          [101,12,105],
+          [102,4,103],
+          [103,-3,115],[103,-7,110],[103,0,110],
+          [104,12,122],
+          [105,35,105],[105,40,115],[105,30,110],[105,42,87],
+          [106,46,105],
+          [107,37,127],[108,40,126],
+          [109,37,140],[109,34,135],
+          [110,24,121],
+          [111,-25,134],[111,-33,148],[111,-22,145],
+          [112,-42,172],[112,-38,176],
+          [113,-6,147],
+          [114,72,-42],
+          [115,65,-19],
+        ];
+
+        // Map each seed to its connected component
+        const seedComps = SEEDS.map(([, lat, lon]) => {
+          const sx = Math.min(TW-1, Math.floor(((lon+180)/360)*TW));
+          const sy = Math.min(TH-1, Math.floor((1-(lat+90)/180)*TH));
+          return compGrid[sy * TW + sx];
+        });
+
+        // 3. Build country grid — each land pixel gets nearest same-component seed's ID
+        const countryGrid = new Uint8Array(TW * TH);
+        for (let y = 0; y < TH; y++) {
+          const lat = 90 - (y / TH) * 180;
+          const cosLat = Math.cos(lat * Math.PI / 180);
+          for (let x = 0; x < TW; x++) {
+            const idx = y * TW + x;
+            if (!landMask[idx]) continue;
+            const comp = compGrid[idx];
+            const lon = (x / TW) * 360 - 180;
+            let bestD = Infinity, bestId = 0;
+            for (let si = 0; si < SEEDS.length; si++) {
+              if (seedComps[si] !== comp) continue;
+              const dlat = lat - SEEDS[si][1];
+              let dlon = lon - SEEDS[si][2];
+              if (dlon > 180) dlon -= 360; if (dlon < -180) dlon += 360;
+              const d = dlat*dlat + (dlon*cosLat)*(dlon*cosLat);
+              if (d < bestD) { bestD = d; bestId = SEEDS[si][0]; }
+            }
+            countryGrid[idx] = bestId;
+          }
+        }
+
+        // 4. Assign each globe dot a country ID
+        const globeCountries = new Uint8Array(globePts.length);
+        for (let i = 0; i < globePts.length; i++) {
+          const [gx, gy, gz] = globePts[i];
+          const lat = Math.asin(gy) * 180 / Math.PI;
+          const lon = Math.atan2(gz, gx) * 180 / Math.PI;
+          const tx = Math.min(TW-1, Math.floor(((lon+180)/360)*TW));
+          const ty = Math.min(TH-1, Math.floor((1-(lat+90)/180)*TH));
+          globeCountries[i] = countryGrid[ty * TW + tx];
+        }
+
+        // 5. Country names + city→country mapping for hover card
+        const COUNTRY_NAMES = {
+          1:'Canada',2:'United States',3:'Mexico',4:'Guatemala',5:'Honduras',
+          6:'Nicaragua',7:'Costa Rica',8:'Panama',9:'Cuba',10:'Jamaica',
+          11:'Haiti',12:'Dominican Republic',13:'Colombia',14:'Venezuela',
+          15:'Guyana',16:'Suriname',17:'Ecuador',18:'Peru',19:'Bolivia',
+          20:'Brazil',21:'Paraguay',22:'Uruguay',23:'Argentina',24:'Chile',
+          25:'United Kingdom',26:'Ireland',27:'Norway',28:'Sweden',29:'Finland',
+          30:'Denmark',31:'France',32:'Spain',33:'Portugal',34:'Germany',
+          35:'Italy',36:'Netherlands',37:'Switzerland',38:'Poland',39:'Hungary',
+          40:'Romania',41:'Bulgaria',42:'Greece',43:'Serbia',44:'Croatia',
+          45:'Estonia',46:'Latvia',47:'Lithuania',48:'Ukraine',49:'Belarus',
+          50:'Russia',51:'Turkey',52:'Iraq',53:'Iran',54:'Saudi Arabia',
+          55:'Yemen',56:'UAE',57:'Syria',58:'Jordan',59:'Kazakhstan',
+          60:'Turkmenistan',61:'Uzbekistan',62:'Afghanistan',63:'Georgia',
+          64:'Azerbaijan',65:'Morocco',66:'Algeria',67:'Tunisia',68:'Libya',
+          69:'Egypt',70:'Sudan',71:'Ethiopia',72:'Kenya',73:'Tanzania',
+          74:'Uganda',75:'DR Congo',76:'Angola',77:'Zambia',78:'Zimbabwe',
+          79:'South Africa',80:'Namibia',81:'Mozambique',82:'Madagascar',
+          83:'Nigeria',84:'Mali',85:'Chad',86:'Cameroon',87:'Ghana',
+          88:'Senegal',89:'Mauritania',90:'South Sudan',91:'Somalia',
+          92:'Pakistan',93:'India',94:'Nepal',95:'Bangladesh',96:'Sri Lanka',
+          97:'Myanmar',98:'Thailand',99:'Laos',100:'Vietnam',101:'Cambodia',
+          102:'Malaysia',103:'Indonesia',104:'Philippines',105:'China',
+          106:'Mongolia',107:'South Korea',108:'North Korea',109:'Japan',
+          110:'Taiwan',111:'Australia',112:'New Zealand',113:'Papua New Guinea',
+          114:'Greenland',115:'Iceland',
+        };
+
+        // Map each city to its country ID
+        const cityCountryIds = CITY_LIST.map(c => {
+          const lat = Math.asin(c.v[1]) * 180 / Math.PI;
+          const lon = Math.atan2(c.v[2], c.v[0]) * 180 / Math.PI;
+          const cx = Math.min(TW-1, Math.floor(((lon+180)/360)*TW));
+          const cy = Math.min(TH-1, Math.floor((1-(lat+90)/180)*TH));
+          return countryGrid[cy * TW + cx];
+        });
+
+        // Pre-build city lists per country: { countryId → [{name, iata}] }
+        const citiesByCountry = {};
+        for (let ci = 0; ci < CITY_LIST.length; ci++) {
+          const cid = cityCountryIds[ci];
+          if (!cid) continue;
+          if (!citiesByCountry[cid]) citiesByCountry[cid] = [];
+          citiesByCountry[cid].push({ name: CITY_LIST[ci].name, iata: iataFor(CITY_LIST[ci].name) });
+        }
+
+        // Country hover card element
+        const countryCard = document.createElement('div');
+        countryCard.className = 'country-card';
+        countryCard.innerHTML = '<div class="cc-name"></div><div class="cc-sub"></div>';
+        document.querySelector('.art-panel').appendChild(countryCard);
+        let lastCardCountry = -1;
+
+        let hoveredCountry = -1;
+        let selectedCountry = -1;
+        // Click globe → select country, show its cities in search dropdown
+        canvas.addEventListener('click', () => {
+          if (hoveredCountry > 0 && citiesByCountry[hoveredCountry]) {
+            selectedCountry = hoveredCountry;
+            const cities = citiesByCountry[hoveredCountry].map(c => {
+              const entry = CITY_DB[c.name.toUpperCase()];
+              return entry || { name: c.name, key: c.name.toUpperCase() };
+            });
+            window.showCountryCities(cities);
+          }
+        });
+
+        // Clear selected country when search input loses focus or user types
+        const searchInput = document.getElementById('globe-search-input');
+        searchInput.addEventListener('blur', () => {
+          setTimeout(() => {
+            if (document.activeElement !== searchInput) selectedCountry = -1;
+          }, 200);
+        });
+        searchInput.addEventListener('input', () => {
+          if (searchInput.value.trim()) selectedCountry = -1;
+        });
+
+        (function draw() {
+          if (W === 0 || H === 0) { requestAnimationFrame(draw); return; }
+          ctx.clearRect(0, 0, W, H);
+          if (spinTarget) {
+            const prog  = Math.min(1, (Date.now() - spinTarget.startMs) / spinTarget.duration);
+            const eased = 1 - Math.pow(1 - prog, 3);
+            t = spinTarget.from + (spinTarget.to - spinTarget.from) * eased;
+            if (prog >= 1) { t = spinTarget.to; spinTarget = null; }
+          } else {
+            t += 0.0022;
+          }
+          const dpr    = devicePixelRatio;
+          const sc     = Math.min(W, H) * 0.33;
+          const ang    = INIT_Y + t;
+          function rotate(v) { return rX(rY(v, ang), INIT_X); }
+          const rTor  = rotate(toronto);
+          const torPt = orth(rTor, sc);
+
+          /* Raycast mouse → sphere to find hovered country */
+          hoveredCountry = -1;
+          if (mouseX > 0) {
+            const rx = (W/2 - mouseX) / sc;
+            const ry = (H/2 - mouseY) / sc;
+            const rr = rx*rx + ry*ry;
+            if (rr <= 1) {
+              const rz = Math.sqrt(1 - rr);
+              const ur = rX([rx, ry, rz], -INIT_X);
+              const uv = rY(ur, -ang);
+              const lat = Math.asin(Math.max(-1, Math.min(1, uv[1]))) * 180 / Math.PI;
+              const lon = Math.atan2(uv[2], uv[0]) * 180 / Math.PI;
+              const hx = Math.min(TW-1, Math.floor(((lon+180)/360)*TW));
+              const hy = Math.min(TH-1, Math.floor((1-(lat+90)/180)*TH));
+              const cid = countryGrid[hy * TW + hx];
+              if (cid > 0) hoveredCountry = cid;
+            }
+          }
+
+          /* Cursor style */
+          canvas.style.cursor = (hoveredCountry > 0 && (citiesByCountry[hoveredCountry] || []).length > 0) ? 'pointer' : 'default';
+
+          /* Country hover card */
+          if (hoveredCountry > 0 && COUNTRY_NAMES[hoveredCountry]) {
+            if (lastCardCountry !== hoveredCountry) {
+              lastCardCountry = hoveredCountry;
+              countryCard.querySelector('.cc-name').textContent = COUNTRY_NAMES[hoveredCountry];
+              const n = (citiesByCountry[hoveredCountry] || []).length;
+              countryCard.querySelector('.cc-sub').textContent = n > 0 ? `${n} airport${n > 1 ? 's' : ''}` : 'No airports';
+            }
+            const mx = mouseX / dpr, my = mouseY / dpr;
+            const panelW = canvas.parentElement.clientWidth;
+            const cw = countryCard.offsetWidth || 100;
+            const ch = countryCard.offsetHeight || 40;
+            let cx = mx + 16, cy = my - ch - 12;
+            if (cx + cw > panelW - 8) cx = mx - cw - 16;
+            if (cy < 8) cy = my + 16;
+            countryCard.style.left = cx + 'px';
+            countryCard.style.top  = cy + 'px';
+            countryCard.classList.add('visible');
+          } else {
+            countryCard.classList.remove('visible');
+            lastCardCountry = -1;
+          }
+
+          /* Land dots */
+          for (let gi = 0; gi < globePts.length; gi++) {
+            const v = globePts[gi];
+            const r = rotate(v);
+            if (r[2] < 0) continue;
+            const alpha = Math.pow(r[2], 0.55) * 0.78;
+            const [px, py] = orth(r, sc);
+            const cid = globeCountries[gi];
+            const lit = (hoveredCountry > 0 && cid === hoveredCountry) || (selectedCountry > 0 && cid === selectedCountry);
+            if (lit) {
+              ctx.shadowBlur  = 10 * dpr;
+              ctx.shadowColor = 'rgba(50,140,255,0.7)';
+              ctx.fillStyle   = `rgba(50,140,255,${Math.min(1, alpha + 0.45)})`;
+              ctx.beginPath(); ctx.arc(px, py, 1.9*dpr, 0, Math.PI*2); ctx.fill();
+              ctx.shadowBlur = 0;
+            } else {
+              ctx.fillStyle = `rgba(35,42,65,${alpha})`;
+              ctx.beginPath(); ctx.arc(px, py, 1.15*dpr, 0, Math.PI*2); ctx.fill();
+            }
+          }
+
+          /* Noise particles */
+          for (const pt of NOISE) {
+            pt.life--;
+            if (pt.life <= 0) {
+              const lat = (Math.random()-0.5)*Math.PI, lon = Math.random()*Math.PI*2;
+              const sv  = [Math.cos(lat)*Math.cos(lon), Math.sin(lat), Math.cos(lat)*Math.sin(lon)];
+              const rv  = rotate(sv);
+              if (rv[2] < 0.08) { pt.life = 2; continue; }
+              const [px,py] = orth(rv, sc);
+              const spd = (0.28 + Math.random()*0.55)*dpr;
+              const nx = px-W/2, ny = py-H/2, nm = Math.sqrt(nx*nx+ny*ny)+1;
+              pt.x = px; pt.y = py;
+              pt.vx = nx/nm*spd + (Math.random()-0.5)*0.18*dpr;
+              pt.vy = ny/nm*spd + (Math.random()-0.5)*0.18*dpr;
+              pt.maxLife = 55 + Math.random()*85; pt.life = pt.maxLife;
+              pt.r = (0.45 + Math.random()*0.65)*dpr;
+            }
+            pt.x += pt.vx; pt.y += pt.vy;
+            const prog = pt.life / pt.maxLife;
+            const a = Math.min(prog*6,1)*prog*0.52;
+            if (a > 0.01) {
+              ctx.fillStyle = `rgba(40,50,75,${a.toFixed(3)})`;
+              ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI*2); ctx.fill();
+            }
+          }
+
+          /* Satellites */
+          for (const s of SATS) {
+            for (let tr = 5; tr >= 0; tr--) {
+              const tt = t - tr*0.042;
+              const angle = s.speed*tt*3.5 + s.phase;
+              const pos = [
+                (Math.cos(angle)*s.u[0]+Math.sin(angle)*s.v[0])*s.orb,
+                (Math.cos(angle)*s.u[1]+Math.sin(angle)*s.v[1])*s.orb,
+                (Math.cos(angle)*s.u[2]+Math.sin(angle)*s.v[2])*s.orb,
+              ];
+              const rp = rotate(pos);
+              if (rp[2] < 0) continue;
+              const [sx,sy] = orth(rp, sc);
+              if (tr === 0) {
+                ctx.shadowBlur = 11*dpr; ctx.shadowColor = 'rgba(30,45,80,0.6)';
+                ctx.fillStyle  = 'rgba(15,20,40,0.95)';
+                ctx.beginPath(); ctx.arc(sx, sy, 2.3*dpr, 0, Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 0;
+              } else {
+                const frac = tr/6;
+                ctx.fillStyle = `rgba(40,55,90,${((1-frac)*0.52).toFixed(3)})`;
+                ctx.beginPath(); ctx.arc(sx, sy, ((1-frac)*1.5+0.4)*dpr, 0, Math.PI*2); ctx.fill();
+              }
+            }
+          }
+
+          /* ── Plotted route + markers ── */
+          const now = Date.now();
+          const ARC_N = 90;
+
+          const allNodes = [];
+          if (home) allNodes.push({ ...home, isHome:true });
+          for (const trp of trips) allNodes.push({ ...trp, isHome:false });
+
+          const MIN_LABEL_DIST = 38 * dpr;
+          const drawnLabelPos  = [];
+          function labelClear(x, y) {
+            for (const [lx,ly] of drawnLabelPos) {
+              const dx = x-lx, dy = y-ly;
+              if (dx*dx+dy*dy < MIN_LABEL_DIST*MIN_LABEL_DIST) return false;
+            }
+            return true;
+          }
+          function drawPillLabel(text, x, y, alpha, isHome) {
+            const fontSize = isHome ? 10*dpr : 8.5*dpr;
+            ctx.font = `${fontSize}px "Space Mono",monospace`;
+            const tw  = ctx.measureText(text).width;
+            const ph  = fontSize * 1.25;
+            const px  = 4*dpr, py = 3*dpr;
+            ctx.fillStyle = `rgba(255,255,255,${alpha*0.88})`;
+            const rx = x - px, ry = y - ph + py*0.5;
+            const rw = tw + px*2, rh = ph + py;
+            const br = 3*dpr;
+            ctx.beginPath();
+            ctx.moveTo(rx+br, ry);
+            ctx.lineTo(rx+rw-br, ry); ctx.arcTo(rx+rw,ry, rx+rw,ry+br, br);
+            ctx.lineTo(rx+rw, ry+rh-br); ctx.arcTo(rx+rw,ry+rh, rx+rw-br,ry+rh, br);
+            ctx.lineTo(rx+br, ry+rh); ctx.arcTo(rx,ry+rh, rx,ry+rh-br, br);
+            ctx.lineTo(rx, ry+br); ctx.arcTo(rx,ry, rx+br,ry, br);
+            ctx.closePath(); ctx.fill();
+            ctx.fillStyle = `rgba(15,20,40,${alpha*0.95})`;
+            ctx.fillText(text, x, y);
+          }
+
+          /* Green dotted route — segments between consecutive plotted nodes */
+          for (let si = 0; si < allNodes.length - 1; si++) {
+            const a = allNodes[si].v;
+            const b = allNodes[si + 1].v;
+            const isLatest = si === allNodes.length - 2;
+            const age = now - allNodes[si + 1].plottedAt;
+            const rawProg = isLatest ? Math.min(1, age / TRIP_MS) : 1;
+            const easedProg = 1 - Math.pow(1 - rawProg, 3);
+            const arcLimit = Math.ceil(ARC_N * easedProg);
+            if (arcLimit <= 0) continue;
+
+            const dotAB = a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+            const arcAngle = Math.acos(Math.max(-1, Math.min(1, dotAB)));
+            const lift = 0.06 + arcAngle * 0.14;
+
+            ctx.setLineDash([5*dpr, 7*dpr]);
+            ctx.lineWidth = 1.6 * dpr;
+            ctx.lineJoin  = 'round';
+            ctx.shadowBlur  = 7*dpr; ctx.shadowColor = 'rgba(40,140,70,0.45)';
+            ctx.strokeStyle = 'rgba(35,130,65,0.85)';
+            let drawing = false;
+            ctx.beginPath();
+            for (let i = 0; i <= arcLimit; i++) {
+              const tt = i / ARC_N;
+              const p  = slerp(a, b, tt);
+              const el = 1 + lift * Math.sin(Math.PI * tt);
+              const rv = rotate([p[0]*el, p[1]*el, p[2]*el]);
+              if (rv[2] < 0.01) { if (drawing) { ctx.stroke(); ctx.beginPath(); drawing = false; } continue; }
+              const [sx,sy] = orth(rv, sc);
+              if (!drawing) { ctx.moveTo(sx,sy); drawing = true; } else ctx.lineTo(sx,sy);
+            }
+            if (drawing) ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.setLineDash([]);
+          }
+
+          /* Visibility list for markers */
+          const visible = [];
+          for (const node of allNodes) {
+            const r = rotate(node.v);
+            if (r[2] < 0.04) continue;
+            const [cx,cy] = orth(r, sc);
+            const baseAlpha = Math.min(1, (r[2]-0.04)*9);
+            const age = now - node.plottedAt;
+            const fadeIn = node.isHome
+              ? Math.min(1, Math.max(0, (age - TRIP_MS*0.78) / (TRIP_MS*0.22)))
+              : Math.min(1, Math.max(0, (age - TRIP_MS*0.78) / (TRIP_MS*0.22)));
+            visible.push({ node, r, cx, cy, alpha: baseAlpha * fadeIn });
+          }
+          visible.sort((a,b) => b.r[2]-a.r[2]);
+
+          for (const { node, cx, cy, alpha } of visible) {
+            if (alpha <= 0.01) continue;
+            if (node.isHome) {
+              for (let wave = 0; wave < 2; wave++) {
+                const phase = ((now + wave*1100) % 2400) / 2400;
+                ctx.strokeStyle = `rgba(30,45,80,${(1-phase)*0.55*alpha})`;
+                ctx.lineWidth   = 0.9*dpr;
+                ctx.beginPath(); ctx.arc(cx,cy,phase*22*dpr,0,Math.PI*2); ctx.stroke();
+              }
+              ctx.fillStyle = `rgba(30,45,80,${0.18*alpha})`;
+              ctx.beginPath(); ctx.arc(cx,cy,6*dpr,0,Math.PI*2); ctx.fill();
+              ctx.shadowBlur = 10*dpr; ctx.shadowColor = `rgba(30,45,80,${alpha*0.5})`;
+              ctx.fillStyle  = `rgba(10,15,30,${alpha*0.98})`;
+              ctx.beginPath(); ctx.arc(cx,cy,2.8*dpr,0,Math.PI*2); ctx.fill();
+              ctx.shadowBlur = 0;
+              const lx = cx+10*dpr, ly = cy-7*dpr;
+              if (labelClear(lx, ly)) {
+                drawnLabelPos.push([lx,ly]);
+                drawPillLabel(`Based out of ${node.name}`, lx, ly, alpha, true);
+              }
+            } else {
+              ctx.shadowBlur = 8*dpr; ctx.shadowColor = `rgba(40,140,70,${alpha*0.5})`;
+              ctx.fillStyle  = `rgba(25,110,55,${alpha})`;
+              ctx.beginPath(); ctx.arc(cx,cy,2.5*dpr,0,Math.PI*2); ctx.fill();
+              ctx.shadowBlur = 0;
+              const lx = cx+8*dpr, ly = cy-5*dpr;
+              if (labelClear(lx, ly)) {
+                drawnLabelPos.push([lx,ly]);
+                drawPillLabel(node.name, lx, ly, alpha, false);
+              }
+            }
+          }
+
+          requestAnimationFrame(draw);
+        })();
+      };
+      img.src = LAND_B64;
+    })();
+  </script>
+</body>
+</html>
