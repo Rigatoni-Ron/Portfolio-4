@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Shape Animator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+  body {
+    background: #f5f3f1;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  canvas { display: block; }
+
+  #bgCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  #particleCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .control-panel {
+    border-radius: 22px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.28) 100%
+    );
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.9) inset,
+      0 0 0 1px rgba(255, 255, 255, 0.25) inset,
+      0 30px 60px -20px rgba(20, 24, 32, 0.18),
+      0 12px 24px -12px rgba(20, 24, 32, 0.12);
+    overflow: hidden;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* Soft refraction blob */
+  .control-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        120% 80% at 0% 0%,
+        rgba(255, 255, 255, 0.28),
+        transparent 50%
+      ),
+      radial-gradient(
+        80% 60% at 100% 100%,
+        rgba(120, 140, 170, 0.1),
+        transparent 60%
+      );
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 22px;
+  }
+
+  .control-panel > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .cell-track {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 4px;
+    background: rgba(12, 15, 20, 0.04);
+    border-radius: 14px;
+    border: none;
+  }
+
+  .cell-pill {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.95),
+      rgba(255, 255, 255, 0.7)
+    );
+    border-radius: 10px;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 1) inset,
+      0 1px 2px rgba(20, 24, 32, 0.12),
+      0 0 0 0.5px rgba(20, 24, 32, 0.06);
+    z-index: 0;
+    transition: top 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .cell-btn {
+    position: relative;
+    display: block;
+    width: 120px;
+    padding: 10px 0;
+    margin: 0;
+    border: none;
+    border-radius: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    cursor: none;
+    transition: color 0.25s ease;
+    background: transparent;
+    color: rgba(74, 82, 96, 0.5);
+    z-index: 1;
+  }
+
+  .cell-btn:hover {
+    color: rgba(12, 15, 20, 0.7);
+  }
+
+  .cell-btn.active {
+    color: rgba(12, 15, 20, 0.9);
+  }
+
+  .color-section {
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .color-section-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(12, 15, 20, 0.4);
+    padding: 0 4px;
+  }
+
+  .color-sv-area {
+    position: relative;
+    width: 100%;
+    height: 80px;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: none;
+    box-shadow: 0 1px 3px rgba(20, 24, 32, 0.08) inset;
+  }
+
+  .color-sv-area canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 10px;
+  }
+
+  .color-sv-thumb {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+
+  .color-hue-track {
+    position: relative;
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(to right,
+      #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000
+    );
+    cursor: none;
+    box-shadow: 0 1px 3px rgba(20, 24, 32, 0.08) inset;
+  }
+
+  .color-hue-thumb {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+
+  .color-info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 2px;
+  }
+
+  .color-swatch-preview {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 1px 3px rgba(20, 24, 32, 0.12), 0 0 0 0.5px rgba(20, 24, 32, 0.06);
+    flex-shrink: 0;
+  }
+
+  .color-hex {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(12, 15, 20, 0.6);
+    flex: 1;
+  }
+
+  .randomize-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 8px 0;
+    border: none;
+    border-radius: 10px;
+    background: rgba(12, 15, 20, 0.04);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(12, 15, 20, 0.55);
+    cursor: none;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .randomize-btn:hover {
+    background: rgba(12, 15, 20, 0.07);
+    color: rgba(12, 15, 20, 0.75);
+  }
+
+  .randomize-btn:active {
+    background: rgba(12, 15, 20, 0.1);
+  }
+
+  .randomize-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* 8 lines that form both crosshair and corners */
+  .cursor-line {
+    position: absolute;
+    background: rgba(40, 40, 45, 0.85);
+    transition: all 0.3s cubic-bezier(0.25, 0, 0.35, 1);
+    transform-origin: center;
+  }
+
+  /* Springy only when entering hover/drag */
+  .cursor.hovering .cursor-line,
+  .cursor.dragging .cursor-line {
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Default: crosshair — 4 arms from center */
+  .cursor-line.top    { width: 1.5px; height: 9px;  left: -0.75px; top: -9px; }
+  .cursor-line.bottom { width: 1.5px; height: 9px;  left: -0.75px; top: 0px; }
+  .cursor-line.left   { width: 9px;   height: 1.5px; left: -9px;   top: -0.75px; }
+  .cursor-line.right  { width: 9px;   height: 1.5px; left: 0px;    top: -0.75px; }
+  /* Second set hidden at center initially */
+  .cursor-line.top2    { width: 1.5px; height: 0px; left: -0.75px; top: 0px; opacity: 0; }
+  .cursor-line.bottom2 { width: 1.5px; height: 0px; left: -0.75px; top: 0px; opacity: 0; }
+  .cursor-line.left2   { width: 0px; height: 1.5px; left: 0px;     top: -0.75px; opacity: 0; }
+  .cursor-line.right2  { width: 0px; height: 1.5px; left: 0px;     top: -0.75px; opacity: 0; }
+
+  /* Hover: lines split outward and bend into corner brackets */
+  .cursor.hovering .cursor-line.top    { height: 8px; left: -14px; top: -14px; }
+  .cursor.hovering .cursor-line.bottom { height: 8px; left: 12.5px; top: 6px; }
+  .cursor.hovering .cursor-line.left   { width: 8px;  left: -14px; top: -14px; }
+  .cursor.hovering .cursor-line.right  { width: 8px;  left: 6px;   top: 12.5px; }
+  /* Second set appears to complete the corners */
+  .cursor.hovering .cursor-line.top2    { height: 8px; left: 12.5px; top: -14px; opacity: 1; }
+  .cursor.hovering .cursor-line.bottom2 { height: 8px; left: -14px;  top: 6px; opacity: 1; }
+  .cursor.hovering .cursor-line.left2   { width: 8px;  left: 6px;    top: -14px; opacity: 1; }
+  .cursor.hovering .cursor-line.right2  { width: 8px;  left: -14px;  top: 12.5px; opacity: 1; }
+
+  /* Dragging: corners tighten inward */
+  .cursor.dragging .cursor-line.top    { height: 7px; left: -10px; top: -10px; }
+  .cursor.dragging .cursor-line.bottom { height: 7px; left: 8.5px;  top: 3px; }
+  .cursor.dragging .cursor-line.left   { width: 7px;  left: -10px; top: -10px; }
+  .cursor.dragging .cursor-line.right  { width: 7px;  left: 3px;   top: 8.5px; }
+  .cursor.dragging .cursor-line.top2    { height: 7px; left: 8.5px;  top: -10px; opacity: 1; }
+  .cursor.dragging .cursor-line.bottom2 { height: 7px; left: -10px;  top: 3px; opacity: 1; }
+  .cursor.dragging .cursor-line.left2   { width: 7px;  left: 3px;    top: -10px; opacity: 1; }
+  .cursor.dragging .cursor-line.right2  { width: 7px;  left: -10px;  top: 8.5px; opacity: 1; }
+
+
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="sidebar">
+  <div class="control-panel" id="controlPanel">
+    <div class="cell-track">
+      <div class="cell-pill" id="cellPill"></div>
+      <button class="cell-btn active" data-count="1" data-index="0">Base cell</button>
+      <button class="cell-btn" data-count="2" data-index="1">Duo cell</button>
+      <button class="cell-btn" data-count="4" data-index="2">Quad cell</button>
+    </div>
+  </div>
+
+  <div class="control-panel" id="colorPanel">
+    <div class="color-section">
+      <div class="color-sv-area" id="svArea">
+        <canvas id="svCanvas"></canvas>
+        <div class="color-sv-thumb" id="svThumb"></div>
+      </div>
+      <div class="color-hue-track" id="hueTrack">
+        <div class="color-hue-thumb" id="hueThumb"></div>
+      </div>
+      <div class="color-info-row">
+        <div class="color-swatch-preview" id="swatchPreview"></div>
+        <span class="color-hex" id="colorHex">#ff5500</span>
+      </div>
+      <button class="randomize-btn" id="randomizeBtn">
+        <svg class="randomize-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H20"/>
+          <path d="m18 2 4 4-4 4"/>
+          <path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/>
+          <path d="M20 18h-3.9c-1.3 0-2.5-.6-3.3-1.7l-.6-.8"/>
+          <path d="m18 14 4 4-4 4"/>
+        </svg>
+        Randomize
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="cursor" id="cursor">
+  <div class="cursor-line top"></div>
+  <div class="cursor-line bottom"></div>
+  <div class="cursor-line left"></div>
+  <div class="cursor-line right"></div>
+  <div class="cursor-line top2"></div>
+  <div class="cursor-line bottom2"></div>
+  <div class="cursor-line left2"></div>
+  <div class="cursor-line right2"></div>
+</div>
+
+
+<script src="./three.min.js"></script>
+<script>
+// ─── Scene Setup ────────────────────────────────────────────
+// ─── Background Shader ──────────────────────────────────────
+const bgCanvas = document.getElementById('bgCanvas');
+const gl = bgCanvas.getContext('webgl');
+
+function resizeBg() {
+  bgCanvas.width = window.innerWidth * Math.min(window.devicePixelRatio, 2);
+  bgCanvas.height = window.innerHeight * Math.min(window.devicePixelRatio, 2);
+  bgCanvas.style.width = window.innerWidth + 'px';
+  bgCanvas.style.height = window.innerHeight + 'px';
+  gl.viewport(0, 0, bgCanvas.width, bgCanvas.height);
+}
+resizeBg();
+
+const bgVert = `
+  attribute vec2 pos;
+  void main() { gl_Position = vec4(pos, 0.0, 1.0); }
+`;
+
+const bgFrag = `
+  precision highp float;
+  uniform float uTime;
+  uniform vec2 uResolution;
+  uniform vec2 uMouse;
+
+  // Simplex-style noise
+  vec3 mod289(vec3 x) { return x - floor(x * (1.0/289.0)) * 289.0; }
+  vec2 mod289(vec2 x) { return x - floor(x * (1.0/289.0)) * 289.0; }
+  vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+
+  float snoise(vec2 v) {
+    const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                       -0.577350269189626, 0.024390243902439);
+    vec2 i = floor(v + dot(v, C.yy));
+    vec2 x0 = v - i + dot(i, C.xx);
+    vec2 i1 = (x0.x > x0.y) ? vec2(1.0,0.0) : vec2(0.0,1.0);
+    vec4 x12 = x0.xyxy + C.xxzz;
+    x12.xy -= i1;
+    i = mod289(i);
+    vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+    vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+    m = m*m; m = m*m;
+    vec3 x = 2.0 * fract(p * C.www) - 1.0;
+    vec3 h = abs(x) - 0.5;
+    vec3 ox = floor(x + 0.5);
+    vec3 a0 = x - ox;
+    m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+    vec3 g;
+    g.x = a0.x * x0.x + h.x * x0.y;
+    g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+    return 130.0 * dot(m, g);
+  }
+
+  // Fewer octaves — flatter, less haze
+  float fbm(vec2 p) {
+    float f = 0.0;
+    float w = 0.6;
+    for (int i = 0; i < 3; i++) {
+      f += w * snoise(p);
+      p *= 2.0;
+      w *= 0.4;
+    }
+    return f;
+  }
+
+  void main() {
+    vec2 uv = gl_FragCoord.xy / uResolution;
+    vec2 p = uv * 2.5;
+
+    float t = uTime * 0.12;
+
+    // Two layers only — big flat patches with subtle variation
+    float n1 = fbm(p * 0.5 + vec2(t * 0.3, t * 0.2));
+    float n2 = fbm(p * 1.2 + vec2(-t * 0.4, t * 0.35));
+
+    float combined = n1 * 0.65 + n2 * 0.35;
+
+    // Flatten the range — less contrast between zones
+    combined = combined * 0.35 + 0.55;
+
+    // Flat background color #D6D9DD
+    vec3 bgColor = vec3(0.839, 0.851, 0.867);
+
+    // Subtle noise variation for texture
+    vec3 c1 = bgColor - vec3(0.02);
+    vec3 c2 = bgColor;
+    vec3 c3 = bgColor + vec3(0.01);
+    vec3 c4 = bgColor + vec3(0.02);
+    vec3 c5 = bgColor + vec3(0.03);
+
+    vec3 col;
+    if (combined < 0.3) {
+      col = mix(c1, c2, combined / 0.3);
+    } else if (combined < 0.5) {
+      col = mix(c2, c3, (combined - 0.3) / 0.2);
+    } else if (combined < 0.7) {
+      col = mix(c3, c4, (combined - 0.5) / 0.2);
+    } else {
+      col = mix(c4, c5, (combined - 0.7) / 0.3);
+    }
+
+    // Very subtle vignette
+    float vig = 1.0 - 0.1 * length(uv - 0.5);
+    col *= vig;
+
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
+
+function compileBgShader(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  return s;
+}
+
+const bgProg = gl.createProgram();
+gl.attachShader(bgProg, compileBgShader(gl.VERTEX_SHADER, bgVert));
+gl.attachShader(bgProg, compileBgShader(gl.FRAGMENT_SHADER, bgFrag));
+gl.linkProgram(bgProg);
+gl.useProgram(bgProg);
+
+const bgBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, bgBuf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+const posAttr = gl.getAttribLocation(bgProg, 'pos');
+gl.enableVertexAttribArray(posAttr);
+gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0);
+
+const uTime = gl.getUniformLocation(bgProg, 'uTime');
+const uRes = gl.getUniformLocation(bgProg, 'uResolution');
+const uMouse = gl.getUniformLocation(bgProg, 'uMouse');
+gl.uniform2f(uRes, bgCanvas.width, bgCanvas.height);
+
+function renderBg(time) {
+  gl.uniform1f(uTime, time);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+// ─── Three.js Scene Setup ───────────────────────────────────
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 2.8);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setClearColor(0x000000, 0);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.domElement.id = 'particleCanvas';
+document.body.appendChild(renderer.domElement);
+
+// ─── Configuration ──────────────────────────────────────────
+const PARTICLE_COUNT = 4000;
+const BASE_SIZE = 2.0;
+
+const colorPalette = [
+  new THREE.Color(0xff5500), // vibrant orange
+];
+
+// ─── Shape Generators ───────────────────────────────────────
+function generateCube(count) {
+  const positions = [];
+  for (let i = 0; i < count; i++) {
+    const face = Math.floor(Math.random() * 6);
+    let x, y, z;
+    const s = BASE_SIZE * 0.5;
+    switch(face) {
+      case 0: x =  s; y = (Math.random()-0.5)*BASE_SIZE; z = (Math.random()-0.5)*BASE_SIZE; break;
+      case 1: x = -s; y = (Math.random()-0.5)*BASE_SIZE; z = (Math.random()-0.5)*BASE_SIZE; break;
+      case 2: y =  s; x = (Math.random()-0.5)*BASE_SIZE; z = (Math.random()-0.5)*BASE_SIZE; break;
+      case 3: y = -s; x = (Math.random()-0.5)*BASE_SIZE; z = (Math.random()-0.5)*BASE_SIZE; break;
+      case 4: z =  s; x = (Math.random()-0.5)*BASE_SIZE; y = (Math.random()-0.5)*BASE_SIZE; break;
+      case 5: z = -s; x = (Math.random()-0.5)*BASE_SIZE; y = (Math.random()-0.5)*BASE_SIZE; break;
+    }
+    positions.push(x, y, z);
+  }
+  return new Float32Array(positions);
+}
+
+function generateSphere(count) {
+  const positions = [];
+  const r = BASE_SIZE * 0.45;
+  for (let i = 0; i < count; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    positions.push(
+      r * Math.sin(phi) * Math.cos(theta),
+      r * Math.sin(phi) * Math.sin(theta),
+      r * Math.cos(phi)
+    );
+  }
+  return new Float32Array(positions);
+}
+
+function generateTorus(count) {
+  const positions = [];
+  const R = BASE_SIZE * 0.55;
+  const r = BASE_SIZE * 0.2;
+  for (let i = 0; i < count; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.random() * Math.PI * 2;
+    positions.push(
+      (R + r * Math.cos(phi)) * Math.cos(theta),
+      (R + r * Math.cos(phi)) * Math.sin(theta),
+      r * Math.sin(phi)
+    );
+  }
+  return new Float32Array(positions);
+}
+
+function generatePyramid(count) {
+  const positions = [];
+  const h = BASE_SIZE * 0.7;
+  const base = BASE_SIZE * 0.45;
+
+  // Calculate face areas for proportional distribution
+  const baseArea = (base * 2) * (base * 2); // square base
+  const slantH = Math.sqrt(h * h + base * base); // slant height of triangular face
+  const sideArea = (base * 2) * slantH / 2; // one triangular face
+  const totalArea = baseArea + 4 * sideArea;
+
+  const baseCount = Math.floor(count * (baseArea / totalArea));
+  const sideCountTotal = count - baseCount;
+  const perSide = Math.floor(sideCountTotal / 4);
+
+  // Base face
+  for (let i = 0; i < baseCount; i++) {
+    positions.push(
+      (Math.random() - 0.5) * base * 2,
+      -h / 2,
+      (Math.random() - 0.5) * base * 2
+    );
+  }
+
+  // 4 triangular side faces — use sqrt for uniform triangle sampling
+  const corners = [
+    [-base, -base], [base, -base], [base, base], [-base, base]
+  ];
+  for (let f = 0; f < 4; f++) {
+    const [bx1, bz1] = corners[f];
+    const [bx2, bz2] = corners[(f + 1) % 4];
+    const needed = f < 3 ? perSide : (sideCountTotal - perSide * 3);
+    for (let i = 0; i < needed; i++) {
+      // Uniform sampling on triangle: apex to base edge
+      let u = Math.random(), v = Math.random();
+      if (u + v > 1) { u = 1 - u; v = 1 - v; }
+      const w = 1 - u - v;
+      positions.push(
+        0 * w + bx1 * u + bx2 * v,
+        h / 2 * w + (-h / 2) * u + (-h / 2) * v,
+        0 * w + bz1 * u + bz2 * v
+      );
+    }
+  }
+
+  return new Float32Array(positions);
+}
+
+function generateHelix(count) {
+  const positions = [];
+  const turns = 4;
+  const height = BASE_SIZE * 0.8;
+  const radius = BASE_SIZE * 0.35;
+  for (let i = 0; i < count; i++) {
+    const strand = i % 2 === 0 ? 0 : Math.PI;
+    const t = (i / count) * turns * Math.PI * 2;
+    const y = ((i / count) - 0.5) * height * 2;
+    const spread = (Math.random() - 0.5) * 0.08;
+    if (Math.random() < 0.15) {
+      const rungT = Math.floor(t / (Math.PI * 0.5)) * (Math.PI * 0.5);
+      const lerp = Math.random();
+      const x1 = radius * Math.cos(rungT);
+      const z1 = radius * Math.sin(rungT);
+      const x2 = radius * Math.cos(rungT + Math.PI);
+      const z2 = radius * Math.sin(rungT + Math.PI);
+      positions.push(
+        x1 + lerp * (x2 - x1) + spread,
+        y + spread,
+        z1 + lerp * (z2 - z1) + spread
+      );
+    } else {
+      positions.push(
+        radius * Math.cos(t + strand) + spread,
+        y + spread,
+        radius * Math.sin(t + strand) + spread
+      );
+    }
+  }
+  return new Float32Array(positions);
+}
+
+function generateStar(count) {
+  const positions = [];
+  const outerR = BASE_SIZE * 0.6;
+  const innerR = BASE_SIZE * 0.25;
+  const points = 5;
+  const depth = BASE_SIZE * 0.15;
+  for (let i = 0; i < count; i++) {
+    const z = (Math.random() - 0.5) * depth;
+    const angle = Math.random() * Math.PI * 2;
+    const sectorAngle = (angle % (Math.PI * 2 / points)) / (Math.PI * 2 / points);
+    const t = Math.abs(sectorAngle - 0.5) * 2;
+    const r = innerR + t * (outerR - innerR);
+    const rRand = r * (0.85 + Math.random() * 0.15);
+    positions.push(
+      rRand * Math.cos(angle),
+      rRand * Math.sin(angle),
+      z
+    );
+  }
+  return new Float32Array(positions);
+}
+
+function generateHeart(count) {
+  const positions = [];
+  const scale = BASE_SIZE * 0.045;
+  for (let i = 0; i < count; i++) {
+    const u = Math.random() * Math.PI * 2;
+    const v = Math.random() * Math.PI;
+    const x = 16 * Math.pow(Math.sin(u), 3);
+    const y = 13 * Math.cos(u) - 5 * Math.cos(2*u) - 2 * Math.cos(3*u) - Math.cos(4*u);
+    const z = (Math.random() - 0.5) * 8 * Math.sin(v);
+    const surfaceBias = 0.85 + Math.random() * 0.15;
+    positions.push(
+      x * scale * surfaceBias,
+      y * scale * surfaceBias,
+      z * scale * surfaceBias
+    );
+  }
+  return new Float32Array(positions);
+}
+
+function generateBitcoin(count) {
+  const positions = [];
+  const S = BASE_SIZE * 0.45;
+  const extrudeDepth = S * 0.7;
+  const strokeW = 0.16;
+
+  // Build the B outline as connected polyline segments
+  const outline = [];
+
+  // Left vertical spine
+  for (let i = 0; i <= 40; i++) {
+    const t = i / 40;
+    outline.push([-0.35, -0.8 + t * 1.6]);
+  }
+  // Top bar
+  for (let i = 0; i <= 15; i++) { outline.push([-0.35 + (i/15)*0.4, 0.8]); }
+  // Upper bump (right side arc)
+  for (let i = 0; i <= 30; i++) {
+    const a = -Math.PI/2 + (i/30) * Math.PI;
+    outline.push([0.05 + 0.38 * Math.cos(a), 0.4 + 0.38 * Math.sin(a)]);
+  }
+  // Middle bar
+  for (let i = 0; i <= 15; i++) { outline.push([0.1 - (i/15)*0.45, 0.0]); }
+  // Lower bump (right side arc, slightly wider)
+  for (let i = 0; i <= 30; i++) {
+    const a = -Math.PI/2 + (i/30) * Math.PI;
+    outline.push([0.1 + 0.42 * Math.cos(a), -0.4 + 0.42 * Math.sin(a)]);
+  }
+  // Bottom bar
+  for (let i = 0; i <= 15; i++) { outline.push([0.05 - (i/15)*0.4, -0.8]); }
+
+  // Strike-through vertical lines (top)
+  for (let i = 0; i <= 8; i++) { outline.push([-0.15, 0.8 + (i/8)*0.25]); }
+  for (let i = 0; i <= 8; i++) { outline.push([0.05, 0.8 + (i/8)*0.25]); }
+  // Strike-through vertical lines (bottom)
+  for (let i = 0; i <= 8; i++) { outline.push([-0.15, -0.8 - (i/8)*0.25]); }
+  for (let i = 0; i <= 8; i++) { outline.push([0.05, -0.8 - (i/8)*0.25]); }
+
+  // Compute segment lengths for the outline to weight side-wall sampling
+  const segLengths = [];
+  let totalOutlineLen = 0;
+  for (let i = 0; i < outline.length - 1; i++) {
+    const dx = outline[i+1][0] - outline[i][0];
+    const dy = outline[i+1][1] - outline[i][1];
+    const len = Math.sqrt(dx*dx + dy*dy);
+    segLengths.push(len);
+    totalOutlineLen += len;
+  }
+
+  // Surface area estimation for proportional distribution:
+  // Front/back face area ≈ outlinePerimeter * strokeW (approximation for stroke-based shape)
+  // Side wall area ≈ outlinePerimeter * extrudeDepth / S (normalized)
+  const faceArea = totalOutlineLen * strokeW;
+  const sideArea = totalOutlineLen * (extrudeDepth / S);
+  const totalArea = faceArea * 2 + sideArea;
+
+  const frontCount = Math.floor(count * (faceArea / totalArea));
+  const backCount = frontCount;
+  const sideCount = count - frontCount - backCount;
+
+  // Front face (z = +depth/2) — particles along strokes
+  for (let i = 0; i < frontCount; i++) {
+    const seg = outline[Math.floor(Math.random() * outline.length)];
+    const nx = (Math.random() - 0.5) * strokeW;
+    const ny = (Math.random() - 0.5) * strokeW;
+    positions.push((seg[0] + nx) * S, (seg[1] + ny) * S, extrudeDepth / 2);
+  }
+
+  // Back face (z = -depth/2)
+  for (let i = 0; i < backCount; i++) {
+    const seg = outline[Math.floor(Math.random() * outline.length)];
+    const nx = (Math.random() - 0.5) * strokeW;
+    const ny = (Math.random() - 0.5) * strokeW;
+    positions.push((seg[0] + nx) * S, (seg[1] + ny) * S, -extrudeDepth / 2);
+  }
+
+  // Side walls — sample proportional to segment length for even distribution
+  for (let i = 0; i < sideCount; i++) {
+    // Pick a segment weighted by its length
+    let r = Math.random() * totalOutlineLen;
+    let segIdx = 0;
+    for (let s = 0; s < segLengths.length; s++) {
+      r -= segLengths[s];
+      if (r <= 0) { segIdx = s; break; }
+    }
+    // Random point along this segment
+    const t = Math.random();
+    const px = outline[segIdx][0] + t * (outline[segIdx+1][0] - outline[segIdx][0]);
+    const py = outline[segIdx][1] + t * (outline[segIdx+1][1] - outline[segIdx][1]);
+    // Random z depth
+    const z = (Math.random() - 0.5) * extrudeDepth;
+    // Place on the outer surface of the stroke — offset outward from the outline
+    const nx = (Math.random() - 0.5) * strokeW * 0.3;
+    const ny = (Math.random() - 0.5) * strokeW * 0.3;
+    positions.push((px + nx) * S, (py + ny) * S, z);
+  }
+
+  while (positions.length / 3 < count) {
+    const idx = Math.floor(Math.random() * positions.length / 3) * 3;
+    positions.push(positions[idx], positions[idx+1], positions[idx+2]);
+  }
+
+  return new Float32Array(positions.slice(0, count * 3));
+}
+
+function generateEthereum(count) {
+  const positions = [];
+  const faceIndices = []; // track which face each particle belongs to
+  const H = BASE_SIZE * 0.45;
+
+  const topY = H * 1.0;
+  const midY = 0;
+  const botY = -H * 0.7;
+  const midW = H * 0.5;
+
+  // mid vertices: right, front, left, back
+  const mid = [
+    [ midW, midY,  0    ],
+    [ 0,    midY,  midW ],
+    [-midW, midY,  0    ],
+    [ 0,    midY, -midW ],
+  ];
+  const top = [0, topY, 0];
+  const bot = [0, botY, 0];
+
+  function triPoint(a, b, c) {
+    let u = Math.random(), v = Math.random();
+    if (u + v > 1) { u = 1 - u; v = 1 - v; }
+    const w = 1 - u - v;
+    return [
+      a[0]*w + b[0]*u + c[0]*v,
+      a[1]*w + b[1]*u + c[1]*v,
+      a[2]*w + b[2]*u + c[2]*v,
+    ];
+  }
+
+  function triArea(a, b, c) {
+    const abx = b[0]-a[0], aby = b[1]-a[1], abz = b[2]-a[2];
+    const acx = c[0]-a[0], acy = c[1]-a[1], acz = c[2]-a[2];
+    const cx = aby*acz - abz*acy;
+    const cy = abz*acx - abx*acz;
+    const cz = abx*acy - aby*acx;
+    return 0.5 * Math.sqrt(cx*cx + cy*cy + cz*cz);
+  }
+
+  // 8 faces: [upper0, lower0, upper1, lower1, upper2, lower2, upper3, lower3]
+  // upper i: top → mid[i] → mid[i+1]
+  // lower i: bot → mid[i] → mid[i+1]
+  const faces = [];
+  for (let i = 0; i < 4; i++) {
+    const j = (i + 1) % 4;
+    faces.push([top, mid[i], mid[j]]);  // upper
+    faces.push([bot, mid[i], mid[j]]);  // lower
+  }
+
+  // Face shade multipliers matching the ETH logo lighting:
+  // Faces are: upper-right/front, lower-right/front, upper-front/left, lower-front/left,
+  //            upper-left/back, lower-left/back, upper-back/right, lower-back/right
+  // Reference: top-left brightest, top-right medium, bottom-left medium-dark, bottom-right darkest
+  const faceShades = [
+    1.0,   // upper right-front: bright
+    0.55,  // lower right-front: dark
+    1.15,  // upper front-left: brightest
+    0.70,  // lower front-left: medium-dark
+    0.85,  // upper left-back: medium
+    0.45,  // lower left-back: darkest
+    0.75,  // upper back-right: medium-dark
+    0.60,  // lower back-right: dark
+  ];
+
+  const areas = faces.map(f => triArea(f[0], f[1], f[2]));
+  const totalArea = areas.reduce((a, b) => a + b, 0);
+
+  for (let f = 0; f < faces.length; f++) {
+    const faceCount = Math.round(count * (areas[f] / totalArea));
+    for (let i = 0; i < faceCount; i++) {
+      const p = triPoint(faces[f][0], faces[f][1], faces[f][2]);
+      positions.push(p[0], p[1], p[2]);
+      faceIndices.push(f);
+    }
+  }
+
+  while (positions.length / 3 < count) {
+    const f = Math.floor(Math.random() * faces.length);
+    const p = triPoint(faces[f][0], faces[f][1], faces[f][2]);
+    positions.push(p[0], p[1], p[2]);
+    faceIndices.push(f);
+  }
+
+  // Build per-particle color array based on face shading
+  const baseColor = new THREE.Color(0xff5500);
+  const ethColors = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    const shade = faceShades[faceIndices[i]];
+    ethColors[i * 3]     = Math.min(baseColor.r * shade, 1.0);
+    ethColors[i * 3 + 1] = Math.min(baseColor.g * shade, 1.0);
+    ethColors[i * 3 + 2] = Math.min(baseColor.b * shade, 1.0);
+  }
+
+  const result = new Float32Array(positions.slice(0, count * 3));
+  result.ethColors = ethColors;
+  return result;
+}
+
+function generateHype(count) {
+  const positions = [];
+  const S = BASE_SIZE * 0.45;
+  const halfDepth = S * 0.275;
+  const br = halfDepth * 0.55; // bevel radius for rounded edges
+
+  // Two-lobe bowtie shape via smooth union of two circles
+  const cx = 0.48;
+  const lr = 0.48;
+  const pk = 0.18;
+
+  function sdf(x, y) {
+    const d1 = Math.sqrt((x - cx) * (x - cx) + y * y) - lr;
+    const d2 = Math.sqrt((x + cx) * (x + cx) + y * y) - lr;
+    const h = Math.max(pk - Math.abs(d1 - d2), 0) / pk;
+    return Math.min(d1, d2) - h * h * pk * 0.25;
+  }
+
+  // Inward normal via SDF gradient
+  function inwardNormal(x, y) {
+    const eps = 0.001;
+    const gx = sdf(x + eps, y) - sdf(x - eps, y);
+    const gy = sdf(x, y + eps) - sdf(x, y - eps);
+    const len = Math.sqrt(gx * gx + gy * gy) + 0.0001;
+    return [-gx / len, -gy / len]; // gradient points outward, negate for inward
+  }
+
+  // Trace outline
+  const outlineSteps = 300;
+  const outline = [];
+  for (let i = 0; i < outlineSteps; i++) {
+    const angle = (i / outlineSteps) * Math.PI * 2;
+    const dx = Math.cos(angle), dy = Math.sin(angle);
+    let lo = 0, hi = 2.0;
+    for (let j = 0; j < 30; j++) {
+      const mid = (lo + hi) / 2;
+      if (sdf(dx * mid, dy * mid) < 0) lo = mid; else hi = mid;
+    }
+    const r = (lo + hi) / 2;
+    outline.push([dx * r, dy * r]);
+  }
+
+  // Segment lengths + perimeter
+  let perimeter = 0;
+  const segLens = [];
+  for (let i = 0; i < outline.length; i++) {
+    const j = (i + 1) % outline.length;
+    const ddx = outline[j][0] - outline[i][0];
+    const ddy = outline[j][1] - outline[i][1];
+    segLens.push(Math.sqrt(ddx * ddx + ddy * ddy));
+    perimeter += segLens[i];
+  }
+
+  // Inner face area (where sdf < -br) via shoelace on eroded outline
+  const innerOutline = [];
+  for (let i = 0; i < outlineSteps; i++) {
+    const angle = (i / outlineSteps) * Math.PI * 2;
+    const dx = Math.cos(angle), dy = Math.sin(angle);
+    let lo = 0, hi = 2.0;
+    for (let j = 0; j < 30; j++) {
+      const mid = (lo + hi) / 2;
+      if (sdf(dx * mid, dy * mid) < -br) lo = mid; else hi = mid;
+    }
+    const r = (lo + hi) / 2;
+    if (sdf(dx * r, dy * r) < -br * 0.9) {
+      innerOutline.push([dx * r, dy * r]);
+    }
+  }
+  let innerFaceArea = 0;
+  for (let i = 0; i < innerOutline.length; i++) {
+    const j = (i + 1) % innerOutline.length;
+    innerFaceArea += innerOutline[i][0] * innerOutline[j][1] - innerOutline[j][0] * innerOutline[i][1];
+  }
+  innerFaceArea = Math.abs(innerFaceArea) / 2;
+
+  // Surface areas for proportional distribution
+  const bevelArea = perimeter * (Math.PI / 2) * br; // quarter-circle swept along perimeter
+  const flatSideHeight = 2 * (halfDepth - br);
+  const sideArea = perimeter * flatSideHeight / S;
+  const totalArea = innerFaceArea * 2 + bevelArea * 2 + sideArea;
+
+  const frontCount = Math.floor(count * (innerFaceArea / totalArea));
+  const backCount = frontCount;
+  const frontBevelCount = Math.floor(count * (bevelArea / totalArea));
+  const backBevelCount = frontBevelCount;
+  const sideCount = count - frontCount - backCount - frontBevelCount - backBevelCount;
+
+  const bx = cx + lr + 0.05;
+  const by = lr + 0.05;
+
+  // Helper: pick a random point along the outline, weighted by segment length
+  function sampleOutline() {
+    let r = Math.random() * perimeter;
+    let segIdx = 0;
+    for (let s = 0; s < segLens.length; s++) {
+      r -= segLens[s];
+      if (r <= 0) { segIdx = s; break; }
+    }
+    const j = (segIdx + 1) % outline.length;
+    const t = Math.random();
+    return [
+      outline[segIdx][0] + t * (outline[j][0] - outline[segIdx][0]),
+      outline[segIdx][1] + t * (outline[j][1] - outline[segIdx][1])
+    ];
+  }
+
+  // Flat front face — only where sdf < -br (inset from edge)
+  let placed = 0;
+  while (placed < frontCount) {
+    const x = (Math.random() * 2 - 1) * bx;
+    const y = (Math.random() * 2 - 1) * by;
+    if (sdf(x, y) < -br) {
+      positions.push(x * S, y * S, halfDepth);
+      placed++;
+    }
+  }
+
+  // Flat back face
+  placed = 0;
+  while (placed < backCount) {
+    const x = (Math.random() * 2 - 1) * bx;
+    const y = (Math.random() * 2 - 1) * by;
+    if (sdf(x, y) < -br) {
+      positions.push(x * S, y * S, -halfDepth);
+      placed++;
+    }
+  }
+
+  // Front bevel — quarter-torus along the outline edge
+  for (let i = 0; i < frontBevelCount; i++) {
+    const [ox, oy] = sampleOutline();
+    const [nx, ny] = inwardNormal(ox, oy);
+
+    // Quarter circle from side wall to front face
+    const a = Math.random() * Math.PI / 2;
+    const inward = br * (1 - Math.cos(a));
+    const z = (halfDepth - br) + br * Math.sin(a);
+
+    positions.push((ox + nx * inward) * S, (oy + ny * inward) * S, z);
+  }
+
+  // Back bevel
+  for (let i = 0; i < backBevelCount; i++) {
+    const [ox, oy] = sampleOutline();
+    const [nx, ny] = inwardNormal(ox, oy);
+
+    const a = Math.random() * Math.PI / 2;
+    const inward = br * (1 - Math.cos(a));
+    const z = (halfDepth - br) + br * Math.sin(a);
+
+    positions.push((ox + nx * inward) * S, (oy + ny * inward) * S, -z);
+  }
+
+  // Flat side walls — between the two bevels
+  for (let i = 0; i < sideCount; i++) {
+    const [px, py] = sampleOutline();
+    const z = (Math.random() * 2 - 1) * (halfDepth - br);
+    positions.push(px * S, py * S, z);
+  }
+
+  return new Float32Array(positions);
+}
+
+const shapeGenerators = {
+  cube: generateCube,
+  sphere: generateSphere,
+  torus: generateTorus,
+  pyramid: generatePyramid,
+  helix: generateHelix,
+  star: generateStar,
+  heart: generateHeart,
+  bitcoin: generateBitcoin,
+  ethereum: generateEthereum,
+  hype: generateHype,
+};
+
+// ─── Particle System ────────────────────────────────────────
+const geometry = new THREE.BufferGeometry();
+const currentPositions = generateSphere(PARTICLE_COUNT);
+const targetPositions = new Float32Array(currentPositions);
+const startPositions = new Float32Array(currentPositions);
+const colors = new Float32Array(PARTICLE_COUNT * 3);
+const sizes = new Float32Array(PARTICLE_COUNT);
+const randoms = new Float32Array(PARTICLE_COUNT); // random offset per particle
+
+// Initialize colors and sizes
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+  colors[i * 3] = color.r;
+  colors[i * 3 + 1] = color.g;
+  colors[i * 3 + 2] = color.b;
+  sizes[i] = 3.0;
+  randoms[i] = Math.random();
+}
+
+const glows = new Float32Array(PARTICLE_COUNT); // 0 = no glow, 1 = full glow
+
+geometry.setAttribute('position', new THREE.BufferAttribute(currentPositions, 3));
+geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+geometry.setAttribute('glow', new THREE.BufferAttribute(glows, 1));
+
+// Custom shader material for soft round particles
+const particleMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    uPixelRatio: { value: renderer.getPixelRatio() },
+  },
+  vertexShader: `
+    attribute float size;
+    attribute vec3 color;
+    varying vec3 vColor;
+    varying float vDepth;
+    uniform float uPixelRatio;
+
+    void main() {
+      vColor = color;
+      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+      vDepth = -mvPosition.z;
+      gl_PointSize = size * uPixelRatio;
+      gl_Position = projectionMatrix * mvPosition;
+    }
+  `,
+  fragmentShader: `
+    varying vec3 vColor;
+    varying float vDepth;
+
+    void main() {
+      vec2 center = gl_PointCoord - vec2(0.5);
+      float dist = length(center);
+      if (dist > 0.5) discard;
+      float alpha = smoothstep(0.5, 0.4, dist);
+      float depthFade = smoothstep(6.0, 2.0, vDepth) * 0.4 + 0.6;
+      gl_FragColor = vec4(vColor, alpha * depthFade);
+    }
+  `,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.NormalBlending,
+});
+
+const particles = new THREE.Points(geometry, particleMaterial);
+scene.add(particles);
+
+// ─── Morphing State ─────────────────────────────────────────
+let morphing = false;
+let morphProgress = 0;
+let sphereCount = 1; // 1, 2, or 4
+
+// Per-particle data
+const midOffsets = new Float32Array(PARTICLE_COUNT * 3);
+const delays = new Float32Array(PARTICLE_COUNT);
+
+// Color morph data
+const startColors = new Float32Array(PARTICLE_COUNT * 3);
+const targetColors = new Float32Array(PARTICLE_COUNT * 3);
+const baseOrange = new THREE.Color(0xff5500);
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  startColors[i*3] = baseOrange.r; startColors[i*3+1] = baseOrange.g; startColors[i*3+2] = baseOrange.b;
+  targetColors[i*3] = baseOrange.r; targetColors[i*3+1] = baseOrange.g; targetColors[i*3+2] = baseOrange.b;
+}
+
+const MORPH_DURATION = 1.0;
+
+// Generate two spheres side by side
+function generateTwoSpheres(count) {
+  const positions = new Float32Array(count * 3);
+  const r = BASE_SIZE * 0.32;    // smaller radius per sphere
+  const gap = BASE_SIZE * 0.45;  // offset from center
+  const half = Math.floor(count / 2);
+
+  for (let i = 0; i < count; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const offsetX = i < half ? -gap : gap;
+    positions[i * 3]     = r * Math.sin(phi) * Math.cos(theta) + offsetX;
+    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    positions[i * 3 + 2] = r * Math.cos(phi);
+  }
+  return positions;
+}
+
+function startMorph(newPositions, color) {
+  startPositions.set(currentPositions);
+  targetPositions.set(newPositions);
+
+  // Set target colors
+  startColors.set(colors);
+  const c = color || baseOrange;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    targetColors[i*3] = c.r; targetColors[i*3+1] = c.g; targetColors[i*3+2] = c.b;
+  }
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const i3 = i * 3;
+    const sx = startPositions[i3], sy = startPositions[i3+1], sz = startPositions[i3+2];
+    const tx = targetPositions[i3], ty = targetPositions[i3+1], tz = targetPositions[i3+2];
+
+    const dx = tx - sx, dy = ty - sy, dz = tz - sz;
+    const travelDist = Math.sqrt(dx*dx + dy*dy + dz*dz) + 0.001;
+
+    const seed = randoms[i];
+    const ax = Math.sin(seed * 50), ay = Math.cos(seed * 30), az = Math.sin(seed * 70);
+    let px = dy*az - dz*ay, py = dz*ax - dx*az, pz = dx*ay - dy*ax;
+    const pLen = Math.sqrt(px*px + py*py + pz*pz) + 0.001;
+    px /= pLen; py /= pLen; pz /= pLen;
+
+    const arcStrength = 0.08 + seed * 0.12;
+    midOffsets[i3]     = px * arcStrength * travelDist;
+    midOffsets[i3 + 1] = py * arcStrength * travelDist;
+    midOffsets[i3 + 2] = pz * arcStrength * travelDist;
+
+    delays[i] = seed * 0.08;
+  }
+
+  morphProgress = 0;
+  morphing = true;
+}
+
+const splitBlue = new THREE.Color(0x1a3fff);
+const splitGreen = new THREE.Color(0x00802b);
+
+// Per-state colors (mutable via color picker)
+const stateColors = {
+  1: baseOrange.clone(),
+  2: splitBlue.clone(),
+  4: splitGreen.clone()
+};
+// Generate four spheres in a 2x2 grid
+function generateFourSpheres(count) {
+  const positions = new Float32Array(count * 3);
+  const r = BASE_SIZE * 0.24;
+  const gap = BASE_SIZE * 0.38;
+  const quarter = Math.floor(count / 4);
+
+  const offsets = [
+    [-gap, gap, 0],
+    [gap, gap, 0],
+    [-gap, -gap, 0],
+    [gap, -gap, 0],
+  ];
+
+  for (let i = 0; i < count; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const g = Math.min(Math.floor(i / quarter), 3);
+    positions[i * 3]     = r * Math.sin(phi) * Math.cos(theta) + offsets[g][0];
+    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) + offsets[g][1];
+    positions[i * 3 + 2] = r * Math.cos(phi) + offsets[g][2];
+  }
+  return positions;
+}
+
+function setCell(target) {
+  if (morphing || target === sphereCount) return;
+  const color = stateColors[target];
+  if (target === 1) {
+    startMorph(generateSphere(PARTICLE_COUNT), color);
+  } else if (target === 2) {
+    startMorph(generateTwoSpheres(PARTICLE_COUNT), color);
+  } else if (target === 4) {
+    startMorph(generateFourSpheres(PARTICLE_COUNT), color);
+  }
+  sphereCount = target;
+  updatePanel();
+}
+
+function toggleSplit() {
+  if (morphing) return;
+  if (sphereCount === 1) setCell(2);
+  else if (sphereCount === 2) setCell(4);
+  else setCell(1);
+}
+
+function updatePanel() {
+  const pill = document.getElementById('cellPill');
+  document.querySelectorAll('.cell-btn').forEach(btn => {
+    const isActive = parseInt(btn.dataset.count) === sphereCount;
+    btn.classList.toggle('active', isActive);
+    if (isActive) {
+      // Slide the pill to match the button position
+      pill.style.top = `${btn.offsetTop}px`;
+      pill.style.height = `${btn.offsetHeight}px`;
+    }
+  });
+}
+
+// Wire up panel buttons
+document.querySelectorAll('.cell-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setCell(parseInt(btn.dataset.count));
+  });
+});
+
+// Initialize pill position on load
+updatePanel();
+
+// ─── Color Picker ──────────────────────────────────────────
+const svArea = document.getElementById('svArea');
+const svCanvas = document.getElementById('svCanvas');
+const svCtx = svCanvas.getContext('2d');
+const svThumb = document.getElementById('svThumb');
+const hueTrack = document.getElementById('hueTrack');
+const hueThumb = document.getElementById('hueThumb');
+const swatchPreview = document.getElementById('swatchPreview');
+const colorHex = document.getElementById('colorHex');
+const randomizeBtn = document.getElementById('randomizeBtn');
+
+let pickerHue = 0, pickerSat = 1, pickerVal = 1;
+let draggingSV = false, draggingHue = false;
+
+function colorToHex(c) {
+  return '#' + c.getHexString();
+}
+
+function hsvToRgb(h, s, v) {
+  let r, g, b;
+  const i = Math.floor(h * 6);
+  const f = h * 6 - i;
+  const p = v * (1 - s);
+  const q = v * (1 - f * s);
+  const t = v * (1 - (1 - f) * s);
+  switch (i % 6) {
+    case 0: r = v; g = t; b = p; break;
+    case 1: r = q; g = v; b = p; break;
+    case 2: r = p; g = v; b = t; break;
+    case 3: r = p; g = q; b = v; break;
+    case 4: r = t; g = p; b = v; break;
+    case 5: r = v; g = p; b = q; break;
+  }
+  return [r, g, b];
+}
+
+function rgbToHsv(r, g, b) {
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const d = max - min;
+  let h, s = max === 0 ? 0 : d / max, v = max;
+  if (d === 0) h = 0;
+  else if (max === r) h = ((g - b) / d + 6) % 6 / 6;
+  else if (max === g) h = ((b - r) / d + 2) / 6;
+  else h = ((r - g) / d + 4) / 6;
+  return [h, s, v];
+}
+
+function drawSVCanvas() {
+  const w = svCanvas.width = svArea.clientWidth * 2;
+  const h = svCanvas.height = svArea.clientHeight * 2;
+  const img = svCtx.createImageData(w, h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const s = x / (w - 1);
+      const v = 1 - y / (h - 1);
+      const [r, g, b] = hsvToRgb(pickerHue, s, v);
+      const idx = (y * w + x) * 4;
+      img.data[idx] = r * 255;
+      img.data[idx + 1] = g * 255;
+      img.data[idx + 2] = b * 255;
+      img.data[idx + 3] = 255;
+    }
+  }
+  svCtx.putImageData(img, 0, 0);
+}
+
+function updatePickerUI() {
+  drawSVCanvas();
+  // SV thumb position
+  const areaW = svArea.clientWidth;
+  const areaH = svArea.clientHeight;
+  svThumb.style.left = (pickerSat * areaW) + 'px';
+  svThumb.style.top = ((1 - pickerVal) * areaH) + 'px';
+  // Hue thumb
+  hueThumb.style.left = (pickerHue * 100) + '%';
+  // Current color
+  const [r, g, b] = hsvToRgb(pickerHue, pickerSat, pickerVal);
+  const hex = colorToHex(new THREE.Color(r, g, b));
+  swatchPreview.style.background = hex;
+  colorHex.textContent = hex;
+  // Thumb colors
+  svThumb.style.background = hex;
+  const hueRgb = hsvToRgb(pickerHue, 1, 1);
+  hueThumb.style.background = `rgb(${hueRgb[0]*255},${hueRgb[1]*255},${hueRgb[2]*255})`;
+}
+
+function applyPickerColor() {
+  const [r, g, b] = hsvToRgb(pickerHue, pickerSat, pickerVal);
+  const c = new THREE.Color(r, g, b);
+  stateColors[sphereCount].copy(c);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    targetColors[i * 3] = c.r;
+    targetColors[i * 3 + 1] = c.g;
+    targetColors[i * 3 + 2] = c.b;
+  }
+  if (!morphing) {
+    const col = particles.geometry.attributes.color.array;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      col[i * 3] = c.r;
+      col[i * 3 + 1] = c.g;
+      col[i * 3 + 2] = c.b;
+    }
+    particles.geometry.attributes.color.needsUpdate = true;
+  }
+}
+
+function applyColor(hexStr) {
+  const c = new THREE.Color(hexStr);
+  const [h, s, v] = rgbToHsv(c.r, c.g, c.b);
+  pickerHue = h; pickerSat = s; pickerVal = v;
+  stateColors[sphereCount].copy(c);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    targetColors[i * 3] = c.r;
+    targetColors[i * 3 + 1] = c.g;
+    targetColors[i * 3 + 2] = c.b;
+  }
+  if (!morphing) {
+    const col = particles.geometry.attributes.color.array;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      col[i * 3] = c.r;
+      col[i * 3 + 1] = c.g;
+      col[i * 3 + 2] = c.b;
+    }
+    particles.geometry.attributes.color.needsUpdate = true;
+  }
+  updatePickerUI();
+}
+
+function syncPickerToState() {
+  const c = stateColors[sphereCount];
+  const [h, s, v] = rgbToHsv(c.r, c.g, c.b);
+  pickerHue = h; pickerSat = s; pickerVal = v;
+  updatePickerUI();
+}
+
+// SV area interaction
+function handleSV(e) {
+  const rect = svArea.getBoundingClientRect();
+  pickerSat = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  pickerVal = Math.max(0, Math.min(1, 1 - (e.clientY - rect.top) / rect.height));
+  updatePickerUI();
+  applyPickerColor();
+}
+
+svArea.addEventListener('mousedown', (e) => {
+  e.stopPropagation();
+  draggingSV = true;
+  handleSV(e);
+});
+
+// Hue track interaction
+function handleHue(e) {
+  const rect = hueTrack.getBoundingClientRect();
+  pickerHue = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  updatePickerUI();
+  applyPickerColor();
+}
+
+hueTrack.addEventListener('mousedown', (e) => {
+  e.stopPropagation();
+  draggingHue = true;
+  handleHue(e);
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (draggingSV) handleSV(e);
+  if (draggingHue) handleHue(e);
+});
+
+window.addEventListener('mouseup', () => {
+  draggingSV = false;
+  draggingHue = false;
+});
+
+// Update picker when switching states
+const origUpdatePanel = updatePanel;
+updatePanel = function() {
+  origUpdatePanel();
+  syncPickerToState();
+};
+
+randomizeBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const hue = Math.random();
+  const sat = 0.6 + Math.random() * 0.4;
+  const light = 0.35 + Math.random() * 0.3;
+  const c = new THREE.Color().setHSL(hue, sat, light);
+  applyColor(colorToHex(c));
+});
+
+// Init picker to current state
+syncPickerToState();
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+// ─── Hover Jelly Effect ─────────────────────────────────────
+const hoverPoint = new THREE.Vector3();
+let hoverActive = false;
+
+// Per-particle spring displacement (stored as offset from rest position)
+const displaceX = new Float32Array(PARTICLE_COUNT);
+const displaceY = new Float32Array(PARTICLE_COUNT);
+const displaceZ = new Float32Array(PARTICLE_COUNT);
+// Per-particle velocity for spring physics
+const velX = new Float32Array(PARTICLE_COUNT);
+const velY = new Float32Array(PARTICLE_COUNT);
+const velZ = new Float32Array(PARTICLE_COUNT);
+// Brightness energy per particle (for glow effect)
+const brightness = new Float32Array(PARTICLE_COUNT);
+
+// Ray origin/direction for hover — computed each frame from mouse
+const hoverRayOrigin = new THREE.Vector3();
+const hoverRayDir = new THREE.Vector3();
+
+// ─── Drag-to-Spin Interaction ───────────────────────────────
+let isDragging = false;
+let dragStartX = 0, dragStartY = 0;
+let dragTotalDist = 0;
+let rotVelX = 0, rotVelY = 0;
+let rotX = 0, rotY = 0;
+let prevMouseX = 0, prevMouseY = 0;
+
+renderer.domElement.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+  dragTotalDist = 0;
+  prevMouseX = e.clientX;
+  prevMouseY = e.clientY;
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - prevMouseX;
+  const dy = e.clientY - prevMouseY;
+  dragTotalDist += Math.abs(dx) + Math.abs(dy);
+  rotVelY = dx * 0.005;
+  rotVelX = dy * 0.005;
+  prevMouseX = e.clientX;
+  prevMouseY = e.clientY;
+});
+
+window.addEventListener('mouseup', (e) => {
+  if (isDragging && dragTotalDist < 5) {
+    toggleSplit();
+  }
+  isDragging = false;
+});
+
+// Touch support
+renderer.domElement.addEventListener('touchstart', (e) => {
+  isDragging = true;
+  const t = e.touches[0];
+  dragStartX = t.clientX;
+  dragStartY = t.clientY;
+  dragTotalDist = 0;
+  prevMouseX = t.clientX;
+  prevMouseY = t.clientY;
+});
+
+window.addEventListener('touchmove', (e) => {
+  if (!isDragging) return;
+  const t = e.touches[0];
+  const dx = t.clientX - prevMouseX;
+  const dy = t.clientY - prevMouseY;
+  dragTotalDist += Math.abs(dx) + Math.abs(dy);
+  rotVelY = dx * 0.005;
+  rotVelX = dy * 0.005;
+  prevMouseX = t.clientX;
+  prevMouseY = t.clientY;
+});
+
+window.addEventListener('touchend', () => {
+  if (isDragging && dragTotalDist < 5) {
+    toggleSplit();
+  }
+  isDragging = false;
+});
+
+// ─── Animation Loop ─────────────────────────────────────────
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  const time = clock.getElapsedTime();
+
+  // Morph animation
+  if (morphing) {
+    morphProgress += dt / MORPH_DURATION;
+    if (morphProgress >= 1) {
+      morphProgress = 1;
+      morphing = false;
+    }
+
+    const pos = geometry.attributes.position.array;
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const i3 = i * 3;
+
+      // Small stagger so particles don't all start at once
+      const raw = Math.min(Math.max((morphProgress - delays[i]) / (1.0 - delays[i]), 0), 1);
+
+      const t = easeInOutCubic(raw);
+
+      const sx = startPositions[i3], sy = startPositions[i3+1], sz = startPositions[i3+2];
+      const tx = targetPositions[i3], ty = targetPositions[i3+1], tz = targetPositions[i3+2];
+
+      // Subtle arc — peaks at midpoint of flight
+      const arc = Math.sin(raw * Math.PI);
+
+      // Direct lerp with gentle perpendicular curve
+      pos[i3]     = sx + (tx - sx) * t + midOffsets[i3] * arc;
+      pos[i3 + 1] = sy + (ty - sy) * t + midOffsets[i3+1] * arc;
+      pos[i3 + 2] = sz + (tz - sz) * t + midOffsets[i3+2] * arc;
+
+      // Lerp colors
+      colors[i3]     = startColors[i3]     + (targetColors[i3]     - startColors[i3])     * t;
+      colors[i3 + 1] = startColors[i3 + 1] + (targetColors[i3 + 1] - startColors[i3 + 1]) * t;
+      colors[i3 + 2] = startColors[i3 + 2] + (targetColors[i3 + 2] - startColors[i3 + 2]) * t;
+    }
+    geometry.attributes.position.needsUpdate = true;
+    geometry.attributes.color.needsUpdate = true;
+  }
+
+
+  // ─── Hover water ripple + darkening ─────────────────────────
+  // Build a ray in particle-local space from the mouse position
+  hoverActive = false;
+  if (!isDragging && mouse2D.x > -99) {
+    raycaster.setFromCamera(mouse2D, camera);
+    // Transform ray into particle local space (undo rotation)
+    hoverRayOrigin.copy(raycaster.ray.origin);
+    hoverRayDir.copy(raycaster.ray.direction);
+    particles.worldToLocal(hoverRayOrigin);
+    // For direction, we need to transform a second point and subtract
+    const farPoint = new THREE.Vector3().copy(raycaster.ray.origin).addScaledVector(raycaster.ray.direction, 1);
+    particles.worldToLocal(farPoint);
+    hoverRayDir.subVectors(farPoint, hoverRayOrigin).normalize();
+    hoverActive = true;
+  }
+
+  {
+    const pos = geometry.attributes.position.array;
+    const col = geometry.attributes.color.array;
+    const hoverRadius = 0.35;
+    const pushStrength = 0.15;   // how hard cursor pushes particles
+    const springK = 0.3;         // spring stiffness — pulls back to rest
+    const damping = 0.75;        // velocity damping — controls wobble decay
+    const darkenGain = 0.25;     // how fast darkening builds
+    const darkenDecay = 0.92;    // how fast darkening fades
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const i3 = i * 3;
+
+      // Rest position: where this particle should be (from morph or target)
+      let rx = morphing ? pos[i3] - displaceX[i] : targetPositions[i3];
+      let ry = morphing ? pos[i3 + 1] - displaceY[i] : targetPositions[i3 + 1];
+      let rz = morphing ? pos[i3 + 2] - displaceZ[i] : targetPositions[i3 + 2];
+
+
+      // Apply cursor push force — distance from particle to mouse ray
+      if (hoverActive) {
+        // Vector from ray origin to particle
+        const tpx = rx - hoverRayOrigin.x;
+        const tpy = ry - hoverRayOrigin.y;
+        const tpz = rz - hoverRayOrigin.z;
+        // Project onto ray direction to find closest point on ray
+        const dot = tpx * hoverRayDir.x + tpy * hoverRayDir.y + tpz * hoverRayDir.z;
+        // Closest point on ray
+        const cpx = hoverRayOrigin.x + hoverRayDir.x * dot;
+        const cpy = hoverRayOrigin.y + hoverRayDir.y * dot;
+        const cpz = hoverRayOrigin.z + hoverRayDir.z * dot;
+        // Distance from particle to closest point on ray
+        const dx = rx - cpx;
+        const dy = ry - cpy;
+        const dz = rz - cpz;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (dist < hoverRadius && dist > 0.001) {
+          const proximity = 1 - dist / hoverRadius;
+          const force = pushStrength * proximity * proximity;
+          // Push away from ray perpendicular to it
+          velX[i] += (dx / dist) * force;
+          velY[i] += (dy / dist) * force;
+          velZ[i] += (dz / dist) * force;
+          // Build darkening
+          brightness[i] = Math.min(brightness[i] + darkenGain * proximity, 1.0);
+        }
+      }
+
+      // Spring force: pull displacement back to zero
+      velX[i] += -springK * displaceX[i];
+      velY[i] += -springK * displaceY[i];
+      velZ[i] += -springK * displaceZ[i];
+
+      // Damping
+      velX[i] *= damping;
+      velY[i] *= damping;
+      velZ[i] *= damping;
+
+      // Integrate
+      displaceX[i] += velX[i];
+      displaceY[i] += velY[i];
+      displaceZ[i] += velZ[i];
+
+      // Apply displacement to position
+      pos[i3]     = rx + displaceX[i];
+      pos[i3 + 1] = ry + displaceY[i];
+      pos[i3 + 2] = rz + displaceZ[i];
+
+      // Darken: decay and apply to color
+      brightness[i] *= darkenDecay;
+
+      if (brightness[i] > 0.01) {
+        const b = brightness[i];
+        const baseR = targetColors[i3], baseG = targetColors[i3 + 1], baseB = targetColors[i3 + 2];
+        // Darken toward a deep shadow
+        col[i3]     = baseR * (1.0 - b * 0.7);
+        col[i3 + 1] = baseG * (1.0 - b * 0.7);
+        col[i3 + 2] = baseB * (1.0 - b * 0.7);
+      } else if (!morphing) {
+        col[i3]     = targetColors[i3];
+        col[i3 + 1] = targetColors[i3 + 1];
+        col[i3 + 2] = targetColors[i3 + 2];
+      }
+    }
+    geometry.attributes.position.needsUpdate = true;
+    geometry.attributes.color.needsUpdate = true;
+  }
+
+  // Apply drag rotation with momentum
+  if (!isDragging) {
+    rotVelX *= 0.97;
+    rotVelY *= 0.97;
+  }
+  rotX += rotVelX;
+  rotY += rotVelY;
+
+  // Gentle auto-rotation when not being touched
+  if (!isDragging && Math.abs(rotVelY) < 0.0005) {
+    rotY += sphereCount === 4 ? 0.025 : sphereCount === 2 ? 0.012 : 0.002;
+  }
+
+  particles.rotation.x = rotX;
+  particles.rotation.y = rotY;
+
+
+  // Render background shader then particles
+  renderBg(time);
+  renderer.render(scene, camera);
+}
+
+// ─── Resize ─────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  particleMaterial.uniforms.uPixelRatio.value = renderer.getPixelRatio();
+  resizeBg();
+  gl.useProgram(bgProg);
+  gl.uniform2f(uRes, bgCanvas.width, bgCanvas.height);
+});
+
+// ─── Custom Cursor ──────────────────────────────────────────
+const cursorEl = document.getElementById('cursor');
+let cursorX = -100, cursorY = -100;
+let cursorVisible = false;
+
+// Raycaster for hover detection
+const raycaster = new THREE.Raycaster();
+raycaster.params.Points.threshold = 0.3;
+const mouse2D = new THREE.Vector2(-999, -999);
+
+window.addEventListener('mousemove', (e) => {
+  cursorX = e.clientX;
+  cursorY = e.clientY;
+  cursorEl.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
+
+
+  if (!cursorVisible) {
+    cursorEl.style.opacity = '1';
+    cursorVisible = true;
+  }
+
+  // Hit test against particles + panel buttons
+  mouse2D.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse2D.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+  const overBtn = e.target.closest('.cell-btn') || e.target.closest('.randomize-btn') || e.target.closest('.color-sv-area') || e.target.closest('.color-hue-track') || e.target.closest('.color-swatch-preview');
+  if (overBtn) {
+    cursorEl.classList.add('hovering');
+  } else {
+    raycaster.setFromCamera(mouse2D, camera);
+    const hits = raycaster.intersectObject(particles);
+    if (hits.length > 0) {
+      cursorEl.classList.add('hovering');
+    } else {
+      cursorEl.classList.remove('hovering');
+    }
+  }
+});
+
+renderer.domElement.addEventListener('mousedown', () => {
+  cursorEl.classList.add('dragging');
+});
+
+document.querySelector('.sidebar').addEventListener('mousedown', (e) => {
+  if (e.target.closest('.cell-btn') || e.target.closest('.randomize-btn') || e.target.closest('.color-sv-area') || e.target.closest('.color-hue-track')) {
+    cursorEl.classList.add('dragging');
+  }
+});
+
+window.addEventListener('mouseup', () => {
+  cursorEl.classList.remove('dragging');
+});
+
+window.addEventListener('mouseleave', () => {
+  cursorEl.style.opacity = '0';
+  cursorVisible = false;
+});
+
+// Start animation after everything is initialized
+animate();
+
+</script>
+</body>
+</html>

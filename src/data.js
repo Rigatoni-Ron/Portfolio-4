@@ -45,11 +45,20 @@ export const projects = [
   },
 ]
 
+// `mode` controls how a tile opens: 'iframe' (vendored standalone build in
+// /public) or 'native' (a ported React component). Tiles without a mode are
+// not yet wired to open.
 export const playground = [
   { id: 'portfolio-node-builder', title: 'Portfolio Node Builder', tag: 'React Flow' },
   { id: 'card-stacker', title: 'Card Stacker', tag: 'Gesture / stack' },
   { id: 'crypto-glass-widget', title: 'Crypto Glass Widget', tag: 'Material' },
   { id: 'plan-your-trip-globe', title: 'Plan Your Trip Globe', tag: '3D globe' },
-  { id: '3d-shape-animator', title: '3D Shape Animator', tag: 'Three.js' },
+  {
+    id: '3d-shape-animator',
+    title: '3D Shape Animator',
+    tag: 'Three.js',
+    mode: 'iframe',
+    src: '/playground/3d-shape-animator/index.html',
+  },
   { id: 'animated-menu', title: 'Animated Menu', tag: 'Interaction' },
 ]

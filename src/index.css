@@ -688,6 +688,74 @@ a {
 }
 
 /* ============================================================
+   Playground fullscreen viewer (tile → zoom → live component)
+   ============================================================ */
+.pg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Click-through centering layer; the panel fills it minus a small margin. */
+.pg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: stretch;
+  padding: var(--s-4);
+  pointer-events: none;
+}
+
+.pg-panel {
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--border-hover);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--bg-raised);
+}
+
+.pg-frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.pg-close {
+  position: fixed;
+  z-index: 80;
+  top: var(--s-5);
+  right: var(--s-5);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  color: var(--text-muted);
+  background: var(--bg-raised);
+  transition:
+    color 0.18s var(--ease),
+    border-color 0.18s var(--ease);
+}
+
+.pg-close:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
+.pg-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================================
    Learnings panel
    ============================================================ */
 .learnings {
