@@ -56,8 +56,20 @@ export const playground = [
     mode: 'iframe',
     src: '/playground/portfolio-node-builder/index.html',
   },
-  { id: 'card-stacker', title: 'Card Stacker', tag: 'Gesture / stack' },
-  { id: 'crypto-glass-widget', title: 'Crypto Glass Widget', tag: 'Material' },
+  {
+    id: 'card-stacker',
+    title: 'Card Stacker',
+    tag: 'Gesture / stack',
+    mode: 'iframe',
+    src: '/playground/card-stacker/index.html',
+  },
+  {
+    id: 'crypto-glass-widget',
+    title: 'Crypto Glass Widget',
+    tag: 'Material',
+    mode: 'iframe',
+    src: '/playground/crypto-glass-widget/index.html',
+  },
   {
     id: 'plan-your-trip-globe',
     title: 'Plan Your Trip Globe',
