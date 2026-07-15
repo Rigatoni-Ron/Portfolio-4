@@ -725,6 +725,31 @@ a {
   height: 100%;
   border: 0;
   display: block;
+  transition: opacity 0.35s var(--ease);
+}
+
+/* Shown while the zoom lands and the app loads. */
+.pg-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.pg-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border-hover);
+  border-top-color: var(--text-muted);
+  animation: pg-spin 0.7s linear infinite;
+}
+
+@keyframes pg-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .pg-close {

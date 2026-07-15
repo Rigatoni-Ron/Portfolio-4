@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Close } from './icons.jsx'
 import { morph } from '../motion.js'
@@ -6,11 +6,23 @@ import { morph } from '../motion.js'
 /*
  * Fullscreen viewer for a Playground tile. The tile shares a layoutId with the
  * panel, so it morphs (zooms) up to near-fullscreen. The live component mounts
- * only while open: 'iframe' loads a vendored standalone build; 'native' will
- * render a ported React component. On close the panel unmounts (tearing down
- * the iframe's document + any WebGL context), and the tile morphs back.
+ * only while open.
+ *
+ * Perf: a same-origin iframe shares the main thread, so booting a heavy app
+ * (e.g. Three.js) *during* the zoom freezes the animation. So we defer mounting
+ * the iframe until the morph finishes (onLayoutAnimationComplete), then fade the
+ * loaded app in — the zoom stays smooth and the content lands a beat later.
+ * On close the panel unmounts, tearing down the iframe + any WebGL context.
  */
 export default function PlaygroundViewer({ item, onClose }) {
+  const [morphDone, setMorphDone] = useState(false)
+  const [frameLoaded, setFrameLoaded] = useState(false)
+
+  useEffect(() => {
+    setMorphDone(false)
+    setFrameLoaded(false)
+  }, [item?.id])
+
   useEffect(() => {
     if (!item) return
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -21,6 +33,8 @@ export default function PlaygroundViewer({ item, onClose }) {
       document.body.style.overflow = ''
     }
   }, [item, onClose])
+
+  const showLoader = item && (!morphDone || !frameLoaded)
 
   return (
     <>
@@ -66,19 +80,28 @@ export default function PlaygroundViewer({ item, onClose }) {
               className="pg-panel"
               onClick={(e) => e.stopPropagation()}
               transition={morph}
+              onLayoutAnimationComplete={() => setMorphDone(true)}
               // Vanish instantly on close so only the tile's morph-back shows.
               exit={{ opacity: 0, transition: { duration: 0 } }}
               role="dialog"
               aria-modal="true"
               aria-label={item.title}
             >
-              {item.mode === 'iframe' && (
+              {/* Mount the iframe only after the zoom lands. */}
+              {item.mode === 'iframe' && morphDone && (
                 <iframe
                   className="pg-frame"
                   src={item.src}
                   title={item.title}
-                  loading="lazy"
+                  style={{ opacity: frameLoaded ? 1 : 0 }}
+                  onLoad={() => setFrameLoaded(true)}
                 />
+              )}
+
+              {showLoader && (
+                <div className="pg-loading" aria-hidden="true">
+                  <span className="pg-spinner" />
+                </div>
               )}
             </motion.div>
           )}
