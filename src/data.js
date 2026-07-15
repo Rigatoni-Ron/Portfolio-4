@@ -60,5 +60,5 @@ export const playground = [
     mode: 'iframe',
     src: '/playground/3d-shape-animator/index.html',
   },
-  { id: 'animated-menu', title: 'Animated Menu', tag: 'Interaction' },
+  { id: 'animated-menu', title: 'Animated Menu', tag: 'Interaction', mode: 'native' },
 ]

@@ -1,7 +1,14 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Close } from './icons.jsx'
 import { morph } from '../motion.js'
+import { nativeComponents } from '../playground/registry.js'
+
+const Spinner = () => (
+  <div className="pg-loading" aria-hidden="true">
+    <span className="pg-spinner" />
+  </div>
+)
 
 /*
  * Fullscreen viewer for a Playground tile. The tile shares a layoutId with the
@@ -34,7 +41,7 @@ export default function PlaygroundViewer({ item, onClose }) {
     }
   }, [item, onClose])
 
-  const showLoader = item && (!morphDone || !frameLoaded)
+  const NativeComp = item?.mode === 'native' ? nativeComponents[item.id] : null
 
   return (
     <>
@@ -87,22 +94,30 @@ export default function PlaygroundViewer({ item, onClose }) {
               aria-modal="true"
               aria-label={item.title}
             >
-              {/* Mount the iframe only after the zoom lands. */}
+              {/* Content mounts only after the zoom lands (keeps the morph
+                  smooth — a heavy boot on the shared main thread would jank it). */}
               {item.mode === 'iframe' && morphDone && (
-                <iframe
-                  className="pg-frame"
-                  src={item.src}
-                  title={item.title}
-                  style={{ opacity: frameLoaded ? 1 : 0 }}
-                  onLoad={() => setFrameLoaded(true)}
-                />
+                <>
+                  <iframe
+                    className="pg-frame"
+                    src={item.src}
+                    title={item.title}
+                    style={{ opacity: frameLoaded ? 1 : 0 }}
+                    onLoad={() => setFrameLoaded(true)}
+                  />
+                  {!frameLoaded && <Spinner />}
+                </>
               )}
 
-              {showLoader && (
-                <div className="pg-loading" aria-hidden="true">
-                  <span className="pg-spinner" />
-                </div>
+              {item.mode === 'native' && morphDone && NativeComp && (
+                <Suspense fallback={<Spinner />}>
+                  <div className="pg-native">
+                    <NativeComp />
+                  </div>
+                </Suspense>
               )}
+
+              {!morphDone && <Spinner />}
             </motion.div>
           )}
         </AnimatePresence>
