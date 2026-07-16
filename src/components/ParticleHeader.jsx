@@ -23,7 +23,7 @@ const CFG = {
   fontFit: 0.7, // name width as a fraction of the canvas (viewport) width
 
   // stream
-  windCount: 26,
+  windCount: 56,
   windSize: 1.5,
   windAlpha: 1,
   baseWind: 0.025,
