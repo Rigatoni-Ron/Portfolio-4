@@ -42,7 +42,7 @@ const CFG = {
 
   // interaction
   interactR: 55,
-  glowGain: 0.5,
+  glowGain: 0.76,
   gravityFraction: 0.25, // fraction of stream pixels that tug the name
   push: 0.26,
   deflect: 0.15,
