@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wind Header — prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html, body { margin: 0; height: 100%; background: #0a0a0b; overflow: hidden; }
+      canvas { display: block; width: 100vw; height: 100vh; }
+      .hint {
+        position: fixed; left: 16px; bottom: 14px; z-index: 2;
+        font: 400 12px/1.4 ui-monospace, Menlo, monospace;
+        color: #565a63; letter-spacing: 0.04em;
+      }
+      /* ── control panel ── */
+      #panel {
+        position: fixed; top: 14px; right: 14px; z-index: 5; width: 244px;
+        max-height: 94vh; overflow-y: auto;
+        background: rgba(14, 14, 16, 0.92); backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
+        padding: 10px 12px 14px; box-sizing: border-box;
+        font: 400 11px/1.3 ui-monospace, Menlo, monospace; color: #ededef;
+        user-select: none;
+      }
+      #panel .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+      #panel .title { font-size: 11px; letter-spacing: 0.06em; color: #8a8f98; text-transform: uppercase; }
+      #panel button {
+        font: inherit; color: #ededef; background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.14); border-radius: 7px;
+        padding: 3px 8px; cursor: pointer;
+      }
+      #panel button:hover { background: rgba(255,255,255,0.12); }
+      #panel .group { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+        color: #565a63; margin: 12px 0 5px; }
+      #panel .row { margin-bottom: 8px; }
+      #panel .rowhead { display: flex; justify-content: space-between; margin-bottom: 3px; }
+      #panel .val { color: #8a8f98; }
+      #panel input[type=range] {
+        width: 100%; height: 3px; margin: 3px 0 0; -webkit-appearance: none; appearance: none;
+        background: rgba(255,255,255,0.14); border-radius: 3px; outline: none;
+      }
+      #panel input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%;
+        background: #ededef; cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <div id="panel"></div>
+    <p class="hint">throwaway prototype · wind + "I'm Aaron" beads · move the mouse too</p>
+
+    <script>
+      /* ─────────────────────────────────────────────────────────────
+       * WIND HEADER PROTOTYPE (with live control panel)
+       * ───────────────────────────────────────────────────────────── */
+      const CFG = {
+        text: "I’m Aaron",
+        square: 2,          // name bead size (css px)
+        restAlpha: 0.5,     // resting bead brightness
+        beadStep: 3,        // name sampling stride (css px) — lower = denser name
+
+        windCount: 170,     // stream density
+        windSize: 4,        // stream pixel size (css px)
+        windAlpha: 0.5,     // stream pixel brightness
+        baseWind: 0.08,     // rightward speed
+        turb: 0.05,         // turbulence
+        noiseScale: 0.0016,
+        timeScale: 0.12,    // flow-field speed
+        windDamp: 0.94,
+
+        // ── path (the ribbon the stream is contained in) ──
+        bandTop: 0.44,      // top of stream (fraction of height)
+        bandBottom: 0.56,   // bottom of stream (fraction of height)
+        bandWave: 46,       // undulation amplitude (css px)
+        bandWaveFreq: 0.004,
+        bandWaveSpeed: 0.2,
+        containment: 0.02,  // how tightly held to the path
+
+        // ── interaction ──
+        interactR: 20,      // reach (css px)
+        glowGain: 0.5,      // wake brightness (how much wind lights beads)
+        gravityFraction: 0.25, // fraction of stream pixels that BULGE the name
+        push: 0.2,          // gravity strength (for the "heavy" pixels)
+
+        // ── hover bulge ──
+        mouseR: 90,
+        mouseForce: 9,
+      }
+
+      // which CFG keys the panel controls, grouped:
+      const CONTROLS = [
+        ['Stream', [
+          ['windCount', 'Density', 0, 500, 1, resizeWind],
+          ['windSize', 'Pixel size', 1, 12, 0.5],
+          ['windAlpha', 'Pixel brightness', 0.1, 1, 0.05],
+          ['baseWind', 'Speed', 0.01, 0.4, 0.005],
+          ['turb', 'Turbulence', 0, 0.4, 0.01],
+          ['timeScale', 'Flow speed', 0.02, 0.6, 0.01],
+        ]],
+        ['Path', [
+          ['bandTop', 'Top', 0, 1, 0.01],
+          ['bandBottom', 'Bottom', 0, 1, 0.01],
+          ['bandWave', 'Wave', 0, 180, 2],
+          ['bandWaveSpeed', 'Wave speed', 0, 1.5, 0.05],
+          ['bandWaveFreq', 'Wave length', 0.0005, 0.012, 0.0005],
+          ['containment', 'Containment', 0.002, 0.12, 0.002],
+        ]],
+        ['Interaction', [
+          ['glowGain', 'Wake brightness', 0, 1, 0.02],
+          ['gravityFraction', 'Gravity amount', 0, 1, 0.02, reassignHeavy],
+          ['push', 'Gravity strength', 0, 0.6, 0.01],
+          ['interactR', 'Reach', 6, 60, 1],
+        ]],
+        ['Hover bulge', [
+          ['mouseR', 'Radius', 20, 220, 5],
+          ['mouseForce', 'Force', 0, 30, 0.5],
+        ]],
+        ['Name', [
+          ['beadStep', 'Name density', 2, 8, 1, buildBeads],
+          ['restAlpha', 'Name brightness', 0.1, 1, 0.02],
+          ['square', 'Name pixel size', 1, 6, 0.5],
+        ]],
+      ]
+
+      const REST = [237, 237, 239]
+      const canvas = document.getElementById('c')
+      const ctx = canvas.getContext('2d')
+      let dpr = Math.min(window.devicePixelRatio || 1, 2)
+      let W = 0, H = 0
+      let beads = [], wind = [], nameData = null
+      const mouse = { x: -1e4, y: -1e4 }
+
+      function glowSprite(size) {
+        const c = document.createElement('canvas'); c.width = c.height = size
+        const g = c.getContext('2d')
+        const grd = g.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2)
+        grd.addColorStop(0, `rgba(${REST[0]},${REST[1]},${REST[2]},0.9)`)
+        grd.addColorStop(1, `rgba(${REST[0]},${REST[1]},${REST[2]},0)`)
+        g.fillStyle = grd; g.fillRect(0, 0, size, size)
+        return c
+      }
+      const glow = glowSprite(40)
+
+      function bandCenterAt(x, tt) {
+        const c = (CFG.bandTop + CFG.bandBottom) / 2
+        return H * c + Math.sin(x * CFG.bandWaveFreq + tt * CFG.bandWaveSpeed) * CFG.bandWave * dpr
+      }
+      function flowAngle(x, y, t) {
+        const s = CFG.noiseScale
+        return (Math.sin(x*s + t*0.3) + Math.cos(y*s*1.3 - t*0.22) + Math.sin((x+y)*s*0.6 + t*0.15)*0.6) * 1.7
+      }
+      function nameAt(x, y) {
+        const px = x|0, py = y|0
+        if (px < 0 || py < 0 || px >= W || py >= H) return 0
+        return nameData[(py*W + px)*4 + 3]
+      }
+
+      let grid = new Map(), cell = 1
+      const key = (cx, cy) => cx + ',' + cy
+      function buildGrid() {
+        cell = Math.max(4, CFG.interactR * dpr)
+        grid = new Map()
+        for (let i = 0; i < beads.length; i++) {
+          const b = beads[i]
+          const k = key((b.rx/cell)|0, (b.ry/cell)|0)
+          let arr = grid.get(k); if (!arr) grid.set(k, (arr = [])); arr.push(i)
+        }
+      }
+
+      function sampleName() {
+        const off = document.createElement('canvas'); off.width = W; off.height = H
+        const o = off.getContext('2d')
+        let fs = H * 0.24
+        const setFont = () => (o.font = `600 ${fs}px Geist, sans-serif`)
+        setFont()
+        const maxW = W * 0.72
+        const tw = o.measureText(CFG.text).width
+        if (tw > maxW) { fs *= maxW / tw; setFont() }
+        o.fillStyle = '#fff'; o.textAlign = 'center'; o.textBaseline = 'middle'
+        o.fillText(CFG.text, W/2, H/2)
+        nameData = o.getImageData(0, 0, W, H).data
+      }
+      function buildBeads() {
+        const step = Math.max(2, Math.round(CFG.beadStep * dpr))
+        beads = []
+        for (let y = 0; y < H; y += step)
+          for (let x = 0; x < W; x += step)
+            if (nameData[(y*W + x)*4 + 3] > 90)
+              beads.push({ rx: x, ry: y, x, y, vx: 0, vy: 0, dist: 0 })
+        buildGrid()
+      }
+      function spawnWind(anywhere) {
+        const x = anywhere ? Math.random()*W : -20*dpr
+        // persistent lane within the band (triangular = denser in the middle,
+        // sparser at the edges — gives the ribbon natural volume)
+        const off = (Math.random() + Math.random()) * 0.5 - 0.5
+        const bh = Math.max(4, (CFG.bandBottom - CFG.bandTop) * H)
+        return {
+          x, off, y: bandCenterAt(x, t) + off*bh,
+          vx: CFG.baseWind*dpr*(2 + Math.random()*3), vy: 0,
+          heavy: Math.random() < CFG.gravityFraction,
+        }
+      }
+      function resizeWind() {
+        const n = Math.round(CFG.windCount)
+        while (wind.length < n) wind.push(spawnWind(true))
+        if (wind.length > n) wind.length = n
+      }
+      function reassignHeavy() { for (const p of wind) p.heavy = Math.random() < CFG.gravityFraction }
+
+      function build() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2)
+        W = canvas.width = Math.round(innerWidth * dpr)
+        H = canvas.height = Math.round(innerHeight * dpr)
+        sampleName(); buildBeads()
+        wind = []; resizeWind()
+      }
+
+      let t = 0
+      function frame() {
+        t += CFG.timeScale
+        ctx.clearRect(0, 0, W, H)
+        const SZ = CFG.square * dpr, WS = CFG.windSize * dpr
+        const R = CFG.interactR * dpr, mR = CFG.mouseR * dpr, mF = CFG.mouseForce * dpr
+
+        for (const p of wind) {
+          const ang = flowAngle(p.x, p.y, t)
+          p.vx += Math.cos(ang) * CFG.turb * dpr + CFG.baseWind * dpr
+          p.vy += Math.sin(ang) * CFG.turb * dpr
+          if (nameAt(p.x, p.y) > 40) {
+            const k = 4 * dpr
+            p.vx -= ((nameAt(p.x+k,p.y) - nameAt(p.x-k,p.y)) / 255) * CFG.deflect * dpr || 0
+            p.vy -= ((nameAt(p.x,p.y+k) - nameAt(p.x,p.y-k)) / 255) * CFG.deflect * dpr || 0
+          }
+          // track this particle's own lane within the wavy band (so the stream
+          // keeps volume instead of collapsing to a single line)
+          const bh = (CFG.bandBottom - CFG.bandTop) * H
+          p.vy += (bandCenterAt(p.x, t) + p.off * bh - p.y) * CFG.containment
+          p.vx *= CFG.windDamp; p.vy *= CFG.windDamp
+          p.x += p.vx; p.y += p.vy
+
+          const cx = (p.x/cell)|0, cy = (p.y/cell)|0
+          for (let ox = -1; ox <= 1; ox++) for (let oy = -1; oy <= 1; oy++) {
+            const arr = grid.get(key(cx+ox, cy+oy)); if (!arr) continue
+            for (const i of arr) {
+              const b = beads[i], dx = b.x-p.x, dy = b.y-p.y, d2 = dx*dx+dy*dy
+              if (d2 < R*R) {
+                const f = 1 - Math.sqrt(d2)/R
+                if (p.heavy) { b.vx += p.vx*CFG.push*f; b.vy += p.vy*CFG.push*f }
+                const lit = f * CFG.glowGain; if (lit > b.dist) b.dist = lit
+              }
+            }
+          }
+          if (p.x > W + 20*dpr || p.y < -60*dpr || p.y > H + 60*dpr) Object.assign(p, spawnWind(false))
+        }
+
+        for (const b of beads) {
+          const dx = b.x-mouse.x, dy = b.y-mouse.y, d = Math.sqrt(dx*dx+dy*dy)
+          if (d < mR && d > 0.1) {
+            const f = ((mR-d)/mR)**2
+            b.vx += (dx/d)*f*mF; b.vy += (dy/d)*f*mF; b.dist = Math.max(b.dist, f)
+          }
+          b.vx += (b.rx-b.x)*0.06; b.vy += (b.ry-b.y)*0.06
+          b.vx *= 0.86; b.vy *= 0.86; b.x += b.vx; b.y += b.vy; b.dist *= 0.92
+        }
+
+        ctx.globalCompositeOperation = 'source-over'
+        ctx.fillStyle = `rgba(${REST[0]},${REST[1]},${REST[2]},${CFG.windAlpha})`
+        for (const p of wind) ctx.fillRect(p.x-WS/2, p.y-WS/2, WS, WS)
+        for (const b of beads) {
+          const a = CFG.restAlpha + b.dist*(1-CFG.restAlpha)
+          ctx.fillStyle = `rgba(${REST[0]},${REST[1]},${REST[2]},${a})`
+          ctx.fillRect(b.x-SZ/2, b.y-SZ/2, SZ, SZ)
+        }
+        ctx.globalCompositeOperation = 'lighter'
+        for (const b of beads) if (b.dist > 0.06) {
+          const g = (7 + b.dist*15) * dpr
+          ctx.globalAlpha = b.dist * 0.35
+          ctx.drawImage(glow, b.x-g/2, b.y-g/2, g, g)
+        }
+        ctx.globalAlpha = 1
+        requestAnimationFrame(frame)
+      }
+      CFG.deflect = 0.15 // slight bend as the stream passes through the name
+
+      // ── build the control panel from CONTROLS ──
+      function buildPanel() {
+        const panel = document.getElementById('panel')
+        panel.innerHTML = ''
+        const top = document.createElement('div'); top.className = 'top'
+        top.innerHTML = '<span class="title">Wind controls</span>'
+        const copy = document.createElement('button'); copy.textContent = 'Copy values'
+        copy.onclick = () => {
+          const out = {}
+          for (const [, rows] of CONTROLS) for (const [k] of rows) out[k] = CFG[k]
+          navigator.clipboard.writeText(JSON.stringify(out, null, 2))
+          copy.textContent = 'Copied!'; setTimeout(() => (copy.textContent = 'Copy values'), 1200)
+        }
+        top.appendChild(copy); panel.appendChild(top)
+
+        for (const [group, rows] of CONTROLS) {
+          const g = document.createElement('div'); g.className = 'group'; g.textContent = group
+          panel.appendChild(g)
+          for (const [k, label, min, max, step, onChange] of rows) {
+            const row = document.createElement('div'); row.className = 'row'
+            const head = document.createElement('div'); head.className = 'rowhead'
+            const val = document.createElement('span'); val.className = 'val'
+            const fmt = (v) => (step < 0.01 ? v.toFixed(4) : step < 1 ? v.toFixed(2) : v)
+            val.textContent = fmt(CFG[k])
+            head.innerHTML = `<span>${label}</span>`; head.appendChild(val)
+            const input = document.createElement('input')
+            input.type = 'range'; input.min = min; input.max = max; input.step = step; input.value = CFG[k]
+            input.oninput = () => {
+              CFG[k] = parseFloat(input.value); val.textContent = fmt(CFG[k])
+              if (onChange) onChange()
+            }
+            row.appendChild(head); row.appendChild(input); panel.appendChild(row)
+          }
+        }
+      }
+
+      addEventListener('mousemove', (e) => { mouse.x = e.clientX*dpr; mouse.y = e.clientY*dpr })
+      addEventListener('mouseleave', () => { mouse.x = mouse.y = -1e4 })
+      let rt
+      addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 150) })
+
+      const start = () => { build(); buildPanel(); requestAnimationFrame(frame) }
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(start); else start()
+    </script>
+  </body>
+</html>

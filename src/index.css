@@ -61,6 +61,7 @@ body {
   line-height: 1.5;
   font-feature-settings: 'ss01';
   -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden; /* full-viewport-width header canvas must not add scroll */
 }
 
 ::selection {
@@ -161,17 +162,19 @@ a {
 .particle-header {
   position: relative;
   width: 100%;
-  /* Shorter layout slot. The canvas itself is taller and bleeds past this
-     (below) so beads pushed out of the name aren't clipped. */
-  height: clamp(96px, 12vw, 150px);
+  /* Layout slot the name occupies (sizes the type). The canvas is taller and
+     full-viewport-width, bleeding past this so the wind + pushed beads aren't
+     clipped. */
+  height: clamp(150px, 20vw, 260px);
 }
 
 .particle-canvas {
   position: absolute;
-  left: 0;
-  top: -80px;
-  width: 100%;
-  height: calc(100% + 160px); /* vertical bleed for pushed beads */
+  left: 50%;
+  top: -70px;
+  transform: translateX(-50%);
+  width: 100vw; /* full viewport width so the wind flows edge-to-edge */
+  height: calc(100% + 140px); /* vertical bleed for pushed beads */
   display: block;
   z-index: 0;
   pointer-events: none; /* mouse is tracked on window; don't block links below */
@@ -207,7 +210,7 @@ a {
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: clamp(52px, 8.5vw, 104px);
+  font-size: clamp(60px, 13vw, 200px);
   letter-spacing: -0.03em;
   color: var(--text);
 }
