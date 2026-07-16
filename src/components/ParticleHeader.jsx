@@ -86,6 +86,7 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
     let nameData = null
     let raf = 0
     let t = 0
+    let visible = true
     const mouse = { cx: -1e5, cy: -1e5 }
 
     // additive glow sprites
@@ -323,7 +324,7 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
           ctx.fillStyle = `rgba(${SPARK[0]},${SPARK[1]},${SPARK[2]},${Math.min(b.spark + 0.2, 1)})`
           ctx.fillRect(b.x - sz / 2, b.y - sz / 2, sz, sz)
         }
-      raf = requestAnimationFrame(loop)
+      if (visible) raf = requestAnimationFrame(loop)
     }
 
     const onMove = (e) => {
@@ -340,6 +341,20 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
       resizeTimer = setTimeout(build, 150)
     })
     ro.observe(wrap)
+
+    // Pause the loop when the header scrolls out of view (saves CPU/battery,
+    // and stops competing with a fullscreen Playground component for the CPU).
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !visible) {
+        visible = true
+        raf = requestAnimationFrame(loop)
+      } else if (!entry.isIntersecting && visible) {
+        visible = false
+        cancelAnimationFrame(raf)
+      }
+    })
+    io.observe(wrap)
+
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseleave', onLeave)
 
@@ -357,6 +372,7 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
       cancelAnimationFrame(raf)
       clearTimeout(resizeTimer)
       ro.disconnect()
+      io.disconnect()
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseleave', onLeave)
     }
