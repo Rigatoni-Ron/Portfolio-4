@@ -12,6 +12,8 @@ import { useEffect, useRef, useState } from 'react'
  */
 
 const REST = [237, 237, 239] // white pixel color
+const GLOW = [57, 69, 101] // navy #394565 — disturbance glow
+const SPARK = [224, 231, 255] // periwinkle #e0e7ff — idle sparks
 
 const CFG = {
   // name
@@ -39,15 +41,23 @@ const CFG = {
   containment: 0.02,
 
   // interaction
-  interactR: 20,
+  interactR: 55,
   glowGain: 0.5,
   gravityFraction: 0.25, // fraction of stream pixels that tug the name
-  push: 0.2,
+  push: 0.26,
   deflect: 0.15,
 
   // cursor bulge
-  mouseR: 90,
+  mouseR: 160,
   mouseForce: 9,
+
+  // electro character (alongside the wind)
+  navyGlow: 1, // navy disturbance-glow amount
+  sparkChance: 0.006, // per-frame chance of a lone idle spark
+  clusterChance: 0.0012, // per-frame chance of a 2–3 spark burst
+  sparkFrequency: 0.7, // multiplier on spark chances
+  sparkDecay: 0.028,
+  sparkSize: 1.2,
 }
 
 export default function ParticleHeader({ text = 'I’m Aaron' }) {
@@ -78,18 +88,20 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
     let t = 0
     const mouse = { cx: -1e5, cy: -1e5 }
 
-    // white glow sprite (additive)
-    const glow = (() => {
+    // additive glow sprites
+    const makeGlow = (rgb) => {
       const c = document.createElement('canvas')
       c.width = c.height = 40
       const g = c.getContext('2d')
       const grd = g.createRadialGradient(20, 20, 0, 20, 20, 20)
-      grd.addColorStop(0, `rgba(${REST[0]},${REST[1]},${REST[2]},0.9)`)
-      grd.addColorStop(1, `rgba(${REST[0]},${REST[1]},${REST[2]},0)`)
+      grd.addColorStop(0, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.9)`)
+      grd.addColorStop(1, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`)
       g.fillStyle = grd
       g.fillRect(0, 0, 40, 40)
       return c
-    })()
+    }
+    const glowNavy = makeGlow(GLOW)
+    const glowSpark = makeGlow(SPARK)
 
     function bandCenterAt(x, tt) {
       const c = (CFG.bandTop + CFG.bandBottom) / 2
@@ -162,7 +174,7 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
       for (let y = 0; y < PH; y += step)
         for (let x = 0; x < PW; x += step)
           if (nameData[(y * PW + x) * 4 + 3] > 90)
-            beads.push({ rx: x, ry: y, x, y, vx: 0, vy: 0, dist: 0 })
+            beads.push({ rx: x, ry: y, x, y, vx: 0, vy: 0, dist: 0, spark: 0 })
       buildGrid()
 
       wind = []
@@ -238,6 +250,27 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
           Object.assign(p, spawnWind(false))
       }
 
+      // idle sparks — random beads flash and kick (the electro life)
+      if (beads.length) {
+        if (Math.random() < CFG.sparkChance * CFG.sparkFrequency) {
+          const b = beads[(Math.random() * beads.length) | 0]
+          const a = Math.random() * Math.PI * 2
+          b.vx += Math.cos(a) * (4 + Math.random() * 5) * dpr
+          b.vy += Math.sin(a) * (4 + Math.random() * 5) * dpr
+          b.spark = 0.75 + Math.random() * 0.25
+        }
+        if (Math.random() < CFG.clusterChance * CFG.sparkFrequency) {
+          const n = 2 + ((Math.random() * 2) | 0)
+          for (let i = 0; i < n; i++) {
+            const b = beads[(Math.random() * beads.length) | 0]
+            const a = Math.random() * Math.PI * 2
+            b.vx += Math.cos(a) * (3 + Math.random() * 4) * dpr
+            b.vy += Math.sin(a) * (3 + Math.random() * 4) * dpr
+            b.spark = 0.6 + Math.random() * 0.4
+          }
+        }
+      }
+
       for (const b of beads) {
         const dx = b.x - rmx
         const dy = b.y - rmy
@@ -255,6 +288,7 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
         b.x += b.vx
         b.y += b.vy
         b.dist *= 0.92
+        if (b.spark > 0) b.spark = Math.max(0, b.spark - CFG.sparkDecay)
       }
 
       ctx.globalCompositeOperation = 'source-over'
@@ -265,14 +299,30 @@ export default function ParticleHeader({ text = 'I’m Aaron' }) {
         ctx.fillStyle = `rgba(${REST[0]},${REST[1]},${REST[2]},${a})`
         ctx.fillRect(b.x - SZ / 2, b.y - SZ / 2, SZ, SZ)
       }
+      // additive glows: navy where disturbed, periwinkle for sparks
       ctx.globalCompositeOperation = 'lighter'
-      for (const b of beads)
+      for (const b of beads) {
         if (b.dist > 0.06) {
           const g = (7 + b.dist * 15) * dpr
-          ctx.globalAlpha = b.dist * 0.35
-          ctx.drawImage(glow, b.x - g / 2, b.y - g / 2, g, g)
+          ctx.globalAlpha = b.dist * CFG.navyGlow
+          ctx.drawImage(glowNavy, b.x - g / 2, b.y - g / 2, g, g)
         }
+        if (b.spark > 0.05) {
+          const g = (10 + b.spark * 30) * CFG.sparkSize * dpr
+          ctx.globalAlpha = b.spark
+          ctx.drawImage(glowSpark, b.x - g / 2, b.y - g / 2, g, g)
+        }
+      }
       ctx.globalAlpha = 1
+
+      // spark cores (periwinkle, on top)
+      ctx.globalCompositeOperation = 'source-over'
+      for (const b of beads)
+        if (b.spark > 0.05) {
+          const sz = SZ * (1 + b.spark * 3)
+          ctx.fillStyle = `rgba(${SPARK[0]},${SPARK[1]},${SPARK[2]},${Math.min(b.spark + 0.2, 1)})`
+          ctx.fillRect(b.x - sz / 2, b.y - sz / 2, sz, sz)
+        }
       raf = requestAnimationFrame(loop)
     }
 
