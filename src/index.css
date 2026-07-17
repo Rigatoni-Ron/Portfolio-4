@@ -750,18 +750,37 @@ a {
   pointer-events: none;
 }
 
-.pg-spinner {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 2px solid var(--border-hover);
-  border-top-color: var(--text-muted);
-  animation: pg-spin 0.7s linear infinite;
+.pg-wave {
+  display: grid;
+  grid-template-columns: repeat(3, 11px);
+  grid-template-rows: repeat(3, 11px);
+  gap: 4px;
 }
 
-@keyframes pg-spin {
-  to {
-    transform: rotate(360deg);
+.pg-wave-cell {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  background: rgb(237, 237, 239);
+  opacity: 0.13;
+  transform: scale(0.82);
+  will-change: opacity, transform;
+  animation: pg-wave-flash 1.4s infinite;
+  animation-delay: calc(var(--wave) * 0.13s);
+}
+
+@keyframes pg-wave-flash {
+  0%,
+  46%,
+  100% {
+    opacity: 0.13;
+    transform: scale(0.82);
+    box-shadow: none;
+  }
+  12% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 7px rgba(237, 237, 239, 0.45);
   }
 }
 

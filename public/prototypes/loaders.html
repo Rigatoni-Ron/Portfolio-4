@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading states — prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0b;
+        --lit: 237, 237, 239; /* white */
+        --cell: 11px;
+        --gap: 4px;
+        --dur: 1.4s;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: var(--bg); color: #ededef; }
+      body {
+        font-family: 'Geist', system-ui, sans-serif;
+        padding: 40px 32px 80px;
+        min-height: 100vh;
+      }
+      h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.01em; margin: 0 0 6px; }
+      .sub {
+        font: 400 13px/1.5 ui-monospace, Menlo, monospace;
+        color: #565a63; letter-spacing: 0.03em; margin: 0 0 36px;
+      }
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        border: 1px solid rgba(255,255,255,0.09);
+        border-radius: 14px;
+        padding: 26px 16px 14px;
+        display: flex; flex-direction: column; align-items: center; gap: 20px;
+        transition: border-color 0.2s ease, background 0.2s ease;
+      }
+      .card:hover { border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.02); }
+      .card .name {
+        font: 400 11px/1 ui-monospace, Menlo, monospace;
+        color: #8a8f98; letter-spacing: 0.06em;
+      }
+      .card .num { color: #565a63; margin-right: 6px; }
+
+      /* ── the 3×3 loader ── */
+      .loader {
+        display: grid;
+        grid-template-columns: repeat(3, var(--cell));
+        grid-template-rows: repeat(3, var(--cell));
+        gap: var(--gap);
+      }
+      .cell {
+        width: var(--cell); height: var(--cell);
+        border-radius: 2px;
+        background: rgb(var(--lit));
+        opacity: 0.13;
+        transform: scale(0.82);
+        will-change: opacity, transform;
+      }
+
+      /* ── keyframes ── */
+      @keyframes flash {
+        0%, 46%, 100% { opacity: 0.13; transform: scale(0.82); box-shadow: none; }
+        12% { opacity: 1; transform: scale(1); box-shadow: 0 0 7px rgba(var(--lit), 0.45); }
+      }
+      @keyframes breathe {
+        0%, 100% { opacity: 0.2; transform: scale(0.88); }
+        50% { opacity: 1; transform: scale(1); box-shadow: 0 0 7px rgba(var(--lit), 0.4); }
+      }
+      @keyframes pop {
+        0%, 100% { opacity: 0.13; transform: scale(0.5); }
+        14% { opacity: 1; transform: scale(1.18); box-shadow: 0 0 8px rgba(var(--lit), 0.5); }
+        40% { opacity: 0.13; transform: scale(0.5); }
+      }
+
+      /* ── per-variant timing (delay drives the pattern) ── */
+      .loader.sequence  .cell { animation: flash var(--dur) infinite; animation-delay: calc(var(--i) * 0.1s); }
+      .loader.snake     .cell { animation: flash var(--dur) infinite; animation-delay: calc(var(--snake) * 0.1s); }
+      .loader.spiral    .cell { animation: flash var(--dur) infinite; animation-delay: calc(var(--spiral) * 0.1s); }
+      .loader.wave      .cell { animation: flash var(--dur) infinite; animation-delay: calc(var(--wave) * 0.13s); }
+      .loader.rows      .cell { animation: flash var(--dur) infinite; animation-delay: calc(var(--r) * 0.18s); }
+      .loader.cols      .cell { animation: flash var(--dur) infinite; animation-delay: calc(var(--c) * 0.18s); }
+      .loader.ripple    .cell { animation: flash var(--dur) infinite; animation-delay: calc(var(--dist) * 0.22s); }
+      .loader.breathe   .cell { animation: breathe var(--dur) infinite; }
+      .loader.checker   .cell { animation: flash 1.1s infinite; animation-delay: calc(var(--set) * 0.55s); }
+      .loader.twinkle   .cell { animation: flash 1.6s infinite; } /* delay set per-cell in JS */
+      .loader.scalepop  .cell { animation: pop var(--dur) infinite; animation-delay: calc(var(--i) * 0.1s); }
+
+      /* perimeter chase — center sits dark, ring flashes in order */
+      .loader.perimeter .cell { animation: flash 1.2s infinite; animation-delay: calc(var(--perim) * 0.14s); }
+      .loader.perimeter .cell[data-center] { animation: none; opacity: 0.06; transform: scale(0.82); }
+
+      /* corners — only the 4 corners cycle */
+      .loader.corners .cell { animation: none; opacity: 0.07; transform: scale(0.82); }
+      .loader.corners .cell[data-corner] { animation: flash var(--dur) infinite; animation-delay: calc(var(--corner) * 0.24s); }
+
+      /* random fill (JS toggles .lit) */
+      .loader.fill .cell { transition: opacity 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease; }
+      .loader.fill .cell.lit { opacity: 1; transform: scale(1); box-shadow: 0 0 7px rgba(var(--lit), 0.4); }
+    </style>
+  </head>
+  <body>
+    <h1>Loading states</h1>
+    <p class="sub">throwaway prototype · 3×3 square loaders · tell me a name to use one</p>
+    <div class="gallery" id="gallery"></div>
+
+    <script>
+      // per-cell pattern data for the 3×3 grid (index 0..8, row-major)
+      const SPIRAL = [0,1,2,7,8,3,6,5,4]
+      const SNAKE  = [0,1,2,5,4,3,6,7,8]
+      const PERIM  = [0,1,2,7,-1,3,6,5,4] // -1 = center
+      const CORNER = [0,-1,1,-1,-1,-1,3,-1,2]
+
+      const LOADERS = [
+        { name: 'Sequence', variant: 'sequence' },
+        { name: 'Snake', variant: 'snake' },
+        { name: 'Spiral', variant: 'spiral' },
+        { name: 'Diagonal wave', variant: 'wave' },
+        { name: 'Rows', variant: 'rows' },
+        { name: 'Columns', variant: 'cols' },
+        { name: 'Ripple', variant: 'ripple' },
+        { name: 'Breathe', variant: 'breathe' },
+        { name: 'Checker', variant: 'checker' },
+        { name: 'Twinkle', variant: 'twinkle', random: true },
+        { name: 'Perimeter chase', variant: 'perimeter' },
+        { name: 'Scale pop', variant: 'scalepop' },
+        { name: 'Corners', variant: 'corners' },
+        { name: 'Random fill', variant: 'fill', fill: true },
+      ]
+
+      const gallery = document.getElementById('gallery')
+
+      LOADERS.forEach((cfg, n) => {
+        const card = document.createElement('div'); card.className = 'card'
+        const loader = document.createElement('div'); loader.className = 'loader ' + cfg.variant
+        const cells = []
+        for (let i = 0; i < 9; i++) {
+          const r = (i / 3) | 0, c = i % 3
+          const cell = document.createElement('div'); cell.className = 'cell'
+          const s = cell.style
+          s.setProperty('--i', i)
+          s.setProperty('--r', r)
+          s.setProperty('--c', c)
+          s.setProperty('--wave', r + c)
+          s.setProperty('--set', (r + c) % 2)
+          s.setProperty('--dist', Math.hypot(r - 1, c - 1).toFixed(2))
+          s.setProperty('--spiral', SPIRAL[i])
+          s.setProperty('--snake', SNAKE[i])
+          if (i === 4) cell.dataset.center = ''
+          if (PERIM[i] >= 0) s.setProperty('--perim', PERIM[i])
+          if (CORNER[i] >= 0) { cell.dataset.corner = ''; s.setProperty('--corner', CORNER[i]) }
+          if (cfg.random) s.animationDelay = (-Math.random() * 1.6).toFixed(2) + 's'
+          loader.appendChild(cell); cells.push(cell)
+        }
+        const label = document.createElement('div'); label.className = 'name'
+        label.innerHTML = `<span class="num">${String(n + 1).padStart(2, '0')}</span>${cfg.name}`
+        card.appendChild(loader); card.appendChild(label); gallery.appendChild(card)
+
+        if (cfg.fill) runFill(cells)
+      })
+
+      // Random progressive fill: light cells one by one in random order, hold, clear, repeat.
+      function runFill(cells) {
+        const cycle = () => {
+          const order = [...cells.keys()].sort(() => Math.random() - 0.5)
+          cells.forEach((c) => c.classList.remove('lit'))
+          order.forEach((idx, k) => setTimeout(() => cells[idx].classList.add('lit'), k * 110))
+          const total = order.length * 110
+          setTimeout(() => cells.forEach((c) => c.classList.remove('lit')), total + 550)
+          setTimeout(cycle, total + 950)
+        }
+        cycle()
+      }
+    </script>
+  </body>
+</html>

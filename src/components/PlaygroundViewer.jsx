@@ -4,9 +4,19 @@ import { Close } from './icons.jsx'
 import { morph } from '../motion.js'
 import { nativeComponents } from '../playground/registry.js'
 
+// Diagonal-wave loader: a 3×3 grid of squares where a diagonal band of light
+// sweeps across (delay driven by row+col). Matches the header bead aesthetic.
 const Spinner = () => (
   <div className="pg-loading" aria-hidden="true">
-    <span className="pg-spinner" />
+    <div className="pg-wave">
+      {Array.from({ length: 9 }, (_, i) => (
+        <span
+          key={i}
+          className="pg-wave-cell"
+          style={{ '--wave': ((i / 3) | 0) + (i % 3) }}
+        />
+      ))}
+    </div>
   </div>
 )
 
