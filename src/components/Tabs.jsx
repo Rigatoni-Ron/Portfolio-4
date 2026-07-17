@@ -6,8 +6,9 @@ const TABS = [
   { id: 'learnings', label: 'Learnings', Icon: Book },
 ]
 
-// Same bouncy spring the original tab component used.
-const bouncy = { type: 'spring', stiffness: 480, damping: 18, mass: 0.9 }
+// Smooth, weighty spring — high damping (no wobble) + heavier mass for a
+// deliberate glide. Tuned live via DialKit, then baked in.
+const bouncy = { type: 'spring', stiffness: 480, damping: 50, mass: 3.1 }
 
 export default function Tabs({ current, onChange }) {
   return (
