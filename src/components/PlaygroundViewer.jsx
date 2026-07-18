@@ -118,7 +118,11 @@ export default function PlaygroundViewer({ item, originRect, onClose }) {
             style={{ transformOrigin: 'top left' }}
             initial={fromTile(originRect)}
             animate={{ x: 0, y: 0, scaleX: 1, scaleY: 1 }}
-            exit={fromTile(originRect)}
+            // Open zooms from the real tile (a perfect match). Close does NOT try
+            // to land the live app back into the tile — its arbitrary state can't
+            // match the preview video underneath — so it just fades out, turning
+            // the content mismatch into a soft dissolve instead of a hard pop.
+            exit={{ opacity: 0, transition: { duration: 0.18, ease: 'easeOut' } }}
             transition={morph}
             onAnimationComplete={() => item && setMorphDone(true)}
             role="dialog"

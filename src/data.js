@@ -83,6 +83,8 @@ export const playground = [
     tag: 'Three.js',
     mode: 'iframe',
     src: '/playground/3d-shape-animator/index.html',
+    preview: '/previews/3d-shape-animator.mp4',
+    poster: '/previews/3d-shape-animator.jpg',
   },
   {
     id: 'animated-menu',

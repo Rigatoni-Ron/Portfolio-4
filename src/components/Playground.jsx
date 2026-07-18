@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { playground } from '../data.js'
-import { ArrowUpRight } from './icons.jsx'
 import PlaygroundViewer from './PlaygroundViewer.jsx'
+import TileVideo from './TileVideo.jsx'
 
 const rectOf = (el) => {
   const r = el.getBoundingClientRect()
@@ -52,21 +52,19 @@ export default function Playground() {
               ref={(n) => {
                 if (n) tileRefs.current[c.id] = n
               }}
-              className="tile"
+              className={`tile ${c.preview ? 'has-preview' : ''}`}
               onClick={(e) => openable && open(c, e.currentTarget)}
               whileTap={openable ? { scale: 0.99 } : undefined}
               animate={{ opacity: isActive ? 0 : 1 }}
               style={{ cursor: openable ? 'pointer' : 'default' }}
               aria-label={`Open ${c.title}`}
             >
+              {c.preview && <TileVideo src={c.preview} poster={c.poster} />}
               <div className="tile-meta">
                 <div>
                   <div className="tile-title">{c.title}</div>
                   <div className="tile-tag">{c.tag}</div>
                 </div>
-                <span className="tile-arrow">
-                  <ArrowUpRight />
-                </span>
               </div>
             </motion.button>
           )
