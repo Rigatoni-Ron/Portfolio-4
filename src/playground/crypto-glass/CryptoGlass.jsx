@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import NumberFlow from '@number-flow/react'
 
 /*
  * Crypto Glass — dark-native rebuild of the "liquid glass" crypto widget.
@@ -60,9 +61,6 @@ function toPaths(series, w, h, pad = 2) {
   return { line, area }
 }
 
-const fmt = (n) =>
-  n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-
 function EthMark({ size = 22 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
@@ -119,9 +117,20 @@ export default function CryptoGlass({ variant = 'full' }) {
         <span className="cg-ticker">ETH / USD</span>
       </div>
       <div className="cg-quote">
-        <span className="cg-price">${fmt(price)}</span>
+        <NumberFlow
+          className="cg-price"
+          value={price}
+          format={{ style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+          willChange
+        />
         <span className={`cg-delta ${up ? 'up' : 'down'}`}>
-          {up ? '▲' : '▼'} {Math.abs(delta).toFixed(2)}%
+          <span className="cg-arrow">{up ? '▲' : '▼'}</span>
+          <NumberFlow
+            value={Math.abs(delta)}
+            format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+            suffix="%"
+            willChange
+          />
         </span>
       </div>
     </div>

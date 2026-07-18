@@ -992,9 +992,15 @@ a {
 }
 
 .cg-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   font-size: 11px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
+}
+.cg-arrow {
+  font-size: 0.85em;
 }
 .cg-delta.up {
   color: var(--cg-up);
