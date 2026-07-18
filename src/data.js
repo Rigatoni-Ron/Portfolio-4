@@ -65,7 +65,7 @@ export const playground = [
   },
   {
     id: 'crypto-glass-widget',
-    title: 'Crypto Glass Widget',
+    title: 'Trading Widget',
     tag: 'Live data',
     mode: 'native',
     liveTile: true, // renders a live compact view in the tile

@@ -65,12 +65,19 @@ function toPaths(series, w, h, pad = 2) {
   return { line, area }
 }
 
+// Official Ethereum diamond (cryptologos.cc), on a circular badge.
 function EthMark({ size = 22 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="12" fill="#5b6cff" />
-      <path d="M12 3.5 7.2 12 12 14.8 16.8 12 12 3.5Z" fill="#fff" fillOpacity="0.9" />
-      <path d="M12 15.7 7.2 12.9 12 20.5 16.8 12.9 12 15.7Z" fill="#fff" fillOpacity="0.65" />
+      <circle cx="12" cy="12" r="12" fill="#627eea" />
+      <svg x="6.4" y="3.6" width="11.2" height="16.8" viewBox="0 0 784.37 1277.39" preserveAspectRatio="xMidYMid meet">
+        <polygon fill="#fff" fillOpacity="0.6" points="392.07,0 383.5,29.11 383.5,873.74 392.07,882.29 784.13,650.54 " />
+        <polygon fill="#fff" points="392.07,0 -0,650.54 392.07,882.29 392.07,472.33 " />
+        <polygon fill="#fff" fillOpacity="0.6" points="392.07,956.52 387.24,962.41 387.24,1263.28 392.07,1277.38 784.37,724.89 " />
+        <polygon fill="#fff" points="392.07,1277.38 392.07,956.52 -0,724.89 " />
+        <polygon fill="#fff" fillOpacity="0.2" points="392.07,882.29 784.13,650.54 392.07,472.33 " />
+        <polygon fill="#fff" fillOpacity="0.45" points="0,650.54 392.07,882.29 392.07,472.33 " />
+      </svg>
     </svg>
   )
 }
