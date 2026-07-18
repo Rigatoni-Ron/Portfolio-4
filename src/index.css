@@ -1103,10 +1103,11 @@ a {
   overflow: visible;
 }
 
-/* Range tabs — span the full card width. */
+/* Range tabs — span the full card width, 8px between each. */
 .cg-ranges {
   position: relative;
   display: flex;
+  gap: var(--s-2);
   width: 100%;
   padding: 4px;
   border-radius: 12px;
@@ -1136,17 +1137,19 @@ a {
 .cg-range:not(.active):hover {
   background: rgba(255, 255, 255, 0.06);
 }
-/* Single sliding indicator, positioned by the active index (0–3). */
+/* Single sliding indicator, positioned by the active index (0–3).
+   Width = one tab: (full − 8px padding − 3×8px gaps) / 4. Each step is one
+   tab width plus the 8px gap, i.e. translateX(idx × (100% + 8px)). */
 .cg-range-pill {
   position: absolute;
   z-index: 0;
   top: 4px;
   bottom: 4px;
   left: 4px;
-  width: calc((100% - 8px) / 4);
+  width: calc((100% - 32px) / 4);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.09);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1) inset;
-  transform: translateX(calc(var(--cg-idx) * 100%));
+  transform: translateX(calc(var(--cg-idx) * (100% + var(--s-2))));
   transition: transform 0.28s var(--ease);
 }
