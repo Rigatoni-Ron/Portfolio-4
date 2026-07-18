@@ -9,13 +9,17 @@ import NumberFlow from '@number-flow/react'
  * Mock data only (seeded random walk that live-ticks) — no network.
  */
 
-const RANGES = ['1H', '1D', '1W', '1M']
+const RANGES = ['1D', '1M', '3M', '1Y', '5Y']
 const RANGE_CFG = {
-  '1H': { n: 42, vol: 2.2, drift: 0.15 },
   '1D': { n: 50, vol: 6, drift: 0.5 },
-  '1W': { n: 58, vol: 15, drift: 1.3 },
-  '1M': { n: 64, vol: 34, drift: -1.8 },
+  '1M': { n: 60, vol: 20, drift: 1.2 },
+  '3M': { n: 66, vol: 38, drift: 3 },
+  '1Y': { n: 74, vol: 80, drift: 6 },
+  '5Y': { n: 82, vol: 150, drift: 14 },
 }
+
+// Distinct seed per range label (avoids collisions between same-length labels).
+const seedFor = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)
 
 function mulberry32(a) {
   return () => {
@@ -83,7 +87,7 @@ export default function CryptoGlass({ variant = 'full' }) {
   // Rebuild the series when the range changes (full only).
   useEffect(() => {
     if (isTile) return
-    setSeries(genSeries(price, RANGE_CFG[range], range.charCodeAt(0) + range.length * 7))
+    setSeries(genSeries(price, RANGE_CFG[range], seedFor(range)))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range])
 
@@ -113,8 +117,8 @@ export default function CryptoGlass({ variant = 'full' }) {
     <div className="cg-row">
       <EthMark size={isTile ? 20 : 26} />
       <div className="cg-id">
-        <span className="cg-name">Ethereum</span>
-        <span className="cg-ticker">ETH / USD</span>
+        <span className="cg-name">ETH / USD</span>
+        <span className="cg-ticker">Ethereum network</span>
       </div>
       <div className="cg-quote">
         <NumberFlow

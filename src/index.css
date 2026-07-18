@@ -922,6 +922,11 @@ a {
 .cg-full {
   --cg-up: #46d69f;
   --cg-down: #f4696a;
+  /* Remove NumberFlow's horizontal mask padding (its 0.5em → 7.5px) so the
+     numbers sit flush; this custom prop inherits into its shadow DOM. The
+     vertical mask (mask-height) is left at its default — it's the clip mask
+     the digit roll needs, and zeroing it exposes the whole reel. */
+  --number-flow-mask-width: 0;
 }
 
 /* Frosted DARK glass. Borders use the site tokens; no inset top-highlight or
@@ -957,7 +962,8 @@ a {
 .cg-id {
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
+  gap: var(--s-1); /* 4px between the name + subtitle */
+  line-height: 1;
 }
 
 .cg-name {
@@ -979,7 +985,8 @@ a {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  line-height: 1.25;
+  gap: var(--s-1); /* 4px between price + percentage */
+  line-height: 1;
 }
 
 .cg-price {
@@ -1135,12 +1142,9 @@ a {
 .cg-range.active {
   color: var(--text);
 }
-/* Each tab has its own little button hover. */
+/* Hover just brightens the text — no surface fill, like the home tabs. */
 .cg-range:hover {
   color: var(--text);
-}
-.cg-range:not(.active):hover {
-  background: var(--fill-hover);
 }
 /* Single sliding indicator, positioned by the active index (0–3).
    Width = one tab: (full − 8px padding − 3×8px gaps) / 4. Each step is one
@@ -1151,7 +1155,8 @@ a {
   top: 4px;
   bottom: 4px;
   left: 4px;
-  width: calc((100% - 32px) / 4);
+  /* one of 5 tabs: (100% − 8px padding − 4×8px gaps) / 5 */
+  width: calc((100% - 40px) / 5);
   border-radius: 8px;
   /* matches the home .tab-indicator */
   background: rgba(255, 255, 255, 0.07);
