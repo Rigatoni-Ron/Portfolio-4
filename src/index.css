@@ -922,12 +922,11 @@ a {
 .cg-full {
   --cg-up: #46d69f;
   --cg-down: #f4696a;
-  /* Remove NumberFlow's horizontal mask padding (its 0.5em → 7.5px) so the
-     numbers sit flush; this custom prop inherits into its shadow DOM. The
-     vertical mask (mask-height) is left at its default — it's the clip mask
-     the digit roll needs, and zeroing it exposes the whole reel. */
-  --number-flow-mask-width: 0;
 }
+/* NumberFlow's mask (its clip window for the digit roll) needs its default
+   padding on BOTH axes — zeroing either exposes the whole 0–9 reel. So the
+   numbers keep ~2px vertical / 7.5px horizontal padding; we mirror that padding
+   onto the left column instead (see .cg-name / .cg-ticker) so it stays balanced. */
 
 /* Frosted DARK glass. Borders use the site tokens; no inset top-highlight or
    drop shadow — the home page is flat/outline-first. */
@@ -970,6 +969,7 @@ a {
   font-size: 15px;
   font-weight: 500;
   color: var(--text);
+  padding: 2px 0; /* mirrors NumberFlow's 2px vertical mask padding (balance) */
 }
 
 .cg-ticker {
@@ -977,6 +977,7 @@ a {
   letter-spacing: 0.06em;
   color: var(--text-faint);
   text-transform: uppercase;
+  padding: 2px 0; /* mirrors NumberFlow's 2px vertical mask padding (balance) */
 }
 
 /* Price + movement on the right. */
