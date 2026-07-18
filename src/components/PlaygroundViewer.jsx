@@ -51,14 +51,17 @@ const fromTile = (rect) => {
  * loaded app in — the zoom stays smooth and the content lands a beat later.
  * On close the panel unmounts, tearing down the iframe + any WebGL context.
  */
-export default function PlaygroundViewer({ item, originRect, onClose }) {
+export default function PlaygroundViewer({ item, originRect, openSeq, onClose }) {
   const [morphDone, setMorphDone] = useState(false)
   const [frameLoaded, setFrameLoaded] = useState(false)
 
+  // Reset only when a NEW item opens (openSeq bumps), never mid-exit — a
+  // setState while the panel is exiting can trip up AnimatePresence removal.
   useEffect(() => {
+    if (!item) return
     setMorphDone(false)
     setFrameLoaded(false)
-  }, [item?.id])
+  }, [openSeq]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!item) return
@@ -112,7 +115,7 @@ export default function PlaygroundViewer({ item, originRect, onClose }) {
       <AnimatePresence>
         {item && (
           <motion.div
-            key={item.id}
+            key={openSeq}
             className="pg-panel"
             onClick={(e) => e.stopPropagation()}
             style={{ transformOrigin: 'top left' }}
@@ -124,6 +127,8 @@ export default function PlaygroundViewer({ item, originRect, onClose }) {
             // the content mismatch into a soft dissolve instead of a hard pop.
             exit={{ opacity: 0, transition: { duration: 0.18, ease: 'easeOut' } }}
             transition={morph}
+            // Gate heavy content until the zoom lands. Guarded by `item` so the
+            // exit's completion (item null) doesn't setState mid-unmount.
             onAnimationComplete={() => item && setMorphDone(true)}
             role="dialog"
             aria-modal="true"

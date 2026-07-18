@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
 
 /*
  * Crypto Glass — dark-native rebuild of the "liquid glass" crypto widget.
@@ -172,7 +171,10 @@ export default function CryptoGlass({ variant = 'full' }) {
           </svg>
         </div>
 
-        <div className="cg-ranges">
+        {/* CSS-slider indicator (no framer layoutId — a shared-layout element
+            inside this AnimatePresence child blocked the panel's exit). */}
+        <div className="cg-ranges" style={{ '--cg-idx': RANGES.indexOf(range) }}>
+          <span className="cg-range-pill" />
           {RANGES.map((r) => (
             <button
               key={r}
@@ -180,9 +182,6 @@ export default function CryptoGlass({ variant = 'full' }) {
               className={`cg-range ${r === range ? 'active' : ''}`}
               onClick={() => setRange(r)}
             >
-              {r === range && (
-                <motion.span layoutId="cg-range-pill" className="cg-range-pill" transition={{ type: 'spring', stiffness: 480, damping: 40 }} />
-              )}
               <span>{r}</span>
             </button>
           ))}

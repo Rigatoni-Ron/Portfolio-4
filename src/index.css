@@ -1089,21 +1089,23 @@ a {
 }
 
 .cg-ranges {
+  position: relative;
   display: flex;
-  gap: var(--s-1);
   padding: 4px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
-  width: fit-content;
+  width: 260px;
 }
 .cg-range {
   position: relative;
+  z-index: 1;
+  flex: 1;
   border: 0;
   background: transparent;
   color: var(--text-muted);
   font-size: 13px;
   font-weight: 500;
-  padding: 6px 16px;
+  padding: 6px 0;
   border-radius: 8px;
   cursor: pointer;
   transition: color 0.2s var(--ease);
@@ -1111,15 +1113,17 @@ a {
 .cg-range.active {
   color: var(--text);
 }
-.cg-range span {
-  position: relative;
-  z-index: 1;
-}
+/* Single sliding indicator, positioned by the active index (0–3). */
 .cg-range-pill {
   position: absolute;
-  inset: 0;
   z-index: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 4);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.09);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1) inset;
+  transform: translateX(calc(var(--cg-idx) * 100%));
+  transition: transform 0.28s var(--ease);
 }

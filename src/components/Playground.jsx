@@ -1,4 +1,4 @@
-import { Suspense, useRef, useState } from 'react'
+import { Suspense, useCallback, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { playground } from '../data.js'
 import { nativeComponents } from '../playground/registry.js'
@@ -12,30 +12,28 @@ const rectOf = (el) => {
 export default function Playground() {
   const [active, setActive] = useState(null)
   const [originRect, setOriginRect] = useState(null)
-  const [closingId, setClosingId] = useState(null)
-  const closeTimer = useRef(null)
+  // Bumped on every open so the viewer panel gets a fresh AnimatePresence key.
+  // Reusing the same key across opens left the exiting panel stuck at opacity:0
+  // (an invisible fullscreen layer that blocked all clicks after the 1st close).
+  const [openSeq, setOpenSeq] = useState(0)
   const tileRefs = useRef({})
 
-  const open = (item, el) => {
-    clearTimeout(closeTimer.current)
-    setClosingId(null)
-    // Capture the tile's exact viewport rect at click time. The viewer zooms
-    // from this box using fixed-position transforms, so an in-flight scroll
-    // can't shift the origin mid-morph (see PlaygroundViewer).
+  // Capture the tile's exact viewport rect at click time. The viewer zooms
+  // from this box using fixed-position transforms, so an in-flight scroll
+  // can't shift the origin mid-morph (see PlaygroundViewer).
+  const open = useCallback((item, el) => {
     setOriginRect(rectOf(el))
+    setOpenSeq((s) => s + 1)
     setActive(item)
-  }
+  }, [])
 
-  const close = () => {
+  const close = useCallback(() => {
     // Re-measure the (still-mounted) tile so the shrink-back targets its
-    // current on-screen box, even after a resize while open.
-    const el = tileRefs.current[active?.id]
+    // current box, even after a resize while open.
+    const el = active ? tileRefs.current[active.id] : null
     if (el) setOriginRect(rectOf(el))
-    setClosingId(active?.id ?? null)
     setActive(null)
-    clearTimeout(closeTimer.current)
-    closeTimer.current = setTimeout(() => setClosingId(null), 550)
-  }
+  }, [active])
 
   return (
     <section aria-labelledby="play-title">
@@ -76,7 +74,12 @@ export default function Playground() {
         })}
       </div>
 
-      <PlaygroundViewer item={active} originRect={originRect} onClose={close} />
+      <PlaygroundViewer
+        item={active}
+        originRect={originRect}
+        openSeq={openSeq}
+        onClose={close}
+      />
     </section>
   )
 }
