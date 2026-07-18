@@ -1051,6 +1051,15 @@ a {
     rgba(255, 255, 255, 0.045) 100%
   );
 }
+/* ...but not while hovering the range tabs — they own their own hover. */
+.cg-full .cg-card:has(.cg-ranges:hover) {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.025) 100%
+  );
+}
 .cg-full .cg-card:focus-visible {
   outline: none;
   border-color: rgba(255, 255, 255, 0.24);
@@ -1119,6 +1128,13 @@ a {
 }
 .cg-range.active {
   color: var(--text);
+}
+/* Each tab has its own little button hover. */
+.cg-range:hover {
+  color: var(--text);
+}
+.cg-range:not(.active):hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 /* Single sliding indicator, positioned by the active index (0–3). */
 .cg-range-pill {
