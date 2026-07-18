@@ -924,7 +924,8 @@ a {
   --cg-down: #f4696a;
 }
 
-/* Frosted DARK glass (the light original was translucent white). */
+/* Frosted DARK glass. Borders use the site tokens; no inset top-highlight or
+   drop shadow — the home page is flat/outline-first. */
 .cg-glass {
   position: relative;
   background: linear-gradient(
@@ -934,10 +935,7 @@ a {
   );
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.12) inset,
-    0 20px 45px -20px rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--border);
 }
 
 /* Card: collapsed pill by default; .is-open reveals chart + tabs. */
@@ -985,7 +983,7 @@ a {
 }
 
 .cg-price {
-  font-size: 16px;
+  font-size: 15px; /* same as .cg-name ("Ethereum") */
   font-weight: 600;
   color: var(--text);
   font-variant-numeric: tabular-nums;
@@ -1025,7 +1023,7 @@ a {
   font-size: 13px;
 }
 .cg-tile .cg-price {
-  font-size: 14px;
+  font-size: 13px; /* same as tile .cg-name */
 }
 
 /* ---------- Full: collapsed pill that expands ---------- */
@@ -1050,7 +1048,7 @@ a {
 }
 /* Hover lights up the WHOLE card (both states). */
 .cg-full .cg-card:hover {
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: var(--border-hover);
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.1) 0%,
@@ -1059,7 +1057,7 @@ a {
 }
 /* ...but not while hovering the range tabs — they own their own hover. */
 .cg-full .cg-card:has(.cg-ranges:hover) {
-  border-color: rgba(255, 255, 255, 0.1);
+  border-color: var(--border);
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.07) 0%,
@@ -1068,7 +1066,7 @@ a {
 }
 .cg-full .cg-card:focus-visible {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.24);
+  border-color: var(--border-strong);
 }
 
 /* Reveal (chart + tabs) — grid-rows 0fr→1fr for a smooth height animation. */
@@ -1109,7 +1107,8 @@ a {
   overflow: visible;
 }
 
-/* Range tabs — span the full card width, 8px between each. */
+/* Range tabs — span the full card width, 8px between each. Outlined container
+   like the home Work/Learnings tabs (no fill). */
 .cg-ranges {
   position: relative;
   display: flex;
@@ -1117,7 +1116,7 @@ a {
   width: 100%;
   padding: 4px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
 }
 .cg-range {
   position: relative;
@@ -1141,7 +1140,7 @@ a {
   color: var(--text);
 }
 .cg-range:not(.active):hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--fill-hover);
 }
 /* Single sliding indicator, positioned by the active index (0–3).
    Width = one tab: (full − 8px padding − 3×8px gaps) / 4. Each step is one
@@ -1154,8 +1153,9 @@ a {
   left: 4px;
   width: calc((100% - 32px) / 4);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.09);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1) inset;
+  /* matches the home .tab-indicator */
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border-hover);
   transform: translateX(calc(var(--cg-idx) * (100% + var(--s-2))));
   transition: transform 0.28s var(--ease);
 }
