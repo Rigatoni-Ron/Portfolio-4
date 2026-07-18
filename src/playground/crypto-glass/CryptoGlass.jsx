@@ -137,45 +137,63 @@ export default function CryptoGlass({ variant = 'full' }) {
 
   return (
     <div className="cg-full">
-      <div className={`cg-glass cg-card ${open ? 'is-open' : ''}`}>
-        <button
-          type="button"
-          className="cg-toggle"
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          aria-label={open ? 'Collapse widget' : 'Expand widget'}
-        >
-          {row}
-        </button>
+      {/* The whole card is the toggle: hover lights it up, clicking anywhere
+          expands/collapses. Range tabs stopPropagation so they don't collapse. */}
+      <div
+        className={`cg-glass cg-card ${open ? 'is-open' : ''}`}
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        aria-label={open ? 'Collapse widget' : 'Expand widget'}
+        onClick={() => setOpen((o) => !o)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            setOpen((o) => !o)
+          }
+        }}
+      >
+        {row}
 
-        {/* Reveal (chart + full-width tabs), animated open via grid-rows. */}
+        {/* Reveal (chart + full-width tabs); grid-rows animates the height.
+            Padding lives on the body (not the clipped element) so the collapsed
+            state is a true 0 height with no residual space under the pill. */}
         <div className="cg-reveal">
           <div className="cg-reveal-inner">
-            <div className="cg-chart">
-              <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="cg-fill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={stroke} stopOpacity="0.28" />
-                    <stop offset="100%" stopColor={stroke} stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <path d={area} fill="url(#cg-fill)" />
-                <path d={line} fill="none" stroke={stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
+            <div className="cg-reveal-body">
+              <div className="cg-chart">
+                <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="cg-fill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={stroke} stopOpacity="0.28" />
+                      <stop offset="100%" stopColor={stroke} stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path d={area} fill="url(#cg-fill)" />
+                  <path d={line} fill="none" stroke={stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
 
-            <div className="cg-ranges" style={{ '--cg-idx': RANGES.indexOf(range) }}>
-              <span className="cg-range-pill" />
-              {RANGES.map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  className={`cg-range ${r === range ? 'active' : ''}`}
-                  onClick={() => setRange(r)}
-                >
-                  <span>{r}</span>
-                </button>
-              ))}
+              <div
+                className="cg-ranges"
+                style={{ '--cg-idx': RANGES.indexOf(range) }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="cg-range-pill" />
+                {RANGES.map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    className={`cg-range ${r === range ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setRange(r)
+                    }}
+                  >
+                    <span>{r}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>

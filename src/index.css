@@ -949,20 +949,6 @@ a {
 }
 
 /* ---------- Header row (identical collapsed + expanded) ---------- */
-.cg-toggle {
-  display: block;
-  width: 100%;
-  padding: 0;
-  background: none;
-  border: 0;
-  text-align: left;
-  color: inherit;
-  cursor: pointer;
-}
-.cg-card:not(.is-open) .cg-toggle:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-
 .cg-row {
   display: flex;
   align-items: center;
@@ -1047,10 +1033,27 @@ a {
 .cg-full .cg-card {
   width: 380px;
   max-width: 100%;
-  transition: width 0.42s var(--ease);
+  cursor: pointer;
+  transition:
+    width 0.42s var(--ease),
+    background 0.2s var(--ease),
+    border-color 0.2s var(--ease);
 }
 .cg-full .cg-card.is-open {
   width: 600px;
+}
+/* Hover lights up the WHOLE card (both states). */
+.cg-full .cg-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.045) 100%
+  );
+}
+.cg-full .cg-card:focus-visible {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.24);
 }
 
 /* Reveal (chart + tabs) — grid-rows 0fr→1fr for a smooth height animation. */
@@ -1062,8 +1065,13 @@ a {
 .cg-card.is-open .cg-reveal {
   grid-template-rows: 1fr;
 }
+/* The clipped element carries NO padding, so collapsed height is a true 0
+   (padding would render even when content is clipped, leaving a gap). */
 .cg-reveal-inner {
   overflow: hidden;
+  min-height: 0;
+}
+.cg-reveal-body {
   display: flex;
   flex-direction: column;
   gap: var(--s-4);
@@ -1071,7 +1079,7 @@ a {
   opacity: 0;
   transition: opacity 0.28s var(--ease);
 }
-.cg-card.is-open .cg-reveal-inner {
+.cg-card.is-open .cg-reveal-body {
   opacity: 1;
 }
 
