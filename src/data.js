@@ -71,22 +71,6 @@ export const playground = [
     src: '/playground/crypto-glass-widget/index.html',
   },
   {
-    id: 'plan-your-trip-globe',
-    title: 'Plan Your Trip Globe',
-    tag: '3D globe',
-    mode: 'iframe',
-    src: '/playground/plan-your-trip-globe/index.html',
-  },
-  {
-    id: '3d-shape-animator',
-    title: '3D Shape Animator',
-    tag: 'Three.js',
-    mode: 'iframe',
-    src: '/playground/3d-shape-animator/index.html',
-    preview: '/previews/3d-shape-animator.mp4',
-    poster: '/previews/3d-shape-animator.jpg',
-  },
-  {
     id: 'animated-menu',
     title: 'Animated Menu',
     tag: 'Interaction',
