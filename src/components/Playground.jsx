@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react'
+import { Suspense, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { playground } from '../data.js'
+import { nativeComponents } from '../playground/registry.js'
 import PlaygroundViewer from './PlaygroundViewer.jsx'
 
 const rectOf = (el) => {
@@ -45,6 +46,7 @@ export default function Playground() {
         {playground.map((c) => {
           const isActive = active?.id === c.id
           const openable = Boolean(c.mode)
+          const TileComp = c.liveTile ? nativeComponents[c.id] : null
           return (
             <motion.button
               key={c.id}
@@ -58,6 +60,11 @@ export default function Playground() {
               style={{ cursor: openable ? 'pointer' : 'default' }}
               aria-label={`Open ${c.title}`}
             >
+              {TileComp && (
+                <Suspense fallback={null}>
+                  <TileComp variant="tile" />
+                </Suspense>
+              )}
               <div className="tile-meta">
                 <div>
                   <div className="tile-title">{c.title}</div>

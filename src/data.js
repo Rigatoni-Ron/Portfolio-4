@@ -66,9 +66,9 @@ export const playground = [
   {
     id: 'crypto-glass-widget',
     title: 'Crypto Glass Widget',
-    tag: 'Material',
-    mode: 'iframe',
-    src: '/playground/crypto-glass-widget/index.html',
+    tag: 'Live data',
+    mode: 'native',
+    liveTile: true, // renders a live compact view in the tile
   },
   {
     id: 'animated-menu',

@@ -150,7 +150,7 @@ export default function PlaygroundViewer({ item, originRect, onClose }) {
                   className="pg-native"
                   style={item.bg ? { background: item.bg } : undefined}
                 >
-                  <NativeComp />
+                  <NativeComp variant="full" />
                 </div>
               </Suspense>
             )}
