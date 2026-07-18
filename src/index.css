@@ -932,11 +932,9 @@ a {
    drop shadow — the home page is flat/outline-first. */
 .cg-glass {
   position: relative;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.07) 0%,
-    rgba(255, 255, 255, 0.025) 100%
-  );
+  /* Flat fill (not a top→bottom gradient) — the gradient's lighter top lit the
+     top border/corner, reading as a subtle inset highlight. */
+  background: rgba(255, 255, 255, 0.035);
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   border: 1px solid var(--border);
@@ -1057,20 +1055,12 @@ a {
 /* Hover lights up the WHOLE card (both states). */
 .cg-full .cg-card:hover {
   border-color: var(--border-hover);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.045) 100%
-  );
+  background: rgba(255, 255, 255, 0.06);
 }
 /* ...but not while hovering the range tabs — they own their own hover. */
 .cg-full .cg-card:has(.cg-ranges:hover) {
   border-color: var(--border);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.07) 0%,
-    rgba(255, 255, 255, 0.025) 100%
-  );
+  background: rgba(255, 255, 255, 0.035);
 }
 .cg-full .cg-card:focus-visible {
   outline: none;
