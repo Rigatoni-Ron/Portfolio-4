@@ -20,18 +20,38 @@ const Spinner = () => (
   </div>
 )
 
+// The fixed panel fills the viewport inset by this margin (matches --s-4).
+const PANEL_INSET = 16
+
+// FLIP: map the fixed, fullscreen panel back onto the tile's viewport rect.
+// The panel is position:fixed and we animate pure transforms, so the zoom is in
+// viewport coordinates and immune to page scroll (a scroll mid-morph used to
+// corrupt framer-motion's cross-context layout projection and make the panel
+// slide up from the bottom instead of zooming from the tile).
+const fromTile = (rect) => {
+  if (!rect) return { x: 0, y: 0, scaleX: 1, scaleY: 1 }
+  const pw = window.innerWidth - PANEL_INSET * 2
+  const ph = window.innerHeight - PANEL_INSET * 2
+  return {
+    x: rect.left - PANEL_INSET,
+    y: rect.top - PANEL_INSET,
+    scaleX: rect.width / pw,
+    scaleY: rect.height / ph,
+  }
+}
+
 /*
- * Fullscreen viewer for a Playground tile. The tile shares a layoutId with the
- * panel, so it morphs (zooms) up to near-fullscreen. The live component mounts
- * only while open.
+ * Fullscreen viewer for a Playground tile. It zooms (FLIP transform) from the
+ * clicked tile's rect up to a near-fullscreen fixed panel. The live component
+ * mounts only while open.
  *
  * Perf: a same-origin iframe shares the main thread, so booting a heavy app
  * (e.g. Three.js) *during* the zoom freezes the animation. So we defer mounting
- * the iframe until the morph finishes (onLayoutAnimationComplete), then fade the
+ * the iframe until the morph finishes (onAnimationComplete), then fade the
  * loaded app in — the zoom stays smooth and the content lands a beat later.
  * On close the panel unmounts, tearing down the iframe + any WebGL context.
  */
-export default function PlaygroundViewer({ item, onClose }) {
+export default function PlaygroundViewer({ item, originRect, onClose }) {
   const [morphDone, setMorphDone] = useState(false)
   const [frameLoaded, setFrameLoaded] = useState(false)
 
@@ -44,9 +64,12 @@ export default function PlaygroundViewer({ item, onClose }) {
     if (!item) return
     const onKey = (e) => e.key === 'Escape' && onClose()
     document.addEventListener('keydown', onKey)
+    // Lock page scroll while open (restored on close).
+    document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
     return () => {
       document.removeEventListener('keydown', onKey)
+      document.documentElement.style.overflow = ''
       document.body.style.overflow = ''
     }
   }, [item, onClose])
@@ -86,55 +109,52 @@ export default function PlaygroundViewer({ item, onClose }) {
         )}
       </AnimatePresence>
 
-      {/* Persistent, click-through centering layer so the panel is a direct
-          AnimatePresence child (required for the tile <-> panel morph). */}
-      <div className="pg-layer">
-        <AnimatePresence>
-          {item && (
-            <motion.div
-              key={item.id}
-              layoutId={`play-${item.id}`}
-              className="pg-panel"
-              onClick={(e) => e.stopPropagation()}
-              transition={morph}
-              onLayoutAnimationComplete={() => setMorphDone(true)}
-              // Vanish instantly on close so only the tile's morph-back shows.
-              exit={{ opacity: 0, transition: { duration: 0 } }}
-              role="dialog"
-              aria-modal="true"
-              aria-label={item.title}
-            >
-              {/* Content mounts only after the zoom lands (keeps the morph
-                  smooth — a heavy boot on the shared main thread would jank it). */}
-              {item.mode === 'iframe' && morphDone && (
-                <>
-                  <iframe
-                    className="pg-frame"
-                    src={item.src}
-                    title={item.title}
-                    style={{ opacity: frameLoaded ? 1 : 0 }}
-                    onLoad={() => setFrameLoaded(true)}
-                  />
-                  {!frameLoaded && <Spinner />}
-                </>
-              )}
+      <AnimatePresence>
+        {item && (
+          <motion.div
+            key={item.id}
+            className="pg-panel"
+            onClick={(e) => e.stopPropagation()}
+            style={{ transformOrigin: 'top left' }}
+            initial={fromTile(originRect)}
+            animate={{ x: 0, y: 0, scaleX: 1, scaleY: 1 }}
+            exit={fromTile(originRect)}
+            transition={morph}
+            onAnimationComplete={() => item && setMorphDone(true)}
+            role="dialog"
+            aria-modal="true"
+            aria-label={item.title}
+          >
+            {/* Content mounts only after the zoom lands (keeps the morph
+                smooth — a heavy boot on the shared main thread would jank it). */}
+            {item.mode === 'iframe' && morphDone && (
+              <>
+                <iframe
+                  className="pg-frame"
+                  src={item.src}
+                  title={item.title}
+                  style={{ opacity: frameLoaded ? 1 : 0 }}
+                  onLoad={() => setFrameLoaded(true)}
+                />
+                {!frameLoaded && <Spinner />}
+              </>
+            )}
 
-              {item.mode === 'native' && morphDone && NativeComp && (
-                <Suspense fallback={<Spinner />}>
-                  <div
-                    className="pg-native"
-                    style={item.bg ? { background: item.bg } : undefined}
-                  >
-                    <NativeComp />
-                  </div>
-                </Suspense>
-              )}
+            {item.mode === 'native' && morphDone && NativeComp && (
+              <Suspense fallback={<Spinner />}>
+                <div
+                  className="pg-native"
+                  style={item.bg ? { background: item.bg } : undefined}
+                >
+                  <NativeComp />
+                </div>
+              </Suspense>
+            )}
 
-              {!morphDone && <Spinner />}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+            {!morphDone && <Spinner />}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }
