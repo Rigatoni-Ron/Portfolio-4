@@ -68,12 +68,18 @@ body {
   background: rgba(255, 255, 255, 0.16);
 }
 
-button {
-  font-family: inherit;
-  color: inherit;
-  border: none;
-  background: none;
-  cursor: pointer;
+/* In @layer base so component utility classes (which live in Tailwind's
+   later `utilities` layer) can override these — unlayered rules would beat
+   ALL layered ones regardless of specificity. Site classes are unlayered
+   and unaffected. */
+@layer base {
+  button {
+    font-family: inherit;
+    color: inherit;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
 }
 
 a {

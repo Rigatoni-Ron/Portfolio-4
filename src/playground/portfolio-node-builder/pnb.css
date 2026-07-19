@@ -16,50 +16,48 @@
   color-scheme: dark;
 }
 
-/* Mini-preflight (the standalone app had Tailwind's; here it's scoped).
-   :where keeps specificity at zero so utility classes always win. */
-.pnb :where(h1, h2, h3, h4, h5, h6, p, ul, ol, figure, blockquote) {
-  margin: 0;
-}
-.pnb :where(img, svg, video, canvas) {
-  display: block;
-}
-/* Form controls: strip UA chrome (the standalone app relied on Tailwind's
-   preflight for this — without it the native inset border/padding showed
-   inside styled wrappers). :where keeps utilities winning. */
-.pnb :where(input, select, textarea) {
-  appearance: none;
-  background-color: transparent;
-  border: 0;
-  margin: 0;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-}
-
-/* Layered as base so Tailwind's font-* / text-* utilities (e.g. font-mono
-   on the numeric inputs) still override it. */
+/* Everything reset-ish lives in @layer base: it still beats UA defaults,
+   but Tailwind's utilities layer (declared later) beats IT — unlayered
+   rules here would override utility classes (e.g. an input's padding)
+   regardless of specificity. */
 @layer base {
+  /* Mini-preflight (the standalone app had Tailwind's; here it's scoped). */
+  .pnb :where(h1, h2, h3, h4, h5, h6, p, ul, ol, figure, blockquote) {
+    margin: 0;
+  }
+  .pnb :where(img, svg, video, canvas) {
+    display: block;
+  }
+  /* Form controls: strip UA chrome (the standalone app relied on Tailwind's
+     preflight for this — without it the native inset border/padding showed
+     inside styled wrappers). */
+  .pnb :where(input, select, textarea) {
+    appearance: none;
+    background-color: transparent;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+  }
   .pnb :is(input, select, button) {
     font-family: inherit;
     color: inherit;
   }
-}
-
-/* Every enabled button feels pressable, matching the zoom controls */
-.pnb button:not(:disabled) {
-  cursor: pointer;
-}
-
-/* Hide number input spinners (allocation fields) */
-.pnb input[type='number'] {
-  appearance: textfield;
-  -moz-appearance: textfield;
-}
-.pnb input[type='number']::-webkit-inner-spin-button,
-.pnb input[type='number']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+  /* Every enabled button feels pressable, matching the zoom controls */
+  .pnb button:not(:disabled) {
+    cursor: pointer;
+  }
+  /* Hide number input spinners (allocation fields) */
+  .pnb input[type='number'] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  .pnb input[type='number']::-webkit-inner-spin-button,
+  .pnb input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
 
 /* React Flow dark theme overrides */

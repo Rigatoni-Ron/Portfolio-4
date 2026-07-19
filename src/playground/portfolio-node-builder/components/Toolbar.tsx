@@ -276,9 +276,17 @@ export function Toolbar() {
         }`}
       >
         <AnimatedWidth>
-          <span className="block whitespace-nowrap px-3 py-2">
+          {/* keyed fade-in so the swapped label doesn't sit fully-drawn,
+              clipped, while the width spring catches up */}
+          <motion.span
+            key={confirmClear ? 'confirm' : 'idle'}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.18, delay: 0.06 }}
+            className="block whitespace-nowrap px-3 py-2"
+          >
             {confirmClear ? 'Are you sure?' : 'Clear all'}
-          </span>
+          </motion.span>
         </AnimatedWidth>
       </button>
         </div>
@@ -303,7 +311,10 @@ export function Toolbar() {
               </button>
             ))}
           </div>,
-          document.body,
+          // Portal into the .pnb root (not document.body): keeps the menu
+          // inside the viewer panel's stacking context — body-level z-50 sat
+          // BEHIND the portfolio's fullscreen panel (z-70) — and in scope.
+          rootRef.current?.closest('.pnb') ?? document.body,
         )}
     </div>
   )
