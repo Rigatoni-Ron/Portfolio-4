@@ -76,6 +76,7 @@ export const playground = [
     title: 'Animated Menu',
     tag: 'Interaction',
     mode: 'native',
-    bg: '#d6d9dd', // its original standalone page background
+    bg: '#0a0a0b', // dark canvas so the floating cards read
+    liveTile: true,
   },
 ]

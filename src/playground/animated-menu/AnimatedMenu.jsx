@@ -77,28 +77,26 @@ const CONTENT_MAP = {
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 
 const T = {
-  card:       '#F7F5F2',
-  text:       '#0D0D0D',
-  textMid:    '#6B7280',
-  textLight:  '#B0B7C3',
-  accent:     '#2563EB',
-  accentSoft: 'rgba(37, 99, 235, 0.08)',
-  hover:      'rgba(0, 0, 0, 0.04)',
-  border:     'rgba(0, 0, 0, 0.07)',
-  sans:       '"Inter", system-ui, sans-serif',
+  card:       '#17181b',
+  text:       '#ededef',
+  textMid:    '#8a8f98',
+  textLight:  '#565a63',
+  accent:     '#3b82f6',
+  accentSoft: 'rgba(59, 130, 246, 0.12)',
+  hover:      'rgba(255, 255, 255, 0.05)',
+  border:     'rgba(255, 255, 255, 0.09)',
+  sans:       "'Geist', system-ui, sans-serif",
 }
 
 const CARD_SHADOW = `
-  0 0 0 1px rgba(255,255,255,1),
-  0 4px 6px rgba(0,0,0,0.04),
-  0 12px 32px rgba(0,0,0,0.08),
-  0 32px 64px rgba(0,0,0,0.04)
+  0 0 0 1px rgba(255,255,255,0.09),
+  0 12px 32px rgba(0,0,0,0.45),
+  0 32px 64px rgba(0,0,0,0.3)
 `
 
 // ─── Global CSS ───────────────────────────────────────────────────────────────
 
 const GLOBAL_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
   * { box-sizing: border-box; }
 
   @keyframes subItemIn {
@@ -138,33 +136,33 @@ const GLOBAL_CSS = `
 
   .contact-input {
     width: 100%;
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 13px; font-weight: 400; color: #0D0D0D;
-    background: rgba(0,0,0,0.025);
-    border: 1px solid rgba(0,0,0,0.09);
+    font-family: 'Geist', system-ui, sans-serif;
+    font-size: 13px; font-weight: 400; color: #ededef;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.09);
     border-radius: 10px; padding: 9px 12px; outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     resize: none; -webkit-appearance: none; line-height: 1.5;
   }
-  .contact-input::placeholder { color: #B0B7C3; }
+  .contact-input::placeholder { color: #565a63; }
   .contact-input:focus {
-    border-color: rgba(37,99,235,0.45);
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
-    background: #F7F5F2;
+    border-color: rgba(59,130,246,0.5);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    background: rgba(255,255,255,0.05);
   }
 
   .send-btn {
-    width: 100%; background: #2563EB; color: #fff; border: none;
+    width: 100%; background: #3b82f6; color: #fff; border: none;
     border-radius: 10px; padding: 10px 16px;
-    font-family: "Inter", system-ui, sans-serif;
+    font-family: 'Geist', system-ui, sans-serif;
     font-size: 13.5px; font-weight: 500; letter-spacing: -0.01em;
     cursor: pointer;
     transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-    box-shadow: 0 2px 8px rgba(37,99,235,0.28);
+    box-shadow: 0 2px 12px rgba(59,130,246,0.35);
   }
-  .send-btn:hover { background: #1d4ed8; box-shadow: 0 4px 14px rgba(37,99,235,0.38); }
+  .send-btn:hover { background: #4c8dff; box-shadow: 0 4px 18px rgba(59,130,246,0.45); }
   .send-btn:active { transform: scale(0.98); }
-  .send-btn:disabled { background: rgba(37,99,235,0.35); box-shadow: none; cursor: default; }
+  .send-btn:disabled { background: rgba(59,130,246,0.3); box-shadow: none; cursor: default; }
 `
 
 // ─── Hooks ────────────────────────────────────────────────────────────────────
@@ -184,7 +182,7 @@ function useDebounce(value, delay) {
 function Card({ children, style }) {
   return (
     <div style={{
-      backgroundColor: '#FFFFFF',
+      backgroundColor: '#26272d', // peeks through the 1px section gaps as hairline dividers
       width: 300,
       borderRadius: 24,
       overflow: 'hidden',
@@ -316,16 +314,19 @@ function ContactForm({ isOpen }) {
     if (!debouncedMessage || debouncedMessage.trim().length < 8) {
       setSubject(''); setSubjectLoading(false); return
     }
+    // Local mock of the original AI subject endpoint: derive a subject from
+    // the first words of the message after a small "thinking" delay.
     let cancelled = false
     setSubjectLoading(true)
-    fetch('/api/generate-subject', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: debouncedMessage }),
-    })
-      .then(r => r.json())
-      .then(d => { if (!cancelled) { setSubject(d.subject || ''); setSubjectLoading(false) } })
-      .catch(() => { if (!cancelled) setSubjectLoading(false) })
-    return () => { cancelled = true }
+    const t = setTimeout(() => {
+      if (cancelled) return
+      const words = debouncedMessage.trim().replace(/\s+/g, ' ').split(' ')
+      const head = words.slice(0, 6).join(' ').replace(/[.,;:!?]+$/, '')
+      const cased = head.charAt(0).toUpperCase() + head.slice(1)
+      setSubject(words.length > 6 ? `${cased}\u2026` : cased)
+      setSubjectLoading(false)
+    }, 900)
+    return () => { cancelled = true; clearTimeout(t) }
   }, [debouncedMessage])
 
   const handleSend = async (e) => {
@@ -430,7 +431,7 @@ function MenuItem({ item, isOpen, hasActiveChild, activeSubItem, onToggle, onSub
         <span style={{
           fontFamily: T.sans, fontSize: 15, fontWeight: isEngaged ? 600 : 500,
           letterSpacing: '-0.02em',
-          color: isEngaged ? T.text : hovered ? T.text : '#374151',
+          color: isEngaged ? T.text : hovered ? T.text : '#b6bac2',
           flex: 1, lineHeight: 1.2, transition: 'color 0.22s ease',
         }}>
           {item.label}
@@ -438,7 +439,7 @@ function MenuItem({ item, isOpen, hasActiveChild, activeSubItem, onToggle, onSub
         {isExpandable && (
           <div style={{
             width: 24, height: 24, borderRadius: 8,
-            backgroundColor: isOpen ? 'rgba(37,99,235,0.12)' : hovered ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.04)',
+            backgroundColor: isOpen ? 'rgba(59,130,246,0.16)' : hovered ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.045)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0, transition: 'background-color 0.25s ease',
           }}>
@@ -522,7 +523,70 @@ const PANEL_GAP     = 20
 const STAGE_WIDTH   = NAV_WIDTH + PANEL_GAP + CONTENT_WIDTH   // 620
 const NAV_OFFSET    = (STAGE_WIDTH - NAV_WIDTH) / 2           // 160 — centers nav when alone
 
-export default function AnimatedMenu() {
+function NavCard({ openId, activeId, onToggle, onSubItemSelect }) {
+  return (
+    <Card>
+      {/* Header */}
+      <div style={{ backgroundColor: T.card, padding: '20px 16px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontFamily: T.sans, fontSize: 13, fontWeight: 600, letterSpacing: '-0.02em', color: T.text }}>Dormant Studio</span>
+        </div>
+      </div>
+
+      {/* Items */}
+      <div style={{ backgroundColor: T.card, padding: '8px 12px 12px' }}>
+        {MENU_ITEMS.map(item => (
+          <MenuItem key={item.id} item={item}
+            isOpen={openId === item.id}
+            hasActiveChild={item.children.some(c => c.id === activeId)}
+            activeSubItem={activeId}
+            onToggle={onToggle}
+            onSubItemSelect={onSubItemSelect}
+          />
+        ))}
+      </div>
+    </Card>
+  )
+}
+
+// ─── Tile micro-moment: the nav card demoing itself ──────────────────────────
+// Auto-cycles through the sections (open → staggered sub-items → highlight one
+// → next section). Non-interactive; scaled to sit inside the Playground tile.
+
+const TILE_SEQUENCE = ['studio', 'work', 'services', 'journal']
+
+function AnimatedMenuTile() {
+  const [step, setStep] = useState(0)
+  const [activeChild, setActiveChild] = useState(null)
+  const openId = TILE_SEQUENCE[step % TILE_SEQUENCE.length]
+
+  useEffect(() => {
+    // highlight a sub-item mid-dwell, then advance to the next section
+    const item = MENU_ITEMS.find(m => m.id === openId)
+    const child = item?.children[1] ?? item?.children[0]
+    const hl = setTimeout(() => setActiveChild(child?.id ?? null), 1300)
+    const next = setTimeout(() => {
+      setActiveChild(null)
+      setStep(s => s + 1)
+    }, 3200)
+    return () => { clearTimeout(hl); clearTimeout(next) }
+  }, [openId])
+
+  return (
+    <div aria-hidden="true" inert style={{
+      position: 'absolute', inset: 0, overflow: 'hidden',
+      display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+      pointerEvents: 'none', borderRadius: 'inherit',
+    }}>
+      <style>{GLOBAL_CSS}</style>
+      <div style={{ transform: 'scale(0.52)', transformOrigin: 'top center', paddingTop: 18 }}>
+        <NavCard openId={openId} activeId={activeChild} onToggle={() => {}} onSubItemSelect={() => {}} />
+      </div>
+    </div>
+  )
+}
+
+export default function AnimatedMenu({ variant = 'full' }) {
   const [openId, setOpenId]           = useState(null)
   const [activeId, setActiveId]       = useState(null)
   const [displayedId, setDisplayedId] = useState(null)
@@ -543,6 +607,8 @@ export default function AnimatedMenu() {
 
   const isContentVisible = !!activeId
 
+  if (variant === 'tile') return <AnimatedMenuTile />
+
   return (
     <>
       <style>{GLOBAL_CSS}</style>
@@ -562,28 +628,7 @@ export default function AnimatedMenu() {
               : 'transform 0.55s cubic-bezier(0.16,1,0.3,1) 0.18s',
           }}
         >
-          <Card>
-            {/* Header */}
-            <div style={{ backgroundColor: T.card, padding: '20px 16px 16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontFamily: T.sans, fontSize: 13, fontWeight: 600, letterSpacing: '-0.02em', color: T.text }}>Dormant Studio</span>
-              </div>
-            </div>
-
-            {/* Items */}
-            <div style={{ backgroundColor: T.card, padding: '8px 12px 12px' }}>
-              {MENU_ITEMS.map(item => (
-                <MenuItem key={item.id} item={item}
-                  isOpen={openId === item.id}
-                  hasActiveChild={item.children.some(c => c.id === activeId)}
-                  activeSubItem={activeId}
-                  onToggle={handleToggle}
-                  onSubItemSelect={handleSubSelect}
-                />
-              ))}
-            </div>
-
-          </Card>
+          <NavCard openId={openId} activeId={activeId} onToggle={handleToggle} onSubItemSelect={handleSubSelect} />
         </div>
 
         {/* ── Content panel — absolutely positioned, never in flow ── */}
