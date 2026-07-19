@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@number-flow/react": "^0.6.2",
+    "@tailwindcss/vite": "^4.3.3",
     "motion": "^12.42.2",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.2",

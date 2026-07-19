@@ -1,0 +1,24 @@
+/* ============================================================
+   Tailwind 4 — ADDITIVE layer for ported/native Playground pieces.
+
+   theme + utilities ONLY — no preflight: Tailwind's global reset would
+   fight the site's hand-tuned base styles in index.css. The site's design
+   tokens are bridged into the Tailwind theme below so utility classes and
+   the token sheet share one source of truth.
+   ============================================================ */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@theme inline {
+  /* site tokens → Tailwind colors (e.g. bg-surface, text-ink, border-line) */
+  --color-ink: var(--text);
+  --color-ink-muted: var(--text-muted);
+  --color-ink-faint: var(--text-faint);
+  --color-surface: var(--bg);
+  --color-surface-raised: var(--bg-raised);
+  --color-line: var(--border);
+  --color-line-hover: var(--border-hover);
+  --color-line-strong: var(--border-strong);
+
+  --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
+}
