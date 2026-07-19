@@ -55,6 +55,7 @@ export const playground = [
     tag: 'React Flow',
     mode: 'native',
     fullBleed: true, // canvas fills the viewer edge-to-edge
+    liveTile: true,
   },
   {
     id: 'card-stacker',

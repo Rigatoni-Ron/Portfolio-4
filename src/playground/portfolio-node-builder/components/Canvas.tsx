@@ -19,7 +19,7 @@ import { GlowEdge } from './edges/GlowEdge'
 import { Toolbar } from './Toolbar'
 import { IntroTour, hasSeenIntro } from './IntroTour'
 
-const nodeTypes = {
+export const nodeTypes = {
   stock: StockNode,
   timeline: TimelineNode,
   portfolio: PortfolioNode,
@@ -28,7 +28,7 @@ const nodeTypes = {
 }
 
 // Overriding "default" makes every typeless edge render with the glow pulse
-const edgeTypes = {
+export const edgeTypes = {
   default: GlowEdge,
 }
 

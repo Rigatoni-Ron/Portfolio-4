@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { playground } from '../data.js'
 import { nativeComponents } from '../playground/registry.js'
@@ -17,6 +17,15 @@ export default function Playground() {
   // (an invisible fullscreen layer that blocked all clicks after the 1st close).
   const [openSeq, setOpenSeq] = useState(0)
   const tileRefs = useRef({})
+
+  // Live tiles (and their code-split chunks) mount only after the page goes
+  // idle, so first paint never waits on a heavy tile like the node builder.
+  const [tilesReady, setTilesReady] = useState(false)
+  useEffect(() => {
+    const ric = window.requestIdleCallback ?? ((cb) => setTimeout(cb, 350))
+    const id = ric(() => setTilesReady(true), { timeout: 2000 })
+    return () => (window.cancelIdleCallback ?? clearTimeout)(id)
+  }, [])
 
   // Capture the tile's exact viewport rect at click time. The viewer zooms
   // from this box using fixed-position transforms, so an in-flight scroll
@@ -44,7 +53,7 @@ export default function Playground() {
         {playground.map((c) => {
           const isActive = active?.id === c.id
           const openable = Boolean(c.mode)
-          const TileComp = c.liveTile ? nativeComponents[c.id] : null
+          const TileComp = c.liveTile && tilesReady ? nativeComponents[c.id] : null
           return (
             <motion.button
               key={c.id}

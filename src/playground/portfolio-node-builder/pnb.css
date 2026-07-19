@@ -24,6 +24,18 @@
 .pnb :where(img, svg, video, canvas) {
   display: block;
 }
+/* Form controls: strip UA chrome (the standalone app relied on Tailwind's
+   preflight for this — without it the native inset border/padding showed
+   inside styled wrappers). :where keeps utilities winning. */
+.pnb :where(input, select, textarea) {
+  appearance: none;
+  background-color: transparent;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
 
 /* Layered as base so Tailwind's font-* / text-* utilities (e.g. font-mono
    on the numeric inputs) still override it. */
@@ -166,4 +178,13 @@
   background: transparent;
   color: var(--color-text-dim);
   font-size: 10px;
+}
+
+/* Home-tile vignette: fills the tile behind the label, non-interactive. */
+.pnb-tile {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
 }

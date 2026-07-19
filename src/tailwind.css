@@ -11,18 +11,20 @@
 @theme {
   /* Portfolio Node Builder vocabulary (its original dark tokens, with the
      site's Geist standing in for its generic sans — the one alignment). */
+  /* neutrals = the site's exact tokens; greens/reds = the Trading Widget's;
+     blue stays as the functional selection accent (canvas UX). */
   --color-canvas: #0a0a0b;
-  --color-surface: #16171d;
-  --color-surface-2: #1f2028;
-  --color-border: #2a2b33;
-  --color-border-strong: #3a3b45;
-  --color-text: #e5e7eb;
-  --color-text-muted: #9ca3af;
-  --color-text-dim: #9ca3af;
+  --color-surface: #0e0e10;
+  --color-surface-2: #1a1b1e;
+  --color-border: rgba(255, 255, 255, 0.09);
+  --color-border-strong: rgba(255, 255, 255, 0.24);
+  --color-text: #ededef;
+  --color-text-muted: #8a8f98;
+  --color-text-dim: #8a8f98;
   --color-accent: #3b82f6;
   --color-accent-soft: rgba(59, 130, 246, 0.15);
-  --color-positive: #10b981;
-  --color-negative: #ef4444;
+  --color-positive: #46d69f;
+  --color-negative: #f4696a;
 
   --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: 'Space Mono', ui-monospace, 'SF Mono', Consolas, monospace;
