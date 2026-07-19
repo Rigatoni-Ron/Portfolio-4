@@ -121,16 +121,51 @@ const viewVariants = {
   exit: { opacity: 0, y: -8 },
 }
 
-// Cycling mock dropdown chip (From / To / Network rows).
-function CycleChip({ options, value, onChange }) {
+const CheckSmall = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M5 12.5 10 17.5 19 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+
+// Dropdown chip (From / To / Network rows): press to open a menu, pick an
+// option. Menu animates with transform/opacity; anchored to the chip.
+function Dropdown({ options, value, onChange, open, onToggle, onClose }) {
   return (
-    <button
-      type="button"
-      className="cg-chip"
-      onClick={() => onChange(options[(options.indexOf(value) + 1) % options.length])}
-    >
-      {value} <Chevron />
-    </button>
+    <div className="cg-dd">
+      <button type="button" className={`cg-chip ${open ? 'is-open' : ''}`} onClick={onToggle} aria-expanded={open} aria-haspopup="listbox">
+        {value} <Chevron />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            className="cg-menu"
+            role="listbox"
+            initial={{ opacity: 0, y: -4, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.97, transition: { duration: 0.12, ease: 'easeIn' } }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
+          >
+            {options.map((o) => (
+              <li key={o}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={o === value}
+                  className={`cg-menu-item ${o === value ? 'active' : ''}`}
+                  onClick={() => {
+                    onChange(o)
+                    onClose()
+                  }}
+                >
+                  <span>{o}</span>
+                  {o === value && <CheckSmall />}
+                </button>
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 
@@ -149,6 +184,28 @@ export default function CryptoGlass({ variant = 'full' }) {
   const [to, setTo] = useState(TO_OPTIONS[0])
   const [network, setNetwork] = useState(NETWORK_OPTIONS[0])
   const [bought, setBought] = useState({ eth: 0, usd: 0, from: FROM_OPTIONS[0] })
+  const [menu, setMenu] = useState(null) // 'from' | 'to' | 'network' | null
+
+  // While a dropdown is open: outside click closes it, and Escape closes it
+  // WITHOUT bubbling to the viewer's own Escape-to-close (capture + stop).
+  useEffect(() => {
+    if (!menu) return
+    const onDown = (e) => {
+      if (!e.target.closest('.cg-dd')) setMenu(null)
+    }
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        setMenu(null)
+      }
+    }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey, true)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey, true)
+    }
+  }, [menu])
 
   useEffect(() => {
     if (isTile) return
@@ -215,7 +272,10 @@ export default function CryptoGlass({ variant = 'full' }) {
     return () => ro.disconnect()
   }, [])
 
-  const go = (v) => setView(v)
+  const go = (v) => {
+    setMenu(null)
+    setView(v)
+  }
   const cancel = () => {
     setAmount('')
     go('chart')
@@ -330,15 +390,15 @@ export default function CryptoGlass({ variant = 'full' }) {
       <div className="cg-rev">
         <div className="cg-rev-row">
           <span>From</span>
-          <CycleChip options={FROM_OPTIONS} value={from} onChange={setFrom} />
+          <Dropdown options={FROM_OPTIONS} value={from} onChange={setFrom} open={menu === 'from'} onToggle={() => setMenu((m) => (m === 'from' ? null : 'from'))} onClose={() => setMenu(null)} />
         </div>
         <div className="cg-rev-row">
           <span>To</span>
-          <CycleChip options={TO_OPTIONS} value={to} onChange={setTo} />
+          <Dropdown options={TO_OPTIONS} value={to} onChange={setTo} open={menu === 'to'} onToggle={() => setMenu((m) => (m === 'to' ? null : 'to'))} onClose={() => setMenu(null)} />
         </div>
         <div className="cg-rev-row">
           <span>Network</span>
-          <CycleChip options={NETWORK_OPTIONS} value={network} onChange={setNetwork} />
+          <Dropdown options={NETWORK_OPTIONS} value={network} onChange={setNetwork} open={menu === 'network'} onToggle={() => setMenu((m) => (m === 'network' ? null : 'network'))} onClose={() => setMenu(null)} />
         </div>
         <div className="cg-rev-row">
           <span>Gas Fee</span>
