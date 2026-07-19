@@ -53,8 +53,8 @@ export const playground = [
     id: 'portfolio-node-builder',
     title: 'Portfolio Node Builder',
     tag: 'React Flow',
-    mode: 'iframe',
-    src: '/playground/portfolio-node-builder/index.html',
+    mode: 'native',
+    fullBleed: true, // canvas fills the viewer edge-to-edge
   },
   {
     id: 'card-stacker',

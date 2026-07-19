@@ -1,0 +1,169 @@
+/* ============================================================
+   Portfolio Node Builder — component styles, ported from the standalone
+   app's index.css. Its @theme tokens live in src/tailwind.css; everything
+   here is scoped under .pnb so nothing leaks into the site. The original
+   html/body/#root base styles became the .pnb wrapper itself.
+   ============================================================ */
+.pnb {
+  height: 100%;
+  width: 100%;
+  background: var(--color-canvas);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+}
+
+/* Mini-preflight (the standalone app had Tailwind's; here it's scoped).
+   :where keeps specificity at zero so utility classes always win. */
+.pnb :where(h1, h2, h3, h4, h5, h6, p, ul, ol, figure, blockquote) {
+  margin: 0;
+}
+.pnb :where(img, svg, video, canvas) {
+  display: block;
+}
+
+/* Layered as base so Tailwind's font-* / text-* utilities (e.g. font-mono
+   on the numeric inputs) still override it. */
+@layer base {
+  .pnb :is(input, select, button) {
+    font-family: inherit;
+    color: inherit;
+  }
+}
+
+/* Every enabled button feels pressable, matching the zoom controls */
+.pnb button:not(:disabled) {
+  cursor: pointer;
+}
+
+/* Hide number input spinners (allocation fields) */
+.pnb input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.pnb input[type='number']::-webkit-inner-spin-button,
+.pnb input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* React Flow dark theme overrides */
+.pnb .react-flow__background {
+  background-color: var(--color-canvas);
+}
+/* Figma-style canvas: arrow cursor, left-drag draws a selection box.
+   Tripled class outranks the library's two-class cursor rules. */
+.pnb .react-flow__pane.react-flow__pane.react-flow__pane {
+  cursor: default;
+}
+.pnb .react-flow__pane.react-flow__pane.react-flow__pane.dragging {
+  cursor: grabbing;
+}
+/* Hand tool (H): grab cursor everywhere on the pane */
+.pnb .tool-hand .react-flow__pane.react-flow__pane.react-flow__pane {
+  cursor: grab;
+}
+.pnb .tool-hand .react-flow__pane.react-flow__pane.react-flow__pane.dragging {
+  cursor: grabbing;
+}
+/* Strip the library's built-in chrome for type "group" nodes — the
+   GroupNode component draws its own frame. Doubled class beats the
+   library rule regardless of stylesheet order. */
+.pnb .react-flow__node.react-flow__node-group {
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.pnb .react-flow .react-flow__edge-path {
+  stroke: var(--color-border);
+  stroke-width: 1.5;
+  transition: stroke 0.15s ease;
+}
+.pnb .react-flow__edge:hover .react-flow__edge-path {
+  stroke: var(--color-border-strong);
+}
+.pnb .react-flow__edge.selected .react-flow__edge-path,
+.pnb .react-flow__edge:focus .react-flow__edge-path {
+  stroke: var(--color-accent);
+}
+/* Intro tour entrances: nodes fade in, wires draw in from their source.
+   Only opacity animates on the node wrapper — transform would fight React
+   Flow's positioning translate. */
+@keyframes node-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.pnb .react-flow__node.node-enter {
+  animation: node-fade-in 0.35s ease-out;
+}
+@keyframes edge-draw-in {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.pnb .react-flow__edge.edge-enter .react-flow__edge-path {
+  stroke-dasharray: 1000 1000;
+  animation: edge-draw-in 0.7s ease-out forwards;
+}
+
+/* Inert (invalid) wires: dashed red, brighter on hover */
+.pnb .react-flow__edge-path.edge-inert {
+  stroke: rgba(239, 68, 68, 0.55);
+}
+.pnb .react-flow__edge:hover .react-flow__edge-path.edge-inert {
+  stroke: rgba(239, 68, 68, 0.9);
+}
+.pnb .react-flow .react-flow__handle {
+  width: 16px;
+  height: 16px;
+  background: var(--color-surface-2);
+  border: 2px solid var(--color-border-strong);
+  transition: scale 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.pnb .react-flow .react-flow__handle:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  /* standalone scale composes with the library's positioning transform —
+     transform: scale() would replace it and shift the handle */
+  scale: 1.25;
+}
+.pnb .react-flow__controls {
+  /* xyflow theming variables — these beat the library stylesheet regardless
+     of import order, unlike overriding its rules directly */
+  --xy-controls-button-background-color: var(--color-surface);
+  --xy-controls-button-background-color-hover: var(--color-surface-2);
+  --xy-controls-button-color: var(--color-text-muted);
+  --xy-controls-button-color-hover: var(--color-text);
+  --xy-controls-button-border-color: var(--color-border);
+  --xy-controls-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+.pnb .react-flow__controls-button {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  fill: var(--color-text-muted);
+}
+.pnb .react-flow__controls-button:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  fill: var(--color-text);
+}
+.pnb .react-flow__attribution {
+  background: transparent;
+  color: var(--color-text-dim);
+  font-size: 10px;
+}

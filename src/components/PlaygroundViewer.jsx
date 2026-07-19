@@ -153,7 +153,10 @@ export default function PlaygroundViewer({ item, originRect, openSeq, onClose })
               <Suspense fallback={<Spinner />}>
                 <div
                   className="pg-native"
-                  style={item.bg ? { background: item.bg } : undefined}
+                  style={{
+                    ...(item.bg ? { background: item.bg } : null),
+                    ...(item.fullBleed ? { padding: 0 } : null),
+                  }}
                 >
                   <NativeComp variant="full" />
                 </div>

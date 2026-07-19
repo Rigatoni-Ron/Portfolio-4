@@ -5,4 +5,5 @@ import { lazy } from 'react'
 export const nativeComponents = {
   'animated-menu': lazy(() => import('./animated-menu/AnimatedMenu.jsx')),
   'crypto-glass-widget': lazy(() => import('./crypto-glass/CryptoGlass.jsx')),
+  'portfolio-node-builder': lazy(() => import('./portfolio-node-builder/PortfolioNodeBuilder.tsx')),
 }

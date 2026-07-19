@@ -2,23 +2,28 @@
    Tailwind 4 — ADDITIVE layer for ported/native Playground pieces.
 
    theme + utilities ONLY — no preflight: Tailwind's global reset would
-   fight the site's hand-tuned base styles in index.css. The site's design
-   tokens are bridged into the Tailwind theme below so utility classes and
-   the token sheet share one source of truth.
+   fight the site's hand-tuned base styles in index.css. The site's own
+   pages use no utility classes; this vocabulary exists for ported pieces.
    ============================================================ */
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
-@theme inline {
-  /* site tokens → Tailwind colors (e.g. bg-surface, text-ink, border-line) */
-  --color-ink: var(--text);
-  --color-ink-muted: var(--text-muted);
-  --color-ink-faint: var(--text-faint);
-  --color-surface: var(--bg);
-  --color-surface-raised: var(--bg-raised);
-  --color-line: var(--border);
-  --color-line-hover: var(--border-hover);
-  --color-line-strong: var(--border-strong);
+@theme {
+  /* Portfolio Node Builder vocabulary (its original dark tokens, with the
+     site's Geist standing in for its generic sans — the one alignment). */
+  --color-canvas: #0a0a0b;
+  --color-surface: #16171d;
+  --color-surface-2: #1f2028;
+  --color-border: #2a2b33;
+  --color-border-strong: #3a3b45;
+  --color-text: #e5e7eb;
+  --color-text-muted: #9ca3af;
+  --color-text-dim: #9ca3af;
+  --color-accent: #3b82f6;
+  --color-accent-soft: rgba(59, 130, 246, 0.15);
+  --color-positive: #10b981;
+  --color-negative: #ef4444;
 
-  --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'SF Mono', Consolas, monospace;
 }
