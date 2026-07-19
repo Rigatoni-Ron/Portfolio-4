@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import NumberFlow from '@number-flow/react'
 
 /*
  * Crypto Glass — dark-native rebuild of the "liquid glass" crypto widget.
  *   variant="tile"  → collapsed pill only, non-interactive (Playground tile)
- *   variant="full"  → starts collapsed; tap the pill to expand into the card
- *                     (live area chart + full-width range tabs)
+ *   variant="full"  → collapsed pill → expands to a chart view → a 3-step Buy
+ *                     flow (input → review → success).
  * Mock data only (seeded random walk that live-ticks) — no network.
  */
 
@@ -18,8 +19,16 @@ const RANGE_CFG = {
   '5Y': { n: 82, vol: 150, drift: 14 },
 }
 
-// Distinct seed per range label (avoids collisions between same-length labels).
+const WALLET = { name: 'Main Wallet', balance: 4210.0 }
+const FEE_RATE = 0.005 // 0.5% mock fee
+const VIEW_ORDER = ['chart', 'input', 'review', 'success']
+
 const seedFor = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)
+const round = (n, d) => Math.round(n * 10 ** d) / 10 ** d
+const fmtUsd = (n) =>
+  n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const fmtEth = (n) =>
+  n.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }) + ' ETH'
 
 function mulberry32(a) {
   return () => {
@@ -82,23 +91,47 @@ function EthMark({ size = 22 }) {
   )
 }
 
+const ChevronLeft = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M10 3.5 5.5 8l4.5 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+const Check = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M5 12.5 10 17.5 19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+
+const stop = (e) => e.stopPropagation()
+
+// View transition: fade + small directional slide (transform/opacity only).
+const viewVariants = {
+  enter: (dir) => ({ opacity: 0, x: dir >= 0 ? 14 : -14 }),
+  center: { opacity: 1, x: 0 },
+  exit: (dir) => ({ opacity: 0, x: dir >= 0 ? -14 : 14 }),
+}
+
 export default function CryptoGlass({ variant = 'full' }) {
   const isTile = variant === 'tile'
-  const [open, setOpen] = useState(false) // full starts collapsed
+  const [open, setOpen] = useState(false)
+  const [view, setView] = useState('chart')
+  const [dir, setDir] = useState(0)
   const [range, setRange] = useState('1D')
   const [price, setPrice] = useState(1632.5)
   const dayOpen = useRef(1596.0)
-
   const [series, setSeries] = useState(() => genSeries(1632.5, RANGE_CFG['1D'], 11))
 
-  // Rebuild the series when the range changes (full only).
+  // Buy-flow state.
+  const [amount, setAmount] = useState('250')
+  const [unit, setUnit] = useState('USD')
+  const [bought, setBought] = useState({ eth: 0, usd: 0 })
+
   useEffect(() => {
     if (isTile) return
     setSeries(genSeries(price, RANGE_CFG[range], seedFor(range)))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range])
 
-  // Live tick.
   useEffect(() => {
     const id = setInterval(
       () => setPrice((p) => Math.max(1420, Math.min(1840, p + (Math.random() - 0.47) * (isTile ? 2 : 3.2)))),
@@ -119,7 +152,59 @@ export default function CryptoGlass({ variant = 'full' }) {
   const { line, area } = useMemo(() => toPaths(series, W, H), [series])
   const stroke = up ? 'var(--cg-up)' : 'var(--cg-down)'
 
-  // Header row — identical in collapsed + expanded (icon left, price/delta right).
+  // Derived buy amounts.
+  const num = parseFloat(amount) || 0
+  const usd = unit === 'USD' ? num : num * price
+  const eth = unit === 'USD' ? num / price : num
+  const fee = usd * FEE_RATE
+  const total = usd + fee
+
+  // Animate the card height between steps: measure the active view and drive a
+  // px height (CSS-transitioned) on the steps container.
+  const stepsInnerRef = useRef(null)
+  const [stepH, setStepH] = useState()
+  useLayoutEffect(() => {
+    const el = stepsInnerRef.current
+    if (!el) return
+    const update = () => setStepH(el.offsetHeight)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const go = (v) => {
+    setDir(Math.sign(VIEW_ORDER.indexOf(v) - VIEW_ORDER.indexOf(view)))
+    setView(v)
+  }
+  const resetTrade = () => {
+    setAmount('250')
+    setUnit('USD')
+  }
+  const collapse = () => {
+    setOpen(false)
+    setView('chart')
+    setDir(0)
+    resetTrade()
+  }
+  const cardClick = () => (open ? collapse() : setOpen(true))
+
+  const toggleUnit = () => {
+    const next = unit === 'USD' ? 'ETH' : 'USD'
+    const converted = unit === 'USD' ? num / price : num * price
+    setUnit(next)
+    setAmount(converted ? String(round(converted, next === 'ETH' ? 4 : 2)) : '')
+  }
+  const preset = (pct) => {
+    const targetUsd = WALLET.balance * pct
+    const val = unit === 'USD' ? targetUsd : targetUsd / price
+    setAmount(String(round(val, unit === 'ETH' ? 4 : 2)))
+  }
+  const confirm = () => {
+    setBought({ eth, usd })
+    go('success')
+  }
+
   const row = (
     <div className="cg-row">
       <EthMark size={isTile ? 20 : 26} />
@@ -136,12 +221,7 @@ export default function CryptoGlass({ variant = 'full' }) {
         />
         <span className={`cg-delta ${up ? 'up' : 'down'}`}>
           <span className="cg-arrow">{up ? '▲' : '▼'}</span>
-          <NumberFlow
-            value={Math.abs(delta)}
-            format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }}
-            suffix="%"
-            willChange
-          />
+          <NumberFlow value={Math.abs(delta)} format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} suffix="%" willChange />
         </span>
       </div>
     </div>
@@ -155,64 +235,151 @@ export default function CryptoGlass({ variant = 'full' }) {
     )
   }
 
+  const chartView = (
+    <>
+      <div className="cg-chart">
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="cg-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={stroke} stopOpacity="0.28" />
+              <stop offset="100%" stopColor={stroke} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d={area} fill="url(#cg-fill)" />
+          <path d={line} fill="none" stroke={stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+      <div className="cg-ranges" style={{ '--cg-idx': RANGES.indexOf(range) }} onClick={stop}>
+        <span className="cg-range-pill" />
+        {RANGES.map((r) => (
+          <button key={r} type="button" className={`cg-range ${r === range ? 'active' : ''}`} onClick={(e) => { stop(e); setRange(r) }}>
+            <span>{r}</span>
+          </button>
+        ))}
+      </div>
+      <button type="button" className="cg-cta" onClick={(e) => { stop(e); go('input') }}>
+        Trade
+      </button>
+    </>
+  )
+
+  const inputView = (
+    <>
+      <button type="button" className="cg-back" onClick={() => go('chart')}>
+        <ChevronLeft /> Buy ETH
+      </button>
+      <div className="cg-field">
+        <span className="cg-field-label">You pay</span>
+        <div className="cg-amount">
+          {unit === 'USD' && <span className="cg-amount-pre">$</span>}
+          <input
+            className="cg-amount-input"
+            inputMode="decimal"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ''))}
+            aria-label="Amount"
+          />
+          <button type="button" className="cg-unit" onClick={toggleUnit}>
+            {unit} <span className="cg-unit-swap">⇄</span>
+          </button>
+        </div>
+        <div className="cg-convert">≈ {unit === 'USD' ? fmtEth(eth) : fmtUsd(usd)}</div>
+      </div>
+      <div className="cg-presets">
+        {[['25%', 0.25], ['50%', 0.5], ['Max', 1]].map(([label, pct]) => (
+          <button key={label} type="button" className="cg-preset" onClick={() => preset(pct)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="cg-field">
+        <span className="cg-field-label">Pay with</span>
+        <div className="cg-source">
+          <span className="cg-source-mark">◈</span>
+          <span className="cg-source-name">{WALLET.name}</span>
+          <span className="cg-source-bal">{fmtUsd(WALLET.balance)}</span>
+        </div>
+      </div>
+      <button type="button" className="cg-cta" onClick={() => go('review')} disabled={!(usd > 0)}>
+        Review
+      </button>
+    </>
+  )
+
+  const reviewView = (
+    <>
+      <button type="button" className="cg-back" onClick={() => go('input')}>
+        <ChevronLeft /> Review
+      </button>
+      <div className="cg-summary">
+        <div className="cg-sum-row"><span>You buy</span><span>{fmtEth(eth)}</span></div>
+        <div className="cg-sum-row"><span>Pay with</span><span>{WALLET.name}</span></div>
+        <div className="cg-sum-row"><span>Rate</span><span>1 ETH = {fmtUsd(price)}</span></div>
+        <div className="cg-sum-row"><span>Fee</span><span>{fmtUsd(fee)}</span></div>
+        <div className="cg-sum-divider" />
+        <div className="cg-sum-row cg-sum-total"><span>Total</span><span>{fmtUsd(total)}</span></div>
+      </div>
+      <button type="button" className="cg-cta" onClick={confirm}>
+        Confirm buy
+      </button>
+    </>
+  )
+
+  const successView = (
+    <div className="cg-success">
+      <div className="cg-check"><Check /></div>
+      <div className="cg-success-title">Bought {fmtEth(bought.eth)}</div>
+      <div className="cg-success-sub">{fmtUsd(bought.usd)} · {WALLET.name}</div>
+      <button type="button" className="cg-cta cg-done" onClick={() => { resetTrade(); go('chart') }}>
+        Done
+      </button>
+    </div>
+  )
+
+  const views = { chart: chartView, input: inputView, review: reviewView, success: successView }
+
+  // Whole-card click toggles collapse ONLY in the chart view; deeper views
+  // navigate with their own back buttons.
+  const toggleProps =
+    view === 'chart'
+      ? {
+          role: 'button',
+          tabIndex: 0,
+          'aria-expanded': open,
+          onClick: cardClick,
+          onKeyDown: (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              cardClick()
+            }
+          },
+        }
+      : {}
+
   return (
     <div className="cg-full">
-      {/* The whole card is the toggle: hover lights it up, clicking anywhere
-          expands/collapses. Range tabs stopPropagation so they don't collapse. */}
-      <div
-        className={`cg-glass cg-card ${open ? 'is-open' : ''}`}
-        role="button"
-        tabIndex={0}
-        aria-expanded={open}
-        aria-label={open ? 'Collapse widget' : 'Expand widget'}
-        onClick={() => setOpen((o) => !o)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            setOpen((o) => !o)
-          }
-        }}
-      >
+      <div className={`cg-glass cg-card ${open ? 'is-open' : ''} ${view !== 'chart' ? 'is-trading' : ''}`} {...toggleProps}>
         {row}
-
-        {/* Reveal (chart + full-width tabs); grid-rows animates the height.
-            Padding lives on the body (not the clipped element) so the collapsed
-            state is a true 0 height with no residual space under the pill. */}
         <div className="cg-reveal">
           <div className="cg-reveal-inner">
             <div className="cg-reveal-body">
-              <div className="cg-chart">
-                <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="cg-fill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={stroke} stopOpacity="0.28" />
-                      <stop offset="100%" stopColor={stroke} stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <path d={area} fill="url(#cg-fill)" />
-                  <path d={line} fill="none" stroke={stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-
-              <div
-                className="cg-ranges"
-                style={{ '--cg-idx': RANGES.indexOf(range) }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span className="cg-range-pill" />
-                {RANGES.map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    className={`cg-range ${r === range ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setRange(r)
-                    }}
-                  >
-                    <span>{r}</span>
-                  </button>
-                ))}
+              <div className="cg-steps" style={{ height: stepH }}>
+                <div ref={stepsInnerRef} className="cg-steps-inner">
+                  <AnimatePresence mode="wait" custom={dir} initial={false}>
+                    <motion.div
+                      key={view}
+                      className="cg-view"
+                      custom={dir}
+                      variants={viewVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                    >
+                      {views[view]}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
           </div>
