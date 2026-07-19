@@ -290,6 +290,14 @@ export default function CryptoGlass({ variant = 'full' }) {
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
+  // Re-measure synchronously on view change (before paint) so the height
+  // transition starts on the SAME frame as the buttons' layout glide — the
+  // ResizeObserver round-trip alone starts a couple frames late, letting the
+  // buttons outrun the card edge on growing steps.
+  useLayoutEffect(() => {
+    const el = stepsInnerRef.current
+    if (el) setStepH(el.offsetHeight)
+  }, [view])
 
   const go = (v) => {
     setMenu(null)
@@ -472,7 +480,12 @@ export default function CryptoGlass({ variant = 'full' }) {
         <div className="cg-reveal">
           <div className="cg-reveal-inner">
             <div className="cg-reveal-body">
-              <div className="cg-steps" style={{ height: stepH }}>
+              <motion.div
+                className="cg-steps"
+                initial={false}
+                {...(stepH != null ? { animate: { height: stepH } } : {})}
+                transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              >
                 <div ref={stepsInnerRef} className="cg-steps-inner">
                   {/* One popLayout presence for the persistent amount block +
                       the swapped view: exiting children pop OUT of the layout
@@ -534,12 +547,16 @@ export default function CryptoGlass({ variant = 'full' }) {
                     {view !== 'success' && (
                       <motion.div
                         key="btns"
+                        // layout: glide to the new position in sync with the
+                        // container's height ease (same curve/duration) instead
+                        // of teleporting and being "revealed" by the fold.
+                        layout
                         className={`cg-btnrow ${isTradeView ? 'two' : ''}`}
                         onClick={stop}
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8, transition: { duration: 0.14, ease: 'easeIn' } }}
-                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        transition={{ duration: 0.2, ease: 'easeOut', layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
                       >
                         <div className="cg-btn-track">
                           <button
@@ -568,7 +585,7 @@ export default function CryptoGlass({ variant = 'full' }) {
                     )}
                   </AnimatePresence>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>

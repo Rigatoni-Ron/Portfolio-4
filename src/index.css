@@ -1170,7 +1170,7 @@ a {
 /* Animated-height container between steps (px height set inline, CSS-eased). */
 .cg-steps {
   overflow: hidden;
-  transition: height 0.32s var(--ease);
+  /* height is animated by motion (same clock as the buttons' layout glide) */
 }
 /* Positioning context for popLayout: exiting views are popped to absolute here
    so the measured height snaps straight to its final target. */
@@ -1194,7 +1194,10 @@ a {
      the fit transform scales it back into view. */
   grid-template-columns: minmax(0, 1fr);
   align-items: center;
-  transition: height 0.34s var(--ease);
+  /* NO height transition: the reserved box snaps so the document flow settles
+     in one frame (container ease + button glide absorb the change); only the
+     row's transform animates the visible shrink. A transitioning height here
+     re-shuffles flow every frame and desyncs the button glide. */
 }
 .cg-amt-wrap.is-small {
   height: 44px;
@@ -1406,6 +1409,7 @@ a {
   display: grid;
   grid-template-columns: 0fr 1fr;
   gap: 0;
+  margin-top: var(--s-4); /* spacing from the step content above */
   transition:
     grid-template-columns 0.3s var(--ease),
     gap 0.3s var(--ease);
