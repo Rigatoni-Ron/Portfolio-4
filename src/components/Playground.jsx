@@ -1,5 +1,5 @@
 import { Suspense, useCallback, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { playground } from '../data.js'
 import { nativeComponents } from '../playground/registry.js'
 import PlaygroundViewer from './PlaygroundViewer.jsx'

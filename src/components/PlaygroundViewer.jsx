@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { Close } from './icons.jsx'
 import { morph } from '../motion.js'
 import { nativeComponents } from '../playground/registry.js'
@@ -26,7 +26,7 @@ const PANEL_INSET = 16
 // FLIP: map the fixed, fullscreen panel back onto the tile's viewport rect.
 // The panel is position:fixed and we animate pure transforms, so the zoom is in
 // viewport coordinates and immune to page scroll (a scroll mid-morph used to
-// corrupt framer-motion's cross-context layout projection and make the panel
+// corrupt motion's cross-context layout projection and make the panel
 // slide up from the bottom instead of zooming from the tile).
 const fromTile = (rect) => {
   if (!rect) return { x: 0, y: 0, scaleX: 1, scaleY: 1 }

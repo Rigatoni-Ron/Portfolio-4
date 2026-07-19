@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 const COURSES = [
   { title: 'Interface Craft', url: 'https://www.interfacecraft.dev/', host: 'interfacecraft.dev' },

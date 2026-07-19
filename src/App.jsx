@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import SocialLinks from './components/SocialLinks.jsx'
 import Header from './components/Header.jsx'
 import Tabs from './components/Tabs.jsx'
