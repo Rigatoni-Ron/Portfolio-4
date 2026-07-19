@@ -42,31 +42,46 @@ type GraphState = {
   resetGraph: () => void
 }
 
-// Starter graph for first-time visitors: one of each node, fully wired
-// along the flow so the tool demonstrates itself.
+// Starter graph for first-time visitors: one of each node, fully wired and
+// grouped, so the tool opens demonstrating itself. The group frame bounds
+// come from the groupNodes math run over the real rendered node sizes
+// (stock 256x208, earn 240x190, timeline 240x184, portfolio 288x386, PAD 16);
+// children are positioned relative to the frame (parent-before-children order).
 const initialNodes: AppNode[] = [
+  {
+    id: 'group-1',
+    type: 'group',
+    position: { x: 64, y: 94 },
+    width: 1300,
+    height: 418,
+    data: { label: 'Group', color: DEFAULT_GROUP_COLOR },
+  },
   {
     id: 'stock-1',
     type: 'stock',
-    position: { x: 80, y: 200 },
+    parentId: 'group-1',
+    position: { x: 16, y: 106 },
     data: { ticker: 'VOO', allocation: 1000 },
   },
   {
     id: 'earn-1',
     type: 'earn',
-    position: { x: 420, y: 220 },
+    parentId: 'group-1',
+    position: { x: 356, y: 126 },
     data: { strategy: 'yield', apr: 4 },
   },
   {
     id: 'timeline-1',
     type: 'timeline',
-    position: { x: 740, y: 200 },
+    parentId: 'group-1',
+    position: { x: 676, y: 106 },
     data: { mode: 'backtest', timeframe: '5Y' },
   },
   {
     id: 'portfolio-1',
     type: 'portfolio',
-    position: { x: 1060, y: 110 },
+    parentId: 'group-1',
+    position: { x: 996, y: 16 },
     data: {},
   },
 ]
@@ -314,16 +329,13 @@ export const useGraphStore = create<GraphState>()(
         nodes: state.nodes.map(stripTourFlags),
         edges: state.edges.map(stripTourFlags),
       }),
-      version: 2,
-      // v2 collapsed Earn strategies stake/lend/borrow into a single "yield"
+      version: 3,
+      // v3 (site embed): reset everyone to the grouped starter graph once —
+      // the tour is gone, so the canvas must open already demonstrating itself.
       migrate: (persisted, version) => {
         const state = persisted as { nodes?: AppNode[]; edges?: AppEdge[] }
-        if (version < 2 && state.nodes) {
-          state.nodes = state.nodes.map((n) =>
-            n.type === 'earn' && n.data.strategy !== 'hold'
-              ? ({ ...n, data: { ...n.data, strategy: 'yield' } } as AppNode)
-              : n,
-          )
+        if (version < 3) {
+          return { nodes: initialNodes, edges: initialEdges }
         }
         return state
       },

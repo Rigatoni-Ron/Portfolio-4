@@ -196,7 +196,9 @@ export function TickerSelect({ value, onChange }: Props) {
             <li className="px-3 py-2 text-[11px] text-text-muted">No matches</li>
           )}
         </ul>,
-          document.body,
+          // Portal into the .pnb root — body-level z-50 sits behind the
+          // portfolio's fullscreen viewer panel (z-70).
+          inputRef.current?.closest('.pnb') ?? document.body,
         )}
     </div>
   )

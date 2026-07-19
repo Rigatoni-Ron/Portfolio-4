@@ -13,7 +13,7 @@ export default function NodeBuilderTile() {
   const nodes = useGraphStore((s) => s.nodes)
   const edges = useGraphStore((s) => s.edges)
   return (
-    <div className="pnb pnb-tile" aria-hidden="true">
+    <div className="pnb pnb-tile" aria-hidden="true" inert>
       <ReactFlowProvider>
         <ReactFlow
           nodes={nodes}
