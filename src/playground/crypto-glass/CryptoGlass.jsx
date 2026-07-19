@@ -423,21 +423,10 @@ export default function CryptoGlass({ variant = 'full' }) {
     </>
   )
 
-  const inputView = (
-    <>
-      <div className="cg-avail">
-        <span className="cg-avail-label">Available</span>
-        <span className="cg-avail-value">{fmtUsd(AVAILABLE_USD)}</span>
-        <button type="button" className="cg-max" onClick={setMax}>
-          Max
-        </button>
-      </div>
-    </>
-  )
+  const inputView = null // input is entirely persistent elements (amount, subline, buttons)
 
   const reviewView = (
     <>
-      <div className="cg-usd-line">{fmtUsd(usd)}</div>
       <div className="cg-rev">
         <div className="cg-rev-row">
           <span>From</span>
@@ -562,6 +551,57 @@ export default function CryptoGlass({ variant = 'full' }) {
                         </div>
                       </motion.div>
                     )}
+                    {/* Persistent subline: shows the Available balance until
+                        the user types, then morphs into the live USD equivalent
+                        — and glides upward with the amount into review. */}
+                    {isTradeView && (
+                      <motion.div
+                        key="subline"
+                        layout
+                        className="cg-subline"
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8, transition: { duration: 0.14, ease: 'easeIn' } }}
+                        transition={{ duration: 0.2, ease: 'easeOut', layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
+                      >
+                        <span className="cg-subline-stack">
+                          <AnimatePresence initial={false}>
+                            {amount === '' ? (
+                              <motion.span
+                                key="avail"
+                                className="cg-subline-item"
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -8 }}
+                                transition={{ duration: 0.18, ease: 'easeOut' }}
+                              >
+                                <span className="cg-avail-label">Available</span>
+                                <span className="cg-avail-value">{fmtUsd(AVAILABLE_USD)}</span>
+                                <button type="button" className="cg-max" onClick={setMax}>
+                                  Max
+                                </button>
+                              </motion.span>
+                            ) : (
+                              <motion.span
+                                key="usd"
+                                className="cg-subline-item cg-subline-usd"
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -8 }}
+                                transition={{ duration: 0.18, ease: 'easeOut' }}
+                              >
+                                <NumberFlow
+                                  value={usd}
+                                  format={{ style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+                                  willChange
+                                />
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
+                        </span>
+                      </motion.div>
+                    )}
+
                     <motion.div
                       key={view}
                       className="cg-view"

@@ -1262,13 +1262,26 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
-/* Available balance line + Max chip. */
-.cg-avail {
-  display: flex;
+/* Persistent subline under the amount (Available ↔ USD equivalent). */
+.cg-subline {
+  text-align: center;
+  min-height: 26px;
+}
+.cg-subline-stack {
+  display: inline-grid;
+  justify-items: center;
+}
+.cg-subline-item {
+  grid-area: 1 / 1;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: var(--s-2);
   font-size: 13px;
+  white-space: nowrap;
+}
+.cg-subline-usd {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 .cg-avail-label {
   color: var(--text-muted);
@@ -1294,20 +1307,12 @@ a {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* USD conversion line under the solidified amount (review). */
-.cg-usd-line {
-  text-align: center;
-  font-size: 14px;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
 /* Review rows (From / To / Network / Gas fee / Date). */
 .cg-rev {
   display: flex;
   flex-direction: column;
   gap: var(--s-3);
-  padding: var(--s-2) 0;
+  padding: var(--s-4) 0 var(--s-2);
 }
 .cg-rev-row {
   display: flex;
