@@ -1400,24 +1400,54 @@ a {
   flex-shrink: 0;
 }
 
-/* Button row: Cancel + primary side by side. */
+/* Persistent button row. One primary that rides across steps; the ghost
+   (Cancel/Back) lives in a grid track that animates 0fr↔1fr open. */
 .cg-btnrow {
-  display: flex;
+  display: grid;
+  grid-template-columns: 0fr 1fr;
+  gap: 0;
+  transition:
+    grid-template-columns 0.3s var(--ease),
+    gap 0.3s var(--ease);
+}
+.cg-btnrow.two {
+  grid-template-columns: 1fr 1fr;
   gap: var(--s-2);
 }
-.cg-btnrow > * {
-  flex: 1;
+.cg-btn-track {
+  overflow: hidden;
+  min-width: 0;
+  border-radius: 12px;
 }
 .cg-btn-ghost {
-  padding: 12px;
+  width: 100%;
+  padding: 12px 0;
   border: 1px solid var(--border-hover);
   border-radius: 12px;
   background: transparent;
   color: var(--text);
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
-  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+  opacity: 0;
+  transition:
+    opacity 0.2s var(--ease),
+    border-color 0.18s var(--ease),
+    background 0.18s var(--ease);
+}
+.cg-btnrow.two .cg-btn-ghost {
+  opacity: 1;
+}
+
+/* Rolling label: exiting + entering text share one grid cell. */
+.cg-label-stack {
+  display: inline-grid;
+  justify-items: center;
+}
+.cg-label {
+  grid-area: 1 / 1;
+  white-space: nowrap;
 }
 .cg-btn-ghost:hover {
   border-color: var(--border-strong);
@@ -1473,7 +1503,4 @@ a {
   font-size: 13px;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
-}
-.cg-done {
-  margin-top: var(--s-3);
 }

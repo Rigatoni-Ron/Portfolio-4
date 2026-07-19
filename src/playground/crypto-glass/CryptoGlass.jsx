@@ -113,6 +113,25 @@ const Check = () => (
 
 const stop = (e) => e.stopPropagation()
 
+// Rolling button label: old text drifts up+out, new text rises in. Both stack
+// in the same grid cell so the button itself never moves.
+const LabelSwap = ({ label }) => (
+  <span className="cg-label-stack">
+    <AnimatePresence initial={false}>
+      <motion.span
+        key={label}
+        className="cg-label"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.18, ease: 'easeOut' }}
+      >
+        {label}
+      </motion.span>
+    </AnimatePresence>
+  </span>
+)
+
 // View transition: rise in from below, drift upward on exit. Pure
 // transform/opacity, no horizontal motion.
 const viewVariants = {
@@ -276,14 +295,30 @@ export default function CryptoGlass({ variant = 'full' }) {
     setMenu(null)
     setView(v)
   }
+
+  // Success lingers ~3s, then the card returns to its collapsed pill state.
+  useEffect(() => {
+    if (view !== 'success') return
+    const t = setTimeout(() => collapse(), 3000)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view])
   const cancel = () => {
     setAmount('')
     go('chart')
   }
+  const collapseTimer = useRef(null)
+  useEffect(() => () => clearTimeout(collapseTimer.current), [])
   const collapse = () => {
     setOpen(false)
-    setView('chart')
-    setAmount('')
+    setMenu(null)
+    // Reset the flow only after the reveal has folded shut — switching to the
+    // (taller) chart view immediately would grow the height mid-collapse.
+    clearTimeout(collapseTimer.current)
+    collapseTimer.current = setTimeout(() => {
+      setView('chart')
+      setAmount('')
+    }, 450)
   }
   const cardClick = () => (open ? collapse() : setOpen(true))
 
@@ -358,9 +393,6 @@ export default function CryptoGlass({ variant = 'full' }) {
           </button>
         ))}
       </div>
-      <button type="button" className="cg-cta" onClick={(e) => { stop(e); go('input') }}>
-        Trade
-      </button>
     </>
   )
 
@@ -371,14 +403,6 @@ export default function CryptoGlass({ variant = 'full' }) {
         <span className="cg-avail-value">{fmtUsd(AVAILABLE_USD)}</span>
         <button type="button" className="cg-max" onClick={setMax}>
           Max
-        </button>
-      </div>
-      <div className="cg-btnrow">
-        <button type="button" className="cg-btn-ghost" onClick={cancel}>
-          Cancel
-        </button>
-        <button type="button" className="cg-cta" onClick={() => go('review')} disabled={!(eth > 0)}>
-          Review
         </button>
       </div>
     </>
@@ -412,14 +436,6 @@ export default function CryptoGlass({ variant = 'full' }) {
           </span>
         </div>
       </div>
-      <div className="cg-btnrow">
-        <button type="button" className="cg-btn-ghost" onClick={() => go('input')}>
-          Back
-        </button>
-        <button type="button" className="cg-cta" onClick={confirm}>
-          Submit order
-        </button>
-      </div>
     </>
   )
 
@@ -428,9 +444,6 @@ export default function CryptoGlass({ variant = 'full' }) {
       <div className="cg-check"><Check /></div>
       <div className="cg-success-title">Bought {fmtEth(bought.eth)}</div>
       <div className="cg-success-sub">{fmtUsd(bought.usd)} · {bought.from}</div>
-      <button type="button" className="cg-cta cg-done" onClick={() => { setAmount(''); go('chart') }}>
-        Done
-      </button>
     </div>
   )
 
@@ -513,6 +526,46 @@ export default function CryptoGlass({ variant = 'full' }) {
                     >
                       {views[view]}
                     </motion.div>
+
+                    {/* Persistent button row: the SAME two buttons ride across
+                        chart/input/review — labels roll (Trade→Review→Submit
+                        order, Cancel→Back) and the ghost track animates open
+                        when a secondary action exists. Absent on success. */}
+                    {view !== 'success' && (
+                      <motion.div
+                        key="btns"
+                        className={`cg-btnrow ${isTradeView ? 'two' : ''}`}
+                        onClick={stop}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8, transition: { duration: 0.14, ease: 'easeIn' } }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                      >
+                        <div className="cg-btn-track">
+                          <button
+                            type="button"
+                            className="cg-btn-ghost"
+                            tabIndex={isTradeView ? 0 : -1}
+                            onClick={view === 'review' ? () => go('input') : cancel}
+                          >
+                            <LabelSwap label={view === 'review' ? 'Back' : 'Cancel'} />
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          className="cg-cta"
+                          disabled={view === 'input' && !(eth > 0)}
+                          onClick={(e) => {
+                            stop(e)
+                            if (view === 'chart') go('input')
+                            else if (view === 'input') go('review')
+                            else confirm()
+                          }}
+                        >
+                          <LabelSwap label={view === 'chart' ? 'Trade' : view === 'input' ? 'Review' : 'Submit order'} />
+                        </button>
+                      </motion.div>
+                    )}
                   </AnimatePresence>
                 </div>
               </div>
