@@ -353,8 +353,8 @@ export default function CryptoGlass({ variant = 'full' }) {
         </div>
       </div>
       <div className="cg-btnrow">
-        <button type="button" className="cg-btn-ghost" onClick={cancel}>
-          Cancel
+        <button type="button" className="cg-btn-ghost" onClick={() => go('input')}>
+          Back
         </button>
         <button type="button" className="cg-cta" onClick={confirm}>
           Submit order
