@@ -1525,6 +1525,8 @@ a {
   grid-template-rows: repeat(3, 9px);
   gap: 4px;
 }
+/* Random fill: each cell lights ONCE (delay = its shuffle position, set
+   inline) and stays lit — the completed grid reads as the order going through. */
 .cg-loader-cell {
   width: 9px;
   height: 9px;
@@ -1532,15 +1534,10 @@ a {
   background: rgb(237, 237, 239);
   opacity: 0.13;
   transform: scale(0.82);
-  animation: cg-loader-flash 1.4s infinite;
-  animation-delay: calc(var(--wave) * 0.13s);
+  animation: cg-loader-fill 0.22s var(--ease) forwards;
 }
-@keyframes cg-loader-flash {
-  0%, 46%, 100% {
-    opacity: 0.13;
-    transform: scale(0.82);
-  }
-  12% {
+@keyframes cg-loader-fill {
+  to {
     opacity: 1;
     transform: scale(1);
     box-shadow: 0 0 6px rgba(237, 237, 239, 0.45);

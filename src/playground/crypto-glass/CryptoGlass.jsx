@@ -20,6 +20,11 @@ const RANGE_CFG = {
 }
 
 const AVAILABLE_USD = 34234238.83 // mock balance (per wireframe)
+// Processing loader (random fill): one cell lights every FILL_STEP ms in a
+// random order, then all 9 hold lit for FILL_HOLD before success.
+const FILL_STEP = 110
+const FILL_HOLD = 650
+const FILL_TOTAL = 9 * FILL_STEP + FILL_HOLD
 const GAS_ETH = 0.0002638
 const FROM_OPTIONS = ['CB wallet 26', 'Vault 3', 'Treasury A']
 const TO_OPTIONS = ['Tri-party BNY', 'Cold storage', 'Fireblocks 2']
@@ -252,6 +257,12 @@ export default function CryptoGlass({ variant = 'full' }) {
   const { line, area } = useMemo(() => toPaths(series, W, H), [series])
   const stroke = up ? 'var(--cg-up)' : 'var(--cg-down)'
 
+  // Random light-up order for the processing loader (fresh per entry).
+  const fillOrder = useMemo(
+    () => (view === 'processing' ? [...Array(9).keys()].sort(() => Math.random() - 0.5) : null),
+    [view],
+  )
+
   const display = fmtAmount(amount)
   const eth = parseFloat(amount) || 0
   const usd = eth * price
@@ -349,10 +360,10 @@ export default function CryptoGlass({ variant = 'full' }) {
     go('processing')
   }
 
-  // Processing lingers ~2s, then resolves to success.
+  // Success arrives when the random fill completes (all cells lit + hold).
   useEffect(() => {
     if (view !== 'processing') return
-    const t = setTimeout(() => go('success'), 2000)
+    const t = setTimeout(() => go('success'), FILL_TOTAL)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view])
@@ -459,7 +470,11 @@ export default function CryptoGlass({ variant = 'full' }) {
     <div className="cg-processing">
       <div className="cg-loader" aria-hidden="true">
         {Array.from({ length: 9 }, (_, i) => (
-          <span key={i} className="cg-loader-cell" style={{ '--wave': ((i / 3) | 0) + (i % 3) }} />
+          <span
+            key={i}
+            className="cg-loader-cell"
+            style={{ animationDelay: `${(fillOrder ? fillOrder.indexOf(i) : i) * FILL_STEP}ms` }}
+          />
         ))}
       </div>
       <div className="cg-processing-label">Processing order</div>
