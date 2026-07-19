@@ -1508,3 +1508,45 @@ a {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
+
+/* Processing (between Submit order and success): loader + label. */
+.cg-processing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-5) 0 var(--s-3);
+}
+/* 3×3 square loader — same language as the Playground loading state.
+   Pattern is set per-cell via animation-delay (currently: diagonal wave). */
+.cg-loader {
+  display: grid;
+  grid-template-columns: repeat(3, 9px);
+  grid-template-rows: repeat(3, 9px);
+  gap: 4px;
+}
+.cg-loader-cell {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: rgb(237, 237, 239);
+  opacity: 0.13;
+  transform: scale(0.82);
+  animation: cg-loader-flash 1.4s infinite;
+  animation-delay: calc(var(--wave) * 0.13s);
+}
+@keyframes cg-loader-flash {
+  0%, 46%, 100% {
+    opacity: 0.13;
+    transform: scale(0.82);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 6px rgba(237, 237, 239, 0.45);
+  }
+}
+.cg-processing-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}

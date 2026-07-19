@@ -346,8 +346,16 @@ export default function CryptoGlass({ variant = 'full' }) {
   }
   const confirm = () => {
     setBought({ eth, usd, from })
-    go('success')
+    go('processing')
   }
+
+  // Processing lingers ~2s, then resolves to success.
+  useEffect(() => {
+    if (view !== 'processing') return
+    const t = setTimeout(() => go('success'), 2000)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view])
 
   const row = (
     <div className="cg-row">
@@ -447,6 +455,17 @@ export default function CryptoGlass({ variant = 'full' }) {
     </>
   )
 
+  const processingView = (
+    <div className="cg-processing">
+      <div className="cg-loader" aria-hidden="true">
+        {Array.from({ length: 9 }, (_, i) => (
+          <span key={i} className="cg-loader-cell" style={{ '--wave': ((i / 3) | 0) + (i % 3) }} />
+        ))}
+      </div>
+      <div className="cg-processing-label">Processing order</div>
+    </div>
+  )
+
   const successView = (
     <div className="cg-success">
       <div className="cg-check"><Check /></div>
@@ -455,7 +474,7 @@ export default function CryptoGlass({ variant = 'full' }) {
     </div>
   )
 
-  const views = { chart: chartView, input: inputView, review: reviewView, success: successView }
+  const views = { chart: chartView, input: inputView, review: reviewView, processing: processingView, success: successView }
 
   const toggleProps =
     view === 'chart'
@@ -544,7 +563,7 @@ export default function CryptoGlass({ variant = 'full' }) {
                         chart/input/review — labels roll (Trade→Review→Submit
                         order, Cancel→Back) and the ghost track animates open
                         when a secondary action exists. Absent on success. */}
-                    {view !== 'success' && (
+                    {view !== 'success' && view !== 'processing' && (
                       <motion.div
                         key="btns"
                         // layout: glide to the new position in sync with the
