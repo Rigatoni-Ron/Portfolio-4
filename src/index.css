@@ -1041,7 +1041,7 @@ a {
   padding: var(--s-6);
 }
 .cg-full .cg-card {
-  width: 380px;
+  width: 340px;
   max-width: 100%;
   cursor: pointer;
   transition:
@@ -1050,7 +1050,7 @@ a {
     border-color 0.2s var(--ease);
 }
 .cg-full .cg-card.is-open {
-  width: 600px;
+  width: 460px; /* one open width for ALL views — steps only change height */
 }
 /* Hover lights up the WHOLE card (both states). */
 .cg-full .cg-card:hover {
@@ -1157,12 +1157,10 @@ a {
 }
 
 /* ---------- Trade flow (input → review → success, per Figma wireframes) ---------- */
-/* In trade views the whole card is no longer a collapse toggle, and it
-   narrows to the wireframes' compact width (existing width transition
-   animates 600 ↔ 420 on the way in/out). */
+/* In trade views the whole card is no longer a collapse toggle. Width stays
+   the same as the chart view — steps only change the card's height. */
 .cg-full .cg-card.is-trading {
   cursor: default;
-  width: 420px;
 }
 .cg-full .cg-card.is-trading:hover {
   border-color: var(--border);
