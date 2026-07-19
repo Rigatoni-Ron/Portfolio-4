@@ -1156,10 +1156,13 @@ a {
   transition: transform 0.28s var(--ease);
 }
 
-/* ---------- Trade flow (Buy: input → review → success) ---------- */
-/* In trade views the whole card is no longer a collapse toggle. */
+/* ---------- Trade flow (input → review → success, per Figma wireframes) ---------- */
+/* In trade views the whole card is no longer a collapse toggle, and it
+   narrows to the wireframes' compact width (existing width transition
+   animates 600 ↔ 420 on the way in/out). */
 .cg-full .cg-card.is-trading {
   cursor: default;
+  width: 420px;
 }
 .cg-full .cg-card.is-trading:hover {
   border-color: var(--border);
@@ -1177,7 +1180,191 @@ a {
   gap: var(--s-4);
 }
 
-/* Primary call-to-action (Trade / Review / Confirm / Done). */
+/* ── Big amount ("0|ETH") — persistent across input/review ─────────
+   The wrap's height + the inner scale animate together for the
+   shrink-and-rise "solidify" move into review. */
+.cg-amt-wrap {
+  height: 96px;
+  display: grid;
+  /* minmax(0,1fr): don't let the track's min-content floor (the unshrinkable
+     input+ETH row) blow the card width out — the row overflows the track and
+     the fit transform scales it back into view. */
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  transition: height 0.34s var(--ease);
+}
+.cg-amt-wrap.is-small {
+  height: 44px;
+  cursor: pointer;
+}
+.cg-amt {
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+}
+.cg-amt-row {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  /* Natural content width (never clamped by the card) so the fit measurement
+     sees the true size; the transform scale keeps it visually contained. */
+  width: max-content;
+  /* --cg-fit: type-to-fit (shrinks as the number grows);
+     the .is-small scale composes on top for the review "solidify". */
+  transform: scale(calc(var(--cg-fit, 1) * var(--cg-solid, 1)));
+  transform-origin: 50% 60%;
+  transition: transform 0.34s var(--ease);
+  will-change: transform;
+}
+.cg-amt-wrap.is-small .cg-amt-row {
+  --cg-solid: 0.52;
+}
+.cg-amt-input {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1.1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  caret-color: var(--text);
+}
+.cg-amt-input::placeholder {
+  color: var(--text);
+}
+.cg-amt-wrap.is-small .cg-amt-input {
+  cursor: pointer;
+}
+.cg-amt-unit {
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--text-faint);
+  user-select: none;
+}
+/* Mirror span: measures the formatted value so the input hugs its content. */
+.cg-amt-mirror {
+  position: absolute;
+  visibility: hidden;
+  white-space: pre;
+  font-size: 44px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Available balance line + Max chip. */
+.cg-avail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  font-size: 13px;
+}
+.cg-avail-label {
+  color: var(--text-muted);
+}
+.cg-avail-value {
+  color: var(--text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.cg-max {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+}
+.cg-max:hover {
+  border-color: var(--border-hover);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* USD conversion line under the solidified amount (review). */
+.cg-usd-line {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Review rows (From / To / Network / Gas fee / Date). */
+.cg-rev {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-2) 0;
+}
+.cg-rev-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28px;
+  font-size: 13px;
+}
+.cg-rev-row > span:first-child {
+  color: var(--text-muted);
+}
+.cg-rev-value {
+  color: var(--text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.cg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+}
+.cg-chip:hover {
+  border-color: var(--border-hover);
+  background: var(--fill-hover);
+}
+.cg-chip svg {
+  color: var(--text-muted);
+}
+
+/* Button row: Cancel + primary side by side. */
+.cg-btnrow {
+  display: flex;
+  gap: var(--s-2);
+}
+.cg-btnrow > * {
+  flex: 1;
+}
+.cg-btn-ghost {
+  padding: 12px;
+  border: 1px solid var(--border-hover);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+}
+.cg-btn-ghost:hover {
+  border-color: var(--border-strong);
+  background: var(--fill-hover);
+}
+
+/* Primary call-to-action (Trade / Review / Submit order / Done). */
 .cg-cta {
   width: 100%;
   padding: 12px;
@@ -1196,178 +1383,6 @@ a {
 .cg-cta:disabled {
   opacity: 0.35;
   cursor: not-allowed;
-}
-
-/* Back link at the top of a step. */
-.cg-back {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0;
-  background: none;
-  border: 0;
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.18s var(--ease);
-}
-.cg-back:hover {
-  color: var(--text);
-}
-
-.cg-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
-}
-.cg-field-label {
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
-
-/* Big amount input + unit toggle. */
-.cg-amount {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.cg-amount-pre {
-  font-size: 30px;
-  font-weight: 600;
-  line-height: 1;
-  color: var(--text);
-}
-.cg-amount-input {
-  flex: 1;
-  min-width: 0;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  outline: none;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 30px;
-  font-weight: 600;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.cg-unit {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-pill);
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.18s var(--ease), border-color 0.18s var(--ease);
-}
-.cg-unit:hover {
-  color: var(--text);
-  border-color: var(--border-hover);
-}
-.cg-unit-swap {
-  font-size: 11px;
-  opacity: 0.7;
-}
-.cg-convert {
-  font-size: 13px;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Quick presets. */
-.cg-presets {
-  display: flex;
-  gap: var(--s-2);
-}
-.cg-preset {
-  flex: 1;
-  padding: 8px 0;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.18s var(--ease), border-color 0.18s var(--ease);
-}
-.cg-preset:hover {
-  color: var(--text);
-  border-color: var(--border-hover);
-}
-
-/* Payment source row. */
-.cg-source {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
-.cg-source-mark {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-muted);
-  font-size: 12px;
-}
-.cg-source-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-}
-.cg-source-bal {
-  margin-left: auto;
-  font-size: 13px;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Review summary. */
-.cg-summary {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-  padding: 2px 0;
-}
-.cg-sum-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 14px;
-}
-.cg-sum-row > span:first-child {
-  color: var(--text-muted);
-}
-.cg-sum-row > span:last-child {
-  color: var(--text);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-.cg-sum-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 2px 0;
-}
-.cg-sum-total {
-  font-size: 16px;
-}
-.cg-sum-total > span:last-child {
-  font-weight: 600;
 }
 
 /* Success. */

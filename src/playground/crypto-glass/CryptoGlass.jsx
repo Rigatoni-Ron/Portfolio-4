@@ -3,10 +3,10 @@ import { AnimatePresence, motion } from 'motion/react'
 import NumberFlow from '@number-flow/react'
 
 /*
- * Crypto Glass — dark-native rebuild of the "liquid glass" crypto widget.
+ * Crypto Glass ("Trading Widget") — dark-native crypto widget.
  *   variant="tile"  → collapsed pill only, non-interactive (Playground tile)
- *   variant="full"  → collapsed pill → expands to a chart view → a 3-step Buy
- *                     flow (input → review → success).
+ *   variant="full"  → collapsed pill → chart view → Buy flow per the Figma
+ *                     wireframes: input (big ETH amount) → review → success.
  * Mock data only (seeded random walk that live-ticks) — no network.
  */
 
@@ -19,16 +19,26 @@ const RANGE_CFG = {
   '5Y': { n: 82, vol: 150, drift: 14 },
 }
 
-const WALLET = { name: 'Main Wallet', balance: 4210.0 }
-const FEE_RATE = 0.005 // 0.5% mock fee
+const AVAILABLE_USD = 34234238.83 // mock balance (per wireframe)
+const GAS_ETH = 0.0002638
+const FROM_OPTIONS = ['CB wallet 26', 'Vault 3', 'Treasury A']
+const TO_OPTIONS = ['Tri-party BNY', 'Cold storage', 'Fireblocks 2']
+const NETWORK_OPTIONS = ['Ethereum', 'Base', 'Arbitrum']
 const VIEW_ORDER = ['chart', 'input', 'review', 'success']
 
 const seedFor = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)
-const round = (n, d) => Math.round(n * 10 ** d) / 10 ** d
 const fmtUsd = (n) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const fmtEth = (n) =>
   n.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }) + ' ETH'
+
+// Raw digit string → display string with thousands separators.
+const fmtAmount = (raw) => {
+  if (!raw) return ''
+  const [int = '', dec] = raw.split('.')
+  const intFmt = int ? Number(int).toLocaleString('en-US') : '0'
+  return dec !== undefined ? `${intFmt}.${dec}` : intFmt
+}
 
 function mulberry32(a) {
   return () => {
@@ -91,9 +101,9 @@ function EthMark({ size = 22 }) {
   )
 }
 
-const ChevronLeft = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <path d="M10 3.5 5.5 8l4.5 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+const Chevron = () => (
+  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M4 6.5 8 10.5 12 6.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
 const Check = () => (
@@ -111,6 +121,19 @@ const viewVariants = {
   exit: (dir) => ({ opacity: 0, x: dir >= 0 ? -14 : 14 }),
 }
 
+// Cycling mock dropdown chip (From / To / Network rows).
+function CycleChip({ options, value, onChange }) {
+  return (
+    <button
+      type="button"
+      className="cg-chip"
+      onClick={() => onChange(options[(options.indexOf(value) + 1) % options.length])}
+    >
+      {value} <Chevron />
+    </button>
+  )
+}
+
 export default function CryptoGlass({ variant = 'full' }) {
   const isTile = variant === 'tile'
   const [open, setOpen] = useState(false)
@@ -121,10 +144,12 @@ export default function CryptoGlass({ variant = 'full' }) {
   const dayOpen = useRef(1596.0)
   const [series, setSeries] = useState(() => genSeries(1632.5, RANGE_CFG['1D'], 11))
 
-  // Buy-flow state.
-  const [amount, setAmount] = useState('250')
-  const [unit, setUnit] = useState('USD')
-  const [bought, setBought] = useState({ eth: 0, usd: 0 })
+  // Buy-flow state. `amount` is the raw ETH digit string the user typed.
+  const [amount, setAmount] = useState('')
+  const [from, setFrom] = useState(FROM_OPTIONS[0])
+  const [to, setTo] = useState(TO_OPTIONS[0])
+  const [network, setNetwork] = useState(NETWORK_OPTIONS[0])
+  const [bought, setBought] = useState({ eth: 0, usd: 0, from: FROM_OPTIONS[0] })
 
   useEffect(() => {
     if (isTile) return
@@ -152,15 +177,33 @@ export default function CryptoGlass({ variant = 'full' }) {
   const { line, area } = useMemo(() => toPaths(series, W, H), [series])
   const stroke = up ? 'var(--cg-up)' : 'var(--cg-down)'
 
-  // Derived buy amounts.
-  const num = parseFloat(amount) || 0
-  const usd = unit === 'USD' ? num : num * price
-  const eth = unit === 'USD' ? num / price : num
-  const fee = usd * FEE_RATE
-  const total = usd + fee
+  const display = fmtAmount(amount)
+  const eth = parseFloat(amount) || 0
+  const usd = eth * price
+  const isTradeView = view === 'input' || view === 'review'
 
-  // Animate the card height between steps: measure the active view and drive a
-  // px height (CSS-transitioned) on the steps container.
+  // ── Big amount: caret-hugging input width + fit-to-space scaling ──
+  // A hidden mirror span measures the formatted text so the input hugs its
+  // content (keeping the caret right before "ETH"). If the row outgrows the
+  // card, scale it down via transform (offsetWidth ignores transforms, so the
+  // measurement stays stable).
+  const amtRowRef = useRef(null)
+  const mirrorRef = useRef(null)
+  const inputRef = useRef(null)
+  useLayoutEffect(() => {
+    const row = amtRowRef.current
+    const mirror = mirrorRef.current
+    const input = inputRef.current
+    // Available width comes from the steps container (a plain block that can't
+    // be blown out by the row's min-content, unlike the amt box's grid track).
+    const avail = stepsInnerRef.current
+    if (!row || !mirror || !input || !avail) return
+    input.style.width = Math.max(mirror.offsetWidth, 28) + 'px'
+    const fit = Math.min(1, (avail.clientWidth - 8) / row.offsetWidth)
+    row.style.setProperty('--cg-fit', fit)
+  }, [display, view])
+
+  // Animate the card height between steps.
   const stepsInnerRef = useRef(null)
   const [stepH, setStepH] = useState()
   useLayoutEffect(() => {
@@ -177,31 +220,34 @@ export default function CryptoGlass({ variant = 'full' }) {
     setDir(Math.sign(VIEW_ORDER.indexOf(v) - VIEW_ORDER.indexOf(view)))
     setView(v)
   }
-  const resetTrade = () => {
-    setAmount('250')
-    setUnit('USD')
+  const cancel = () => {
+    setAmount('')
+    go('chart')
   }
   const collapse = () => {
     setOpen(false)
     setView('chart')
     setDir(0)
-    resetTrade()
+    setAmount('')
   }
   const cardClick = () => (open ? collapse() : setOpen(true))
 
-  const toggleUnit = () => {
-    const next = unit === 'USD' ? 'ETH' : 'USD'
-    const converted = unit === 'USD' ? num / price : num * price
-    setUnit(next)
-    setAmount(converted ? String(round(converted, next === 'ETH' ? 4 : 2)) : '')
+  const onType = (e) => {
+    let raw = e.target.value.replace(/[^\d.]/g, '')
+    const firstDot = raw.indexOf('.')
+    if (firstDot !== -1) {
+      raw = raw.slice(0, firstDot + 1) + raw.slice(firstDot + 1).replace(/\./g, '')
+      raw = raw.slice(0, firstDot + 5) // max 4 decimals
+    }
+    raw = raw.replace(/^0+(?=\d)/, '') // no leading zeros
+    setAmount(raw.slice(0, 14))
   }
-  const preset = (pct) => {
-    const targetUsd = WALLET.balance * pct
-    const val = unit === 'USD' ? targetUsd : targetUsd / price
-    setAmount(String(round(val, unit === 'ETH' ? 4 : 2)))
+  const setMax = () => {
+    const maxEth = Math.floor((AVAILABLE_USD / price) * 10000) / 10000
+    setAmount(String(maxEth))
   }
   const confirm = () => {
-    setBought({ eth, usd })
+    setBought({ eth, usd, from })
     go('success')
   }
 
@@ -265,63 +311,60 @@ export default function CryptoGlass({ variant = 'full' }) {
 
   const inputView = (
     <>
-      <button type="button" className="cg-back" onClick={() => go('chart')}>
-        <ChevronLeft /> Buy ETH
-      </button>
-      <div className="cg-field">
-        <span className="cg-field-label">You pay</span>
-        <div className="cg-amount">
-          {unit === 'USD' && <span className="cg-amount-pre">$</span>}
-          <input
-            className="cg-amount-input"
-            inputMode="decimal"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ''))}
-            aria-label="Amount"
-          />
-          <button type="button" className="cg-unit" onClick={toggleUnit}>
-            {unit} <span className="cg-unit-swap">⇄</span>
-          </button>
-        </div>
-        <div className="cg-convert">≈ {unit === 'USD' ? fmtEth(eth) : fmtUsd(usd)}</div>
+      <div className="cg-avail">
+        <span className="cg-avail-label">Available</span>
+        <span className="cg-avail-value">{fmtUsd(AVAILABLE_USD)}</span>
+        <button type="button" className="cg-max" onClick={setMax}>
+          Max
+        </button>
       </div>
-      <div className="cg-presets">
-        {[['25%', 0.25], ['50%', 0.5], ['Max', 1]].map(([label, pct]) => (
-          <button key={label} type="button" className="cg-preset" onClick={() => preset(pct)}>
-            {label}
-          </button>
-        ))}
+      <div className="cg-btnrow">
+        <button type="button" className="cg-btn-ghost" onClick={cancel}>
+          Cancel
+        </button>
+        <button type="button" className="cg-cta" onClick={() => go('review')} disabled={!(eth > 0)}>
+          Review
+        </button>
       </div>
-      <div className="cg-field">
-        <span className="cg-field-label">Pay with</span>
-        <div className="cg-source">
-          <span className="cg-source-mark">◈</span>
-          <span className="cg-source-name">{WALLET.name}</span>
-          <span className="cg-source-bal">{fmtUsd(WALLET.balance)}</span>
-        </div>
-      </div>
-      <button type="button" className="cg-cta" onClick={() => go('review')} disabled={!(usd > 0)}>
-        Review
-      </button>
     </>
   )
 
   const reviewView = (
     <>
-      <button type="button" className="cg-back" onClick={() => go('input')}>
-        <ChevronLeft /> Review
-      </button>
-      <div className="cg-summary">
-        <div className="cg-sum-row"><span>You buy</span><span>{fmtEth(eth)}</span></div>
-        <div className="cg-sum-row"><span>Pay with</span><span>{WALLET.name}</span></div>
-        <div className="cg-sum-row"><span>Rate</span><span>1 ETH = {fmtUsd(price)}</span></div>
-        <div className="cg-sum-row"><span>Fee</span><span>{fmtUsd(fee)}</span></div>
-        <div className="cg-sum-divider" />
-        <div className="cg-sum-row cg-sum-total"><span>Total</span><span>{fmtUsd(total)}</span></div>
+      <div className="cg-usd-line">{fmtUsd(usd)}</div>
+      <div className="cg-rev">
+        <div className="cg-rev-row">
+          <span>From</span>
+          <CycleChip options={FROM_OPTIONS} value={from} onChange={setFrom} />
+        </div>
+        <div className="cg-rev-row">
+          <span>To</span>
+          <CycleChip options={TO_OPTIONS} value={to} onChange={setTo} />
+        </div>
+        <div className="cg-rev-row">
+          <span>Network</span>
+          <CycleChip options={NETWORK_OPTIONS} value={network} onChange={setNetwork} />
+        </div>
+        <div className="cg-rev-row">
+          <span>Gas Fee</span>
+          <span className="cg-rev-value">{GAS_ETH} ETH</span>
+        </div>
+        <div className="cg-rev-row">
+          <span>Date and time</span>
+          <span className="cg-rev-value">
+            {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} ·{' '}
+            {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+          </span>
+        </div>
       </div>
-      <button type="button" className="cg-cta" onClick={confirm}>
-        Confirm buy
-      </button>
+      <div className="cg-btnrow">
+        <button type="button" className="cg-btn-ghost" onClick={cancel}>
+          Cancel
+        </button>
+        <button type="button" className="cg-cta" onClick={confirm}>
+          Submit order
+        </button>
+      </div>
     </>
   )
 
@@ -329,8 +372,8 @@ export default function CryptoGlass({ variant = 'full' }) {
     <div className="cg-success">
       <div className="cg-check"><Check /></div>
       <div className="cg-success-title">Bought {fmtEth(bought.eth)}</div>
-      <div className="cg-success-sub">{fmtUsd(bought.usd)} · {WALLET.name}</div>
-      <button type="button" className="cg-cta cg-done" onClick={() => { resetTrade(); go('chart') }}>
+      <div className="cg-success-sub">{fmtUsd(bought.usd)} · {bought.from}</div>
+      <button type="button" className="cg-cta cg-done" onClick={() => { setAmount(''); go('chart') }}>
         Done
       </button>
     </div>
@@ -338,8 +381,6 @@ export default function CryptoGlass({ variant = 'full' }) {
 
   const views = { chart: chartView, input: inputView, review: reviewView, success: successView }
 
-  // Whole-card click toggles collapse ONLY in the chart view; deeper views
-  // navigate with their own back buttons.
   const toggleProps =
     view === 'chart'
       ? {
@@ -365,6 +406,45 @@ export default function CryptoGlass({ variant = 'full' }) {
             <div className="cg-reveal-body">
               <div className="cg-steps" style={{ height: stepH }}>
                 <div ref={stepsInnerRef} className="cg-steps-inner">
+                  {/* Persistent amount block — lives OUTSIDE the view swap so it
+                      can shrink+rise ("solidify") between input and review with
+                      pure transforms instead of remounting. */}
+                  <AnimatePresence initial={false}>
+                    {isTradeView && (
+                      <motion.div
+                        key="amt"
+                        className={`cg-amt-wrap ${view === 'review' ? 'is-small' : ''}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0, transition: { duration: 0.12 } }}
+                        transition={{ duration: 0.22, ease: 'easeOut' }}
+                        onClick={view === 'review' ? () => go('input') : undefined}
+                        title={view === 'review' ? 'Edit amount' : undefined}
+                      >
+                        <div className="cg-amt">
+                          <div className="cg-amt-row" ref={amtRowRef}>
+                            <span className="cg-amt-mirror" ref={mirrorRef} aria-hidden="true">
+                              {display || '0'}
+                            </span>
+                            <input
+                              ref={inputRef}
+                              className="cg-amt-input"
+                              inputMode="decimal"
+                              placeholder="0"
+                              value={display}
+                              onChange={onType}
+                              readOnly={view === 'review'}
+                              tabIndex={view === 'review' ? -1 : 0}
+                              aria-label="Amount in ETH"
+                              autoFocus={view === 'input'}
+                            />
+                            <span className="cg-amt-unit">ETH</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <AnimatePresence mode="wait" custom={dir} initial={false}>
                     <motion.div
                       key={view}
