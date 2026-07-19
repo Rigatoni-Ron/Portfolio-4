@@ -1512,6 +1512,27 @@ a {
 }
 /* Success: the same cells flip green (animation dropped so the class styles
    win over the fill keyframe's forwards state; bg/glow transition smoothly). */
+/* Celebratory pulse: the grid swells and settles (slight overshoot back)
+   as it turns green. On the inner grid, not the wrap — the wrap's transform
+   belongs to motion's layout glide. */
+.cg-loaderwrap.is-success .cg-loader {
+  animation: cg-pulse 0.55s var(--ease) both;
+  transform-origin: center;
+}
+@keyframes cg-pulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.22);
+  }
+  72% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 .cg-loaderwrap.is-success .cg-loader-cell {
   animation: none;
   opacity: 1;
