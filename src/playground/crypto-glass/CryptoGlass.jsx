@@ -110,11 +110,6 @@ const Chevron = () => (
     <path d="M4 6.5 8 10.5 12 6.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
-const Check = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M5 12.5 10 17.5 19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-)
 
 const stop = (e) => e.stopPropagation()
 
@@ -457,22 +452,12 @@ export default function CryptoGlass({ variant = 'full' }) {
 
   const processingView = (
     <div className="cg-processing">
-      <div className="cg-loader" aria-hidden="true">
-        {Array.from({ length: 9 }, (_, i) => (
-          <span
-            key={i}
-            className="cg-loader-cell"
-            style={{ animationDelay: `${(fillOrder ? fillOrder.indexOf(i) : i) * FILL_STEP}ms` }}
-          />
-        ))}
-      </div>
       <div className="cg-processing-label">Processing order</div>
     </div>
   )
 
   const successView = (
     <div className="cg-success">
-      <div className="cg-check"><Check /></div>
       <div className="cg-success-title">Bought {fmtEth(bought.eth)}</div>
       <div className="cg-success-sub">{fmtUsd(bought.usd)} · {bought.from}</div>
     </div>
@@ -599,6 +584,31 @@ export default function CryptoGlass({ variant = 'full' }) {
                             )}
                           </AnimatePresence>
                         </span>
+                      </motion.div>
+                    )}
+
+                    {/* Persistent 3×3 grid: fills white during processing,
+                        then the SAME cells flip green on success — the grid is
+                        the confirmation. */}
+                    {(view === 'processing' || view === 'success') && (
+                      <motion.div
+                        key="loader"
+                        layout
+                        className={`cg-loaderwrap ${view === 'success' ? 'is-success' : ''}`}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8, transition: { duration: 0.14, ease: 'easeIn' } }}
+                        transition={{ duration: 0.2, ease: 'easeOut', layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
+                      >
+                        <div className="cg-loader" aria-hidden="true">
+                          {Array.from({ length: 9 }, (_, i) => (
+                            <span
+                              key={i}
+                              className="cg-loader-cell"
+                              style={{ animationDelay: `${(fillOrder ? fillOrder.indexOf(i) : i) * FILL_STEP}ms` }}
+                            />
+                          ))}
+                        </div>
                       </motion.div>
                     )}
 

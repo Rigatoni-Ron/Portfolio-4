@@ -1491,17 +1491,7 @@ a {
   align-items: center;
   text-align: center;
   gap: var(--s-2);
-  padding: 8px 0 0;
-}
-.cg-check {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: rgba(70, 214, 159, 0.12);
-  color: var(--cg-up);
-  margin-bottom: var(--s-2);
+  padding: 0 0 var(--s-3);
 }
 .cg-success-title {
   font-size: 18px;
@@ -1514,13 +1504,29 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
-/* Processing (between Submit order and success): loader + label. */
+/* Persistent 3×3 grid (processing → success). */
+.cg-loaderwrap {
+  display: flex;
+  justify-content: center;
+  padding: var(--s-5) 0 var(--s-4);
+}
+/* Success: the same cells flip green (animation dropped so the class styles
+   win over the fill keyframe's forwards state; bg/glow transition smoothly). */
+.cg-loaderwrap.is-success .cg-loader-cell {
+  animation: none;
+  opacity: 1;
+  transform: scale(1);
+  background: var(--cg-up);
+  box-shadow: 0 0 6px rgba(70, 214, 159, 0.45);
+  transition:
+    background 0.35s var(--ease),
+    box-shadow 0.35s var(--ease);
+}
+
 .cg-processing {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--s-4);
-  padding: var(--s-5) 0 var(--s-3);
+  justify-content: center;
+  padding: 0 0 var(--s-3);
 }
 /* 3×3 square loader — same language as the Playground loading state.
    Pattern is set per-cell via animation-delay (currently: diagonal wave). */
