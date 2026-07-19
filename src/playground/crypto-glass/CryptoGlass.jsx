@@ -24,7 +24,6 @@ const GAS_ETH = 0.0002638
 const FROM_OPTIONS = ['CB wallet 26', 'Vault 3', 'Treasury A']
 const TO_OPTIONS = ['Tri-party BNY', 'Cold storage', 'Fireblocks 2']
 const NETWORK_OPTIONS = ['Ethereum', 'Base', 'Arbitrum']
-const VIEW_ORDER = ['chart', 'input', 'review', 'success']
 
 const seedFor = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)
 const fmtUsd = (n) =>
@@ -114,11 +113,12 @@ const Check = () => (
 
 const stop = (e) => e.stopPropagation()
 
-// View transition: fade + small directional slide (transform/opacity only).
+// View transition: rise in from below, drift upward on exit. Pure
+// transform/opacity, no horizontal motion.
 const viewVariants = {
-  enter: (dir) => ({ opacity: 0, x: dir >= 0 ? 14 : -14 }),
-  center: { opacity: 1, x: 0 },
-  exit: (dir) => ({ opacity: 0, x: dir >= 0 ? -14 : 14 }),
+  enter: { opacity: 0, y: 12 },
+  center: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -8 },
 }
 
 // Cycling mock dropdown chip (From / To / Network rows).
@@ -138,7 +138,6 @@ export default function CryptoGlass({ variant = 'full' }) {
   const isTile = variant === 'tile'
   const [open, setOpen] = useState(false)
   const [view, setView] = useState('chart')
-  const [dir, setDir] = useState(0)
   const [range, setRange] = useState('1D')
   const [price, setPrice] = useState(1632.5)
   const dayOpen = useRef(1596.0)
@@ -216,10 +215,7 @@ export default function CryptoGlass({ variant = 'full' }) {
     return () => ro.disconnect()
   }, [])
 
-  const go = (v) => {
-    setDir(Math.sign(VIEW_ORDER.indexOf(v) - VIEW_ORDER.indexOf(view)))
-    setView(v)
-  }
+  const go = (v) => setView(v)
   const cancel = () => {
     setAmount('')
     go('chart')
@@ -227,7 +223,6 @@ export default function CryptoGlass({ variant = 'full' }) {
   const collapse = () => {
     setOpen(false)
     setView('chart')
-    setDir(0)
     setAmount('')
   }
   const cardClick = () => (open ? collapse() : setOpen(true))
@@ -406,18 +401,22 @@ export default function CryptoGlass({ variant = 'full' }) {
             <div className="cg-reveal-body">
               <div className="cg-steps" style={{ height: stepH }}>
                 <div ref={stepsInnerRef} className="cg-steps-inner">
-                  {/* Persistent amount block — lives OUTSIDE the view swap so it
-                      can shrink+rise ("solidify") between input and review with
-                      pure transforms instead of remounting. */}
-                  <AnimatePresence initial={false}>
+                  {/* One popLayout presence for the persistent amount block +
+                      the swapped view: exiting children pop OUT of the layout
+                      immediately, so the measured steps height moves straight
+                      to its final target (no grow-then-shrink bounce). The amt
+                      block keeps its key across input/review, so it never
+                      remounts there — its shrink+rise "solidify" runs as pure
+                      CSS transitions. */}
+                  <AnimatePresence mode="popLayout" initial={false}>
                     {isTradeView && (
                       <motion.div
                         key="amt"
                         className={`cg-amt-wrap ${view === 'review' ? 'is-small' : ''}`}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0, transition: { duration: 0.12 } }}
-                        transition={{ duration: 0.22, ease: 'easeOut' }}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8, transition: { duration: 0.14, ease: 'easeIn' } }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
                         onClick={view === 'review' ? () => go('input') : undefined}
                         title={view === 'review' ? 'Edit amount' : undefined}
                       >
@@ -443,18 +442,14 @@ export default function CryptoGlass({ variant = 'full' }) {
                         </div>
                       </motion.div>
                     )}
-                  </AnimatePresence>
-
-                  <AnimatePresence mode="wait" custom={dir} initial={false}>
                     <motion.div
                       key={view}
                       className="cg-view"
-                      custom={dir}
                       variants={viewVariants}
                       initial="enter"
                       animate="center"
                       exit="exit"
-                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
                     >
                       {views[view]}
                     </motion.div>

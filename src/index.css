@@ -1172,6 +1172,11 @@ a {
   overflow: hidden;
   transition: height 0.32s var(--ease);
 }
+/* Positioning context for popLayout: exiting views are popped to absolute here
+   so the measured height snaps straight to its final target. */
+.cg-steps-inner {
+  position: relative;
+}
 .cg-view {
   display: flex;
   flex-direction: column;
