@@ -42,22 +42,8 @@
         background: var(--canvas);
       }
 
-      .stage::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image: radial-gradient(
-            var(--pg-dot, rgba(255, 255, 255, 0.05)) 1px,
-            transparent 1px
-          );
-        background-size: 24px 24px;
-        mask-image: radial-gradient(
-          ellipse at center,
-          black 40%,
-          transparent 80%
-        );
-        pointer-events: none;
-      }
+      /* No dot grid: Card Stacker sits on the flat --pg-canvas like the
+         Animated Menu and Trading Widget; the dots are the Node Builder's. */
 
       /* ── Stack: vertical lineup of cards ────────────────────── */
       .stack {
