@@ -14,8 +14,25 @@ import { useEffect, useRef, useState } from 'react'
  */
 
 // What counts as "interactive" → cursor blooms into corner brackets.
-const INTERACTIVE =
-  'a, button, [role="button"], input, textarea, select, label, summary, .tab, [data-cursor="hover"]'
+// Semantic interactive elements, plus clickable non-semantic containers from
+// the Playground pieces (whole-card / row click targets that aren't a
+// button/link). Add `[data-cursor="hover"]` to anything else that should bloom
+// the cursor without being one of these.
+const INTERACTIVE = [
+  'a',
+  'button',
+  '[role="button"]',
+  'input',
+  'textarea',
+  'select',
+  'label',
+  'summary',
+  '.tab',
+  '[data-cursor="hover"]',
+  '.cscard', // Card Stacker — whole card is a click target
+  '.nav-row', // Animated Menu — top-level rows
+  '.sub-row', // Animated Menu — sub-items
+].join(', ')
 
 export default function CustomCursor() {
   // Only a fine, hovering pointer with motion allowed gets the custom cursor;
