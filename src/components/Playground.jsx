@@ -55,13 +55,24 @@ export default function Playground() {
           const openable = Boolean(c.mode)
           const TileComp = c.liveTile && tilesReady ? nativeComponents[c.id] : null
           return (
-            <motion.button
+            <motion.div
               key={c.id}
               ref={(n) => {
                 if (n) tileRefs.current[c.id] = n
               }}
+              // div[role=button], not <button>: live tile previews legally
+              // contain their own (inert) buttons/inputs — button-in-button
+              // is invalid HTML and React warns on it.
+              role="button"
+              tabIndex={openable ? 0 : -1}
               className="tile"
               onClick={(e) => openable && open(c, e.currentTarget)}
+              onKeyDown={(e) => {
+                if (openable && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault()
+                  open(c, e.currentTarget)
+                }
+              }}
               whileTap={openable ? { scale: 0.99 } : undefined}
               animate={{ opacity: isActive ? 0 : 1 }}
               style={{ cursor: openable ? 'pointer' : 'default' }}
@@ -78,7 +89,7 @@ export default function Playground() {
                   <div className="tile-tag">{c.tag}</div>
                 </div>
               </div>
-            </motion.button>
+            </motion.div>
           )
         })}
       </div>

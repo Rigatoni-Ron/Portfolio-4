@@ -61,8 +61,9 @@ export const playground = [
     id: 'card-stacker',
     title: 'Card Stacker',
     tag: 'Compare liquidity between lenders',
-    mode: 'iframe',
-    src: '/playground/card-stacker/index.html',
+    mode: 'native',
+    fullBleed: true,
+    liveTile: true,
   },
   {
     id: 'crypto-glass-widget',
