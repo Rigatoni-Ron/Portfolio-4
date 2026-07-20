@@ -575,11 +575,12 @@ function AnimatedMenuTile() {
   return (
     <div aria-hidden="true" inert style={{
       position: 'absolute', inset: 0, overflow: 'hidden',
-      display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+      display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end',
+      paddingRight: 36, // card rides right so the tile label owns the bottom-left
       pointerEvents: 'none', borderRadius: 'inherit',
     }}>
       <style>{GLOBAL_CSS}</style>
-      <div style={{ transform: 'scale(0.52)', transformOrigin: 'top center', paddingTop: 18 }}>
+      <div style={{ transform: 'scale(0.52)', transformOrigin: 'top right', paddingTop: 18 }}>
         <NavCard openId={openId} activeId={activeChild} onToggle={() => {}} onSubItemSelect={() => {}} />
       </div>
     </div>

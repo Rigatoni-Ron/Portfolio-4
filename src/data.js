@@ -52,7 +52,7 @@ export const playground = [
   {
     id: 'portfolio-node-builder',
     title: 'Portfolio Node Builder',
-    tag: 'React Flow',
+    tag: 'Backtest or project future earnings on any asset',
     mode: 'native',
     fullBleed: true, // canvas fills the viewer edge-to-edge
     liveTile: true,
@@ -60,21 +60,21 @@ export const playground = [
   {
     id: 'card-stacker',
     title: 'Card Stacker',
-    tag: 'Gesture / stack',
+    tag: 'Compare liquidity between lenders',
     mode: 'iframe',
     src: '/playground/card-stacker/index.html',
   },
   {
     id: 'crypto-glass-widget',
     title: 'Trading Widget',
-    tag: 'Live data',
+    tag: 'Purchase Ether on any network from any wallet',
     mode: 'native',
     liveTile: true, // renders a live compact view in the tile
   },
   {
     id: 'animated-menu',
     title: 'Animated Menu',
-    tag: 'Interaction',
+    tag: 'Browse, drill in, and drop a line',
     mode: 'native',
     bg: '#0a0a0b', // dark canvas so the floating cards read
     liveTile: true,
