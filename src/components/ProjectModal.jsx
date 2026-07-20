@@ -91,41 +91,21 @@ export default function ProjectModal({ project, onClose }) {
                   transition: { delay: 0.12, duration: 0.28 },
                 }}
               >
-                <div className="modal-eyebrow">
-                  <span>{project.role}</span>
-                  <span>·</span>
-                  <span>{project.year}</span>
+                <div className="modal-title-row">
+                  <h2 id="modal-title">{project.title}</h2>
+                  {project.link && (
+                    <a
+                      className="modal-linkout"
+                      href={project.link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={project.link.label}
+                    >
+                      <ArrowUpRight />
+                    </a>
+                  )}
                 </div>
-                <h2 id="modal-title">{project.title}</h2>
                 <p className="modal-desc">{project.body}</p>
-
-                {project.highlights && (
-                  <ul className="modal-highlights">
-                    {project.highlights.map((h) => (
-                      <li key={h}>{h}</li>
-                    ))}
-                  </ul>
-                )}
-
-                <div className="modal-tags">
-                  {project.tags.map((t) => (
-                    <span className="tag" key={t}>
-                      {t}
-                    </span>
-                  ))}
-                </div>
-
-                {project.link && (
-                  <a
-                    className="modal-link"
-                    href={project.link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {project.link.label}
-                    <ArrowUpRight />
-                  </a>
-                )}
               </motion.div>
             </motion.div>
           )}
