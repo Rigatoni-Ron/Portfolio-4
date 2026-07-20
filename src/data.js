@@ -2,7 +2,7 @@
    Recently-shipped titles/descriptions come straight from the wireframe.
    Playground titles reference real builds so the tiles read as real work. */
 
-import collateralImg from './assets/collateral-management.png'
+import collateralImg from './assets/collateral-management.webp'
 
 export const projects = [
   {
