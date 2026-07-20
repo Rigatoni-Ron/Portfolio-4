@@ -1,4 +1,4 @@
-import { ReactFlow, ReactFlowProvider, Background, BackgroundVariant } from '@xyflow/react'
+import { ReactFlow, ReactFlowProvider } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useGraphStore } from './store/graphStore'
 import { nodeTypes, edgeTypes } from './components/Canvas'
@@ -32,9 +32,7 @@ export default function NodeBuilderTile() {
           zoomOnDoubleClick={false}
           preventScrolling={false}
           proOptions={{ hideAttribution: true }}
-        >
-          <Background variant={BackgroundVariant.Dots} gap={80} size={2} />
-        </ReactFlow>
+        />
       </ReactFlowProvider>
     </div>
   )

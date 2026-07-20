@@ -1,8 +1,6 @@
 import { useMemo } from 'react'
 import {
   ReactFlow,
-  Background,
-  BackgroundVariant,
   Controls,
   ReactFlowProvider,
   SelectionMode,
@@ -79,13 +77,6 @@ function CanvasInner() {
         panOnScroll
         zoomOnScroll={false}
       >
-        {/* gap 26 ≈ Card Stacker's 24px screen pitch at this canvas's ~0.92
-            fit zoom; dot color comes from the shared --pg-dot token (CSS). */}
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={26}
-          size={1}
-        />
         <Controls showInteractive={false} />
       </ReactFlow>
     </div>

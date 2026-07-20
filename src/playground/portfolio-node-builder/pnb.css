@@ -5,6 +5,7 @@
    html/body/#root base styles became the .pnb wrapper itself.
    ============================================================ */
 .pnb {
+  position: relative;
   height: 100%;
   width: 100%;
   background: var(--pg-canvas, var(--color-canvas));
@@ -64,10 +65,22 @@
 .pnb .react-flow__background {
   background-color: var(--pg-canvas, var(--color-canvas));
 }
-/* RF's Background dots ship with a light default color — pin them to the
-   shared playground dot token so density/brightness matches Card Stacker. */
-.pnb .react-flow__background circle {
-  fill: var(--pg-dot, rgba(255, 255, 255, 0.05));
+/* Screen-fixed dot grid — the exact Card Stacker stage recipe. React Flow's
+   own Background scales with canvas zoom, so its dots spread/vanish at wide
+   windows (fit zoom 1.38 → 36px pitch hairlines); a fixed 24px layer keeps
+   every opened piece's texture identical at any window size. */
+.pnb::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    var(--pg-dot, rgba(255, 255, 255, 0.05)) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
 }
 /* Figma-style canvas: arrow cursor, left-drag draws a selection box.
    Tripled class outranks the library's two-class cursor rules. */
