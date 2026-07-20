@@ -1,7 +1,7 @@
 /* Card Stacker — ported from Builds/Card-Stacker (dark stage).
    All rules scoped to .cs via @scope so nothing leaks into the site. */
       .cs {
-        --canvas: #0a0a0b;
+        --canvas: var(--pg-canvas, #0a0a0b);
         --space-12: 48px;
         --sans: 'Geist', -apple-system, system-ui, sans-serif;
 
@@ -47,7 +47,7 @@
         position: absolute;
         inset: 0;
         background-image: radial-gradient(
-            rgba(255, 255, 255, 0.05) 1px,
+            var(--pg-dot, rgba(255, 255, 255, 0.05)) 1px,
             transparent 1px
           );
         background-size: 24px 24px;

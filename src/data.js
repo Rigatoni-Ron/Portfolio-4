@@ -70,6 +70,7 @@ export const playground = [
     title: 'Trading Widget',
     tag: 'Purchase Ether on any network from any wallet',
     mode: 'native',
+    bg: 'var(--pg-canvas)', // shared opened-playground canvas token
     liveTile: true, // renders a live compact view in the tile
   },
   {
@@ -77,7 +78,7 @@ export const playground = [
     title: 'Animated Menu',
     tag: 'Browse, drill in, and drop a line',
     mode: 'native',
-    bg: '#0a0a0b', // dark canvas so the floating cards read
+    bg: 'var(--pg-canvas)', // shared opened-playground canvas token
     liveTile: true,
   },
 ]

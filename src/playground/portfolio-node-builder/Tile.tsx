@@ -33,7 +33,7 @@ export default function NodeBuilderTile() {
           preventScrolling={false}
           proOptions={{ hideAttribution: true }}
         >
-          <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
+          <Background variant={BackgroundVariant.Dots} gap={80} size={2} />
         </ReactFlow>
       </ReactFlowProvider>
     </div>

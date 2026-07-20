@@ -79,11 +79,12 @@ function CanvasInner() {
         panOnScroll
         zoomOnScroll={false}
       >
+        {/* gap 26 ≈ Card Stacker's 24px screen pitch at this canvas's ~0.92
+            fit zoom; dot color comes from the shared --pg-dot token (CSS). */}
         <Background
           variant={BackgroundVariant.Dots}
-          gap={20}
+          gap={26}
           size={1}
-          color="#2a2b33"
         />
         <Controls showInteractive={false} />
       </ReactFlow>

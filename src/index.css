@@ -19,6 +19,10 @@
   /* subtle fill used only on hover / active, never as a base surface */
   --fill-hover: rgba(255, 255, 255, 0.04);
 
+  /* canvas behind opened Playground pieces (and their dot grids) */
+  --pg-canvas: #0a0a0b;
+  --pg-dot: rgba(255, 255, 255, 0.05);
+
   /* radii */
   --r-sm: 10px;
   --r-md: 14px;
