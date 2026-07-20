@@ -359,7 +359,7 @@ import aaveIcon from "./icons/aave.svg"
 
         return h("canvas", {
           ref: canvasRef,
-          className: "card-shader" + (isActive ? " is-active" : ""),
+          className: "cscard-shader" + (isActive ? " is-active" : ""),
         });
       }
 
@@ -423,11 +423,11 @@ import aaveIcon from "./icons/aave.svg"
 
         const statsEl = h(
           "div",
-          { className: "card-stats" },
+          { className: "cscard-stats" },
           stats.map((s, si) =>
             h(
               "div",
-              { key: si, className: "card-stat" },
+              { key: si, className: "cscard-stat" },
               h("span", { className: "label" }, s.label),
               h(
                 "span",
@@ -443,7 +443,7 @@ import aaveIcon from "./icons/aave.svg"
         // prefix label, sized as a single line of structured data.
         const collateralEl = h(
           "p",
-          { className: "card-collateral" },
+          { className: "cscard-collateral" },
           h("span", { className: "prefix" }, "Accepted collateral: "),
           collateral
         );
@@ -451,7 +451,7 @@ import aaveIcon from "./icons/aave.svg"
         return h(
           "article",
           {
-            className: "card" + (isSelected ? " is-selected" : ""),
+            className: "cscard" + (isSelected ? " is-selected" : ""),
             onClick,
             onMouseEnter: () => setIsHovered(true),
             onMouseLeave: () => setIsHovered(false),
@@ -467,30 +467,30 @@ import aaveIcon from "./icons/aave.svg"
           },
           h(
             "div",
-            { className: "card-hero" },
+            { className: "cscard-hero" },
             flatHero
               ? h("div", {
-                  className: "card-shader" + (isSelected || isHovered ? " is-active" : ""),
+                  className: "cscard-shader" + (isSelected || isHovered ? " is-active" : ""),
                   style: { background: `radial-gradient(120% 140% at 30% 20%, color-mix(in srgb, ${accent} 38%, #0e0f12) 0%, #0e0f12 75%)` },
                 })
               : h(ShaderCanvas, { variant: shaderVariant, accent, isSelected, isHovered }),
             icon
-              ? h("img", { className: "card-hero-icon", src: icon, alt: "" })
-              : h("span", { className: "card-hero-ticker" }, ticker)
+              ? h("img", { className: "cscard-hero-icon", src: icon, alt: "" })
+              : h("span", { className: "cscard-hero-ticker" }, ticker)
           ),
           h(
             "div",
-            { className: "card-text" },
+            { className: "cscard-text" },
             h(
               "div",
-              { className: "card-text-inner" },
-              h("h3", { className: "card-title" }, title),
-              h("p", { className: "card-subtitle" }, subtitle)
+              { className: "cscard-text-inner" },
+              h("h3", { className: "cscard-title" }, title),
+              h("p", { className: "cscard-subtitle" }, subtitle)
             ),
             h(
               flatHero ? "span" : "a",
-              flatHero ? { className: "card-linkout" } : {
-                className: "card-linkout",
+              flatHero ? { className: "cscard-linkout" } : {
+                className: "cscard-linkout",
                 href: url,
                 target: "_blank",
                 rel: "noopener noreferrer",
@@ -505,14 +505,14 @@ import aaveIcon from "./icons/aave.svg"
           ),
           h(
             "div",
-            { className: "card-extra", ref: extraRef },
+            { className: "cscard-extra", ref: extraRef },
             collateralEl,
             statsEl,
             h(
               flatHero ? "div" : "button",
-              flatHero ? { className: "card-cta" } : {
+              flatHero ? { className: "cscard-cta" } : {
                 type: "button",
-                className: "card-cta" + (ctaState === "sent" ? " is-sent" : ""),
+                className: "cscard-cta" + (ctaState === "sent" ? " is-sent" : ""),
                 disabled: ctaState !== "idle",
                 // Stop the card's onClick so pressing the CTA doesn't
                 // also collapse the card. Walks the button through
@@ -532,14 +532,14 @@ import aaveIcon from "./icons/aave.svg"
               },
               ctaState === "loading" && h(
                 "span",
-                { className: "card-cta-spinner" },
+                { className: "cscard-cta-spinner" },
                 h("span"),
                 h("span"),
                 h("span")
               ),
               ctaState === "sending" && h(
                 "span",
-                { className: "card-cta-plane" },
+                { className: "cscard-cta-plane" },
                 h("svg", { width: 16, height: 16, viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true },
                   h("path", { d: "M3.4 20.4 20.85 12 3.4 3.6l-.01 6.53L15 12 3.39 13.87z" }))
               ),
@@ -547,7 +547,7 @@ import aaveIcon from "./icons/aave.svg"
                 ctaState === "loading" ? "Adding..." :
                   h(
                     "span",
-                    { className: "card-cta-rolodex" },
+                    { className: "cscard-cta-rolodex" },
                     "Request sent".split("").map((char, i) =>
                       h(
                         "span",

@@ -6,7 +6,7 @@
         --sans: 'Geist', -apple-system, system-ui, sans-serif;
 
         /* card tokens (from Figma 1:7) */
-        --card-bg: #1a1a1a;
+        --card-bg: rgba(255, 255, 255, 0.02); /* hollow: outline card, site language */
         --card-radius: 16px;
         --card-pad: 12px;
         --card-gap: 12px;
@@ -71,7 +71,7 @@
       /* Children are absolutely positioned so we can fluidly morph
          from a row layout (image left, text right) to a column layout
          (image on top, text below) when the card is selected. */
-      .card {
+      .cscard {
         position: absolute;
         top: 50%;
         left: 50%;
@@ -84,7 +84,7 @@
            overshoots smaller than the image and the image pokes out. */
         min-height: 102px;
         background: var(--card-bg);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.09);
         border-radius: var(--card-radius);
         /* Clip any momentary overshoot of the inner image to the card's
            rounded bounds so the image can bounce in sync without poking out. */
@@ -101,9 +101,6 @@
         will-change: transform;
         cursor: pointer;
         z-index: var(--z);
-        box-shadow:
-          0 24px 60px -20px rgba(8, 10, 14, 0.55),
-          0 8px 24px -10px rgba(8, 10, 14, 0.35);
       }
 
       /* Selected: non-pressed cards slide left and tuck against the left
@@ -112,7 +109,7 @@
          from 50px to 450px in, leaving a tidy margin. The Y uses
          var(--ty-left) so cards below the selected one shift up a slot
          to fill the gap, then animate back down on reset. */
-      .stack.selected .card {
+      .stack.selected .cscard {
         transform: translate3d(calc(-50vw + 250px), var(--ty-left), 0) rotate(0deg);
         /* Tucked cards remain clickable so the user can swap selection
            directly. Durations match the selected card's so the outgoing
@@ -123,7 +120,7 @@
       /* Selected card: slide up and morph taller in one motion. No
          delays anywhere on the selected card so transform, height,
          image scale and text all kick off in the same frame. */
-      .stack.selected .card.is-selected {
+      .stack.selected .cscard.is-selected {
         transform: translate3d(0, var(--top-ty), 0) rotate(0deg);
         /* Per-card height measured from real content (see Card component)
            so the card ends 12px below its last element — matching the
@@ -133,16 +130,13 @@
         pointer-events: auto;
         transition-delay: 0s, 0s, 0s, 0s, 0s;
         transition-duration: 0.5s, 0.5s, 0.18s, 0.18s, 0s;
-        box-shadow:
-          0 24px 60px -20px rgba(8, 10, 14, 0.55),
-          0 8px 24px -10px rgba(8, 10, 14, 0.35);
       }
 
       /* Hover: card surface brightens — but not while the cursor is
          over the linkout button, so its own hover state reads as the
          only interactive element under the pointer. */
-      .card:hover:not(:has(.card-linkout:hover)):not(:has(.card-cta:hover)) {
-        background: #262626;
+      .cscard:hover:not(:has(.cscard-linkout:hover)):not(:has(.cscard-cta:hover)) {
+        background: rgba(255, 255, 255, 0.05);
       }
 
       /* Brand tile: CSS-rendered hero block that replaces the EVA
@@ -151,7 +145,7 @@
          an accent-toned gradient gives each lender a distinct mark
          without needing any image assets. To swap in real logos later,
          replace this div with an <img class="card-hero" src="..." />. */
-      .card-hero {
+      .cscard-hero {
         position: absolute;
         top: 12px;
         left: 12px;
@@ -178,7 +172,7 @@
         transition: width 0.5s cubic-bezier(0.34, 1.25, 0.64, 1),
                     height 0.5s cubic-bezier(0.34, 1.25, 0.64, 1);
       }
-      .stack.selected .card.is-selected .card-hero {
+      .stack.selected .cscard.is-selected .cscard-hero {
         width: 376px;
         height: 200px;
         transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1);
@@ -189,7 +183,7 @@
          frame matching the animated version. Saturation is keyed to
          the selected state — collapsed cards show a grayscale frame,
          and color blooms in as the card expands. */
-      .card-shader {
+      .cscard-shader {
         position: absolute;
         inset: 0;
         width: 100%;
@@ -203,19 +197,19 @@
       }
       /* Active = selected OR hovered (set from JS). Both states bring
          the shader into full color and start the rAF animation. */
-      .card-shader.is-active {
+      .cscard-shader.is-active {
         filter: saturate(1) brightness(1);
         transition-timing-function: ease-out;
       }
       /* Ticker text sits above the canvas via z-index. */
-      .card-hero-ticker {
+      .cscard-hero-ticker {
         position: relative;
         z-index: 1;
       }
       /* Icon variant of the hero brand mark — sized to occupy a
          comfortable ~60% of the tile so it reads as the primary
          identity in both collapsed and expanded states. */
-      .card-hero-icon {
+      .cscard-hero-icon {
         position: relative;
         z-index: 1;
         /* Default = collapsed icon size. Transitions to 120px when
@@ -226,7 +220,7 @@
         transition: width 0.5s cubic-bezier(0.34, 1.25, 0.64, 1),
                     height 0.5s cubic-bezier(0.34, 1.25, 0.64, 1);
       }
-      .stack.selected .card.is-selected .card-hero-icon {
+      .stack.selected .cscard.is-selected .cscard-hero-icon {
         width: 120px;
         height: 120px;
         transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1);
@@ -236,7 +230,7 @@
          and X axis can be choreographed independently. The visual
          result is a curved path "around" the image instead of a
          straight diagonal that would cut underneath it. */
-      .card-text {
+      .cscard-text {
         position: absolute;
         top: 224px;
         left: 12px;
@@ -255,7 +249,7 @@
         transition: transform 0.48s cubic-bezier(0.34, 1.1, 0.64, 1);
       }
 
-      .card-text-inner {
+      .cscard-text-inner {
         display: flex;
         flex-direction: column;
         gap: 4px;
@@ -267,7 +261,7 @@
 
       /* Text Y drops immediately so it clears the image's growing
          footprint as one continuous motion with the card expanding. */
-      .stack.selected .card.is-selected .card-text {
+      .stack.selected .cscard.is-selected .cscard-text {
         transform: translate3d(0, 0, 0);
         transition-delay: 0s;
       }
@@ -276,12 +270,12 @@
          curves around the image's right edge instead of diagonally
          cutting through it. The delay is short enough that, paired
          with overlapping easings, it still reads as one fluid gesture. */
-      .stack.selected .card.is-selected .card-text-inner {
+      .stack.selected .cscard.is-selected .cscard-text-inner {
         transform: translate3d(0, 0, 0);
         transition-delay: 0.12s;
       }
 
-      .card-title {
+      .cscard-title {
         margin: 0;
         font-family: var(--sans);
         font-weight: 500;
@@ -290,7 +284,7 @@
         color: var(--card-title);
       }
 
-      .card-subtitle {
+      .cscard-subtitle {
         margin: 0;
         font-family: var(--sans);
         font-weight: 400;
@@ -304,8 +298,8 @@
          a 32×32 target), 8px radius, 1px light border, transparent
          fill until hover. Sits to the right of the title text in both
          collapsed and expanded states by virtue of living inside
-         .card-text (which already owns the Y choreography). */
-      .card-linkout {
+         .cscard-text (which already owns the Y choreography). */
+      .cscard-linkout {
         flex-shrink: 0;
         width: 32px;
         height: 32px;
@@ -319,7 +313,7 @@
         transition: background 0.18s ease, border-color 0.18s ease,
                     color 0.18s ease;
       }
-      .card-linkout:hover {
+      .cscard-linkout:hover {
         background: rgba(255, 255, 255, 0.08);
         border-color: rgba(255, 255, 255, 0.32);
         color: rgba(255, 255, 255, 0.95);
@@ -331,7 +325,7 @@
          card has grown tall enough to reveal it. Each child fades
          and lifts in with a staggered delay so the section reads
          as one cascade rather than a single block pop. */
-      .card-extra {
+      .cscard-extra {
         position: absolute;
         top: 300px;
         left: 12px;
@@ -346,7 +340,7 @@
          The very short opacity transition handles the close path —
          a snap would leave one jarring frame where the card is
          still tall enough to show the content at full opacity. */
-      .card-extra > * {
+      .cscard-extra > * {
         opacity: 0;
         transform: translateY(-10px);
         transition: opacity 0.1s ease-out, transform 0s;
@@ -355,37 +349,37 @@
       /* Selected: each child fades and lifts into place. Delays
          start ~0.2s in so the content arrives as the card's
          growing height first reveals this region. */
-      .stack.selected .card.is-selected .card-extra {
+      .stack.selected .cscard.is-selected .cscard-extra {
         pointer-events: auto;
       }
-      .stack.selected .card.is-selected .card-extra > * {
+      .stack.selected .cscard.is-selected .cscard-extra > * {
         opacity: 1;
         transform: translateY(0);
         transition: opacity 0.44s ease-out,
                     transform 0.56s cubic-bezier(0.34, 1.0, 0.64, 1);
       }
-      .stack.selected .card.is-selected .card-extra > *:nth-child(1) { transition-delay: 0.22s; }
-      .stack.selected .card.is-selected .card-extra > *:nth-child(2) { transition-delay: 0.30s; }
-      .stack.selected .card.is-selected .card-extra > *:nth-child(3) { transition-delay: 0.38s; }
-      .stack.selected .card.is-selected .card-extra > *:nth-child(4) { transition-delay: 0.45s; }
+      .stack.selected .cscard.is-selected .cscard-extra > *:nth-child(1) { transition-delay: 0.22s; }
+      .stack.selected .cscard.is-selected .cscard-extra > *:nth-child(2) { transition-delay: 0.30s; }
+      .stack.selected .cscard.is-selected .cscard-extra > *:nth-child(3) { transition-delay: 0.38s; }
+      .stack.selected .cscard.is-selected .cscard-extra > *:nth-child(4) { transition-delay: 0.45s; }
 
       /* Accepted-collateral line: a body-copy paragraph with a
          slightly muted prefix. Reads as a labeled sales-deck data
          point rather than a visual chip row. */
-      .card-collateral {
+      .cscard-collateral {
         margin: 0;
         font-size: 13px;
         line-height: 1.55;
         color: rgba(255, 255, 255, 0.62);
       }
-      .card-collateral .prefix {
+      .cscard-collateral .prefix {
         color: rgba(255, 255, 255, 0.42);
       }
 
       /* Stats: three-column data panel. 1px gap + dark child bg
          on lighter parent gives the inset divider look without
          actual borders between cells. */
-      .card-stats {
+      .cscard-stats {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
         gap: 1px;
@@ -394,27 +388,27 @@
         border-radius: 10px;
         overflow: hidden;
       }
-      .card-stat {
-        background: rgba(0, 0, 0, 0.28);
+      .cscard-stat {
+        background: rgba(255, 255, 255, 0.035);
         padding: 10px 12px;
         display: flex;
         flex-direction: column;
         gap: 2px;
       }
-      .card-stat .label {
+      .cscard-stat .label {
         font-size: 10px;
         font-weight: 500;
         letter-spacing: 0.1em;
         text-transform: uppercase;
         color: rgba(255, 255, 255, 0.42);
       }
-      .card-stat .value {
+      .cscard-stat .value {
         font-size: 18px;
         font-weight: 600;
         color: var(--card-title);
         font-variant-numeric: tabular-nums;
       }
-      .card-stat .unit {
+      .cscard-stat .unit {
         font-size: 11px;
         font-weight: 500;
         color: rgba(255, 255, 255, 0.4);
@@ -422,9 +416,9 @@
       }
 
       /* Primary CTA at the bottom of the expanded content. Sits as
-         the last child of .card-extra so it picks up the staggered
+         the last child of .cscard-extra so it picks up the staggered
          fade-in delay and only animates in while the card is open. */
-      .card-cta {
+      .cscard-cta {
         display: block;
         width: 100%;
         padding: 12px 16px;
@@ -452,7 +446,7 @@
                     color 2s ease,
                     scale 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       }
-      .card-cta:hover:not(:disabled) {
+      .cscard-cta:hover:not(:disabled) {
         background: #ffffff;
         /* Hover wants a snappy fill change, so override the slow base
            timing back to ~0.22s while still allowing :is-sent to ease. */
@@ -460,9 +454,9 @@
       }
       /* Press feedback — scales down while held and pops back on
          release. Uses the standalone `scale` property so it composes
-         with the translateY the cascade puts on .card-extra children
+         with the translateY the cascade puts on .cscard-extra children
          (transform there would override this rule). */
-      .card-cta:active:not(:disabled) {
+      .cscard-cta:active:not(:disabled) {
         scale: 0.97;
       }
       /* Post-add disabled state — muted fill with light text reads as
@@ -471,26 +465,26 @@
          surface eases into the muted look rather than snapping. */
       /* Disabled keeps the active light fill — the rolodex landing
          on "Request sent" is the completion cue. */
-      .card-cta:disabled {
+      .cscard-cta:disabled {
         cursor: default;
       }
       /* Sent: muted dark fill with light text. The 2s ease transition
-         is supplied by the base .card-cta rule above, so swapping in
+         is supplied by the base .cscard-cta rule above, so swapping in
          this class triggers the slow drift to the completed look. */
-      .card-cta.is-sent {
+      .cscard-cta.is-sent {
         background: rgba(255, 255, 255, 0.08);
         color: rgba(255, 255, 255, 0.5);
       }
       /* Three-dot bouncy loader. Each dot rises and falls on its own
          delay, creating a wave of motion across the trio. */
-      .card-cta-spinner {
+      .cscard-cta-spinner {
         display: inline-flex;
         align-items: center;
         gap: 4px;
         vertical-align: -1px;
         margin-right: 8px;
       }
-      .card-cta-spinner span {
+      .cscard-cta-spinner span {
         display: inline-block;
         width: 5px;
         height: 5px;
@@ -498,8 +492,8 @@
         background: currentColor;
         animation: card-cta-bounce 0.7s ease-in-out infinite;
       }
-      .card-cta-spinner span:nth-child(2) { animation-delay: 0.14s; }
-      .card-cta-spinner span:nth-child(3) { animation-delay: 0.28s; }
+      .cscard-cta-spinner span:nth-child(2) { animation-delay: 0.14s; }
+      .cscard-cta-spinner span:nth-child(3) { animation-delay: 0.28s; }
       @keyframes card-cta-bounce {
         0%, 80%, 100% { transform: translateY(0); opacity: 0.3; }
         40% { transform: translateY(-4px); opacity: 1; }
@@ -508,7 +502,7 @@
       /* Paper plane soaring across the button on the loading→sending
          transition. Fades in shortly after entering the left edge and
          fades out before exiting the right. */
-      .card-cta-plane {
+      .cscard-cta-plane {
         position: absolute;
         top: 50%;
         left: 0;
@@ -529,7 +523,7 @@
 
       /* Rolodex container — the visible "slot" through which the
          Request sent line rolls upward into place. */
-      .card-cta-rolodex {
+      .cscard-cta-rolodex {
         display: inline-block;
         overflow: hidden;
         height: 1.4em;
@@ -539,7 +533,7 @@
       /* Each child span is a single letter — inline-block so it can be
          transformed individually. Animation-delay is set inline per
          letter so they cascade up one after another. */
-      .card-cta-rolodex > span {
+      .cscard-cta-rolodex > span {
         display: inline-block;
         transform: translateY(100%);
         animation: card-cta-roll-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
