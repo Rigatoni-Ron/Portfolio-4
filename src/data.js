@@ -52,7 +52,7 @@ export const playground = [
   {
     id: 'portfolio-node-builder',
     title: 'Portfolio Node Builder',
-    tag: 'Backtest or project future earnings on any asset',
+    tag: 'Backtest or project future earnings',
     mode: 'native',
     fullBleed: true, // canvas fills the viewer edge-to-edge
     liveTile: true,
