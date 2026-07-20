@@ -7,6 +7,7 @@ import RecentlyShipped from './components/RecentlyShipped.jsx'
 import Playground from './components/Playground.jsx'
 import Learnings from './components/Learnings.jsx'
 import ProjectModal from './components/ProjectModal.jsx'
+import CustomCursor from './components/CustomCursor.jsx'
 
 const panelVariants = {
   initial: { opacity: 0, y: 12 },
@@ -84,6 +85,7 @@ export default function App() {
       </div>
 
       <ProjectModal project={active} onClose={close} />
+      <CustomCursor />
     </div>
   )
 }
