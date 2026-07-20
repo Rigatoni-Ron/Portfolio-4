@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Card Stacker stats — prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #0a0a0b;
+        --border: rgba(255, 255, 255, 0.09);
+        --border-hover: rgba(255, 255, 255, 0.18);
+        --text: #ededef;
+        --muted: #8a8f98;
+        --faint: #565a63;
+        --accent: rgb(243, 120, 160); /* Spark pink */
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: var(--bg); color: var(--text); }
+      body { font-family: 'Geist', system-ui, sans-serif; padding: 40px 32px 80px; -webkit-font-smoothing: antialiased; }
+      h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.01em; margin: 0 0 6px; }
+      .sub { font: 400 13px/1.5 ui-monospace, Menlo, monospace; color: var(--faint); letter-spacing: 0.03em; margin: 0 0 36px; }
+      .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(430px, 1fr)); gap: 28px; }
+      .slot { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+      .slot .name { font: 400 11px/1 ui-monospace, Menlo, monospace; color: var(--muted); letter-spacing: 0.06em; }
+      .slot .num { color: var(--faint); margin-right: 6px; }
+
+      /* ── the expanded card (hollow), identical across variants ── */
+      .card {
+        width: 400px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+      }
+      .hero {
+        height: 200px;
+        border-radius: 8px;
+        background:
+          repeating-radial-gradient(circle at 50% 55%, rgba(243,120,160,0.28) 0 1px, transparent 1px 7px),
+          radial-gradient(120% 140% at 30% 20%, rgba(243,120,160,0.16) 0%, #0e0f12 75%);
+        display: grid;
+        place-items: center;
+        margin-bottom: 10px;
+      }
+      .hero svg { width: 92px; height: 92px; }
+      .trow { display: flex; align-items: center; justify-content: space-between; padding: 2px 0 0; }
+      .title { margin: 0; font-size: 18px; font-weight: 500; line-height: 27px; color: #d2d2d2; }
+      .subtitle { margin: 0; font-size: 14px; color: #777; line-height: 21px; }
+      .linkout {
+        width: 32px; height: 32px; display: grid; place-items: center;
+        border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; color: var(--muted);
+      }
+      .collateral { margin: 12px 0 12px; font-size: 12.5px; line-height: 1.5; color: #b9bdc4; }
+      .collateral .prefix { color: var(--faint); }
+      .cta {
+        margin-top: 12px;
+        background: #e8e8ea; color: #1a1a1a; border: none; border-radius: 10px;
+        padding: 12px 16px; font-family: inherit; font-size: 13.5px; font-weight: 500;
+        text-align: center;
+      }
+
+      /* shared stat typography */
+      .stat .label { display: block; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin-bottom: 3px; white-space: nowrap; }
+      .stat .value { font-size: 17px; font-weight: 600; color: var(--text); white-space: nowrap; }
+      .stat .unit { font-size: 11px; font-weight: 400; color: var(--muted); margin-left: 2px; }
+
+      /* ── 01 Outlined container: one box, hairline column dividers ── */
+      .v1 { display: flex; border: 1px solid var(--border); border-radius: 10px; }
+      .v1 .stat { flex: 1; padding: 10px 12px; }
+      .v1 .stat + .stat { border-left: 1px solid var(--border); }
+
+      /* ── 02 Cell chips: three separate outlined cells ── */
+      .v2 { display: flex; gap: 8px; }
+      .v2 .stat { flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; }
+
+      /* ── 03 Dividers only: open row, vertical hairlines between ── */
+      .v3 { display: flex; }
+      .v3 .stat { flex: 1; padding: 6px 12px; }
+      .v3 .stat:first-child { padding-left: 2px; }
+      .v3 .stat + .stat { border-left: 1px solid var(--border); }
+
+      /* ── 04 Rules above + below: table-section feel, fully open ── */
+      .v4 { display: flex; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+      .v4 .stat { flex: 1; padding: 12px 12px 12px 2px; }
+
+      /* ── 05 Fully open: typography only, no lines at all ── */
+      .v5 { display: flex; }
+      .v5 .stat { flex: 1; padding: 6px 12px 6px 2px; }
+
+      /* ── 06 Accent ticks: open row, tiny accent bar before each label ── */
+      .v6 { display: flex; }
+      .v6 .stat { flex: 1; padding: 6px 12px; position: relative; }
+      .v6 .stat::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: var(--accent); opacity: 0.7; }
+      .v6 .stat { padding-left: 12px; }
+
+      /* ── 07 Underlined values: hairline under each stat, open sides ── */
+      .v7 { display: flex; gap: 16px; }
+      .v7 .stat { flex: 1; padding: 6px 0 10px; border-bottom: 1px solid var(--border); }
+    </style>
+  </head>
+  <body>
+    <h1>Card Stacker — expanded stats</h1>
+    <p class="sub">throwaway prototype · hollow-language treatments for Min Loan / Max LTV / Time to Fund · tell me a number</p>
+    <div class="gallery" id="gallery"></div>
+
+    <script>
+      const VARIANTS = [
+        ['v1', 'Outlined container'],
+        ['v2', 'Cell chips'],
+        ['v3', 'Dividers only'],
+        ['v4', 'Rules above + below'],
+        ['v5', 'Fully open'],
+        ['v6', 'Accent ticks'],
+        ['v7', 'Underlined values'],
+      ]
+      const STATS = [
+        ['Min Loan', '$10', 'K'],
+        ['Max LTV', '86', '%'],
+        ['Time to Fund', 'Instant', ''],
+      ]
+      const star = `<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 1.6c.5 4.6 1.4 6.5 3.2 7.4 1.5.8 3.6.9 7.2.6-4.2 1.9-5.9 3.2-6.6 5.2-.6 1.7-.5 3.9.2 7.6-2.3-3.9-3.7-5.5-5.8-5.9-1.8-.4-3.9.2-7.4 1.5 3.2-3.2 4.4-5 4.3-7.1-.1-1.8-1.2-3.7-3.3-6.7 4.1 2.1 6.1 2.7 8 1.9 1.6-.7 2.8-2.4 4.2-5.5-.9 4.5-.9 6.7 0 8.4"/></svg>`
+      const gallery = document.getElementById('gallery')
+      VARIANTS.forEach(([cls, name], i) => {
+        const slot = document.createElement('div')
+        slot.className = 'slot'
+        slot.innerHTML = `
+          <div class="card">
+            <div class="hero">${star}</div>
+            <div class="trow">
+              <div>
+                <h3 class="title">Spark Protocol</h3>
+                <p class="subtitle">Permissionless Lending</p>
+              </div>
+              <span class="linkout">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+            <p class="collateral"><span class="prefix">Accepted collateral: </span>blue chip, LSTs, stables, RWAs</p>
+            <div class="${cls}">
+              ${STATS.map(([l, v, u]) => `<div class="stat"><span class="label">${l}</span><span class="value">${v}${u ? `<span class="unit">${u}</span>` : ''}</span></div>`).join('')}
+            </div>
+            <div class="cta">Add counterparty</div>
+          </div>
+          <div class="name"><span class="num">${String(i + 1).padStart(2, '0')}</span>${name}</div>`
+        gallery.appendChild(slot)
+      })
+    </script>
+  </body>
+</html>

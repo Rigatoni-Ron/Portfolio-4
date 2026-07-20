@@ -365,21 +365,24 @@
       /* Stats: three-column data panel. 1px gap + dark child bg
          on lighter parent gives the inset divider look without
          actual borders between cells. */
+      /* Outlined container (Aaron's pick, stats proto #01): one hollow box
+         on the token border, hairline dividers between the three columns —
+         no surface fills, matching the card's hollow language. */
       .cscard-stats {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
-        gap: 1px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.09);
         border-radius: 10px;
         overflow: hidden;
       }
       .cscard-stat {
-        background: rgba(255, 255, 255, 0.035);
         padding: 10px 12px;
         display: flex;
         flex-direction: column;
         gap: 2px;
+      }
+      .cscard-stat + .cscard-stat {
+        border-left: 1px solid rgba(255, 255, 255, 0.09);
       }
       .cscard-stat .label {
         font-size: 10px;
