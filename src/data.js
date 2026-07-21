@@ -9,6 +9,7 @@ import colDashboard from './assets/collateral-dashboard.webp'
 import colLoanDetails from './assets/collateral-loan-details.webp'
 import colLoanDetails2 from './assets/collateral-loan-details-2.webp'
 import colEmptyState from './assets/collateral-empty-state.webp'
+import setCutout from './assets/settlements-cutout.webp'
 import triCutout from './assets/triparty-cutout.webp'
 import triDetail from './assets/triparty-detail.webp'
 import triPanel from './assets/triparty-panel.webp'
@@ -45,6 +46,8 @@ export const projects = [
     id: 'settlements',
     title: 'Settlements',
     desc: 'B2B payments — singular & multi-party settlements',
+    cutout: 'tall',
+    images: [{ src: setCutout, w: 1400, h: 1349 }],
     year: '2025',
     role: 'Product Design',
     body: 'End-to-end settlement rails for business payments, covering single and multi-party flows. Focused on making counterparties, amounts, and status legible at a glance, and on reducing the failure modes that make B2B payments stressful.',
