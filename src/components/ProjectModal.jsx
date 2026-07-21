@@ -198,6 +198,17 @@ export default function ProjectModal({ project, onClose }) {
                   )}
                 </div>
                 <p className="modal-desc">{project.body}</p>
+
+                {project.metrics && (
+                  <div className="modal-metrics">
+                    {project.metrics.map((m) => (
+                      <div className="metric" key={m.label}>
+                        <div className="metric-value">{m.value}</div>
+                        <div className="metric-label">{m.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             </motion.div>
           )}

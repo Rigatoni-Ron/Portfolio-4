@@ -41,6 +41,10 @@ export const projects = [
       href: 'https://www.anchorage.com/insights/expanding-atlas-anchorage-digital-launches-institutional-grade-collateral-management-offering',
     },
     tags: ['DeFi', 'Lending', 'Dashboard', 'Risk'],
+    metrics: [
+      { value: '+62%', label: 'Pledged collateral under custody' },
+      { value: '4\u00d7', label: 'Collateral deals in the pipeline' },
+    ],
   },
   {
     id: 'settlements',
@@ -52,6 +56,10 @@ export const projects = [
     role: 'Product Design',
     body: 'End-to-end settlement rails for business payments, covering single and multi-party flows. Focused on making counterparties, amounts, and status legible at a glance, and on reducing the failure modes that make B2B payments stressful.',
     tags: ['Payments', 'Fintech', 'Flows', 'Usability'],
+    metrics: [
+      { value: '+20%', label: 'Settlement volume' },
+      { value: '2\u00d7', label: 'Settlements done per month' },
+    ],
   },
   {
     id: 'escrow',
@@ -67,6 +75,9 @@ export const projects = [
     role: 'Product Design',
     body: 'Tri-party escrow arrangements reimagined for a digital-asset context — clear roles, release conditions, and an audit trail that all three parties can trust. Designed the states and edge cases first, then the happy path.',
     tags: ['Escrow', 'DeFi', 'Systems', 'Edge cases'],
+    metrics: [
+      { value: '+90%', label: 'Pledged assets under custody' },
+    ],
   },
 ]
 

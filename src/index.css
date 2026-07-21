@@ -741,6 +741,38 @@ a {
   line-height: 1.65;
 }
 
+/* Impact metrics — a stat row at the bottom of the modal, separated by a
+   hairline. Big value + muted label; growth reads via the +/× in the value. */
+.modal-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-5) var(--s-7);
+  margin-top: var(--s-5);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--border);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.metric-label {
+  max-width: 22ch;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
 .modal-close {
   position: fixed;
   z-index: 60;
