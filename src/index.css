@@ -561,6 +561,8 @@ a {
      its top (cover + top-align) instead of forcing the modal to scroll —
      landscape screens are shorter than the cap, so they stay uncropped. */
   aspect-ratio: 2 / 1;
+  width: 100%; /* explicit: without it, aspect-ratio + max-height let a tall
+                  image derive width from the capped height and shrink/left-align */
   max-height: 600px;
   transition: aspect-ratio 0.35s var(--ease);
   border-radius: var(--r-md);
