@@ -185,6 +185,16 @@ export default function ProjectModal({ project, onClose }) {
               >
                 <div className="modal-title-row">
                   <h2 id="modal-title">{project.title}</h2>
+                  {project.metrics && (
+                    <div className="modal-badges">
+                      {project.metrics.map((m) => (
+                        <span className="metric-badge" key={m.label}>
+                          <span className="metric-badge-value">{m.value}</span>
+                          {m.label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {project.link && (
                     <a
                       className="modal-linkout"
@@ -198,17 +208,6 @@ export default function ProjectModal({ project, onClose }) {
                   )}
                 </div>
                 <p className="modal-desc">{project.body}</p>
-
-                {project.metrics && (
-                  <div className="modal-metrics">
-                    {project.metrics.map((m) => (
-                      <div className="metric" key={m.label}>
-                        <div className="metric-value">{m.value}</div>
-                        <div className="metric-label">{m.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </motion.div>
             </motion.div>
           )}

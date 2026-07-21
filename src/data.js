@@ -42,8 +42,8 @@ export const projects = [
     },
     tags: ['DeFi', 'Lending', 'Dashboard', 'Risk'],
     metrics: [
-      { value: '+62%', label: 'Pledged collateral under custody' },
-      { value: '4\u00d7', label: 'Collateral deals in the pipeline' },
+      { value: '+62%', label: 'pledged AUC' },
+      { value: '4\u00d7', label: 'collateral deals' },
     ],
   },
   {
@@ -57,8 +57,8 @@ export const projects = [
     body: 'End-to-end settlement rails for business payments, covering single and multi-party flows. Focused on making counterparties, amounts, and status legible at a glance, and on reducing the failure modes that make B2B payments stressful.',
     tags: ['Payments', 'Fintech', 'Flows', 'Usability'],
     metrics: [
-      { value: '+20%', label: 'Settlement volume' },
-      { value: '2\u00d7', label: 'Settlements done per month' },
+      { value: '+20%', label: 'volume' },
+      { value: '2\u00d7', label: 'settlements / mo' },
     ],
   },
   {
@@ -76,7 +76,7 @@ export const projects = [
     body: 'Tri-party escrow arrangements reimagined for a digital-asset context — clear roles, release conditions, and an audit trail that all three parties can trust. Designed the states and edge cases first, then the happy path.',
     tags: ['Escrow', 'DeFi', 'Systems', 'Edge cases'],
     metrics: [
-      { value: '+90%', label: 'Pledged assets under custody' },
+      { value: '+90%', label: 'pledged AUC' },
     ],
   },
 ]

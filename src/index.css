@@ -691,8 +691,39 @@ a {
 .modal-title-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--s-4);
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-3);
+}
+
+/* Impact metrics as neutral badges beside the title. Value pops in white,
+   label is muted; outline pill, no colour (growth reads via the +/×). */
+.modal-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.metric-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 5px var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  font-size: 12.5px;
+  line-height: 1;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.metric-badge-value {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Link-out sits at the far right of the title row. */
+.modal-title-row .modal-linkout {
+  margin-left: auto;
 }
 
 .modal h2 {
@@ -739,38 +770,6 @@ a {
   color: var(--text-muted);
   font-size: 15px;
   line-height: 1.65;
-}
-
-/* Impact metrics — a stat row at the bottom of the modal, separated by a
-   hairline. Big value + muted label; growth reads via the +/× in the value. */
-.modal-metrics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-5) var(--s-7);
-  margin-top: var(--s-5);
-  padding-top: var(--s-5);
-  border-top: 1px solid var(--border);
-}
-
-.metric {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-1);
-}
-
-.metric-value {
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  color: var(--text);
-}
-
-.metric-label {
-  max-width: 22ch;
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--text-muted);
 }
 
 .modal-close {
