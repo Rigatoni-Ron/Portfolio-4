@@ -9,6 +9,7 @@ import colDashboard from './assets/collateral-dashboard.webp'
 import colLoanDetails from './assets/collateral-loan-details.webp'
 import colLoanDetails2 from './assets/collateral-loan-details-2.webp'
 import colEmptyState from './assets/collateral-empty-state.webp'
+import triCutout from './assets/triparty-cutout.webp'
 import triDetail from './assets/triparty-detail.webp'
 import triPanel from './assets/triparty-panel.webp'
 
@@ -17,7 +18,7 @@ export const projects = [
     id: 'collateral',
     title: 'Collateral management',
     desc: 'Lending and borrowing of digital assets',
-    cutout: true,
+    cutout: 'tall',
     images: [
       { src: colHero, w: 1400, h: 1734 },
       { src: colDashboard, w: 2400, h: 1625 },
@@ -53,7 +54,9 @@ export const projects = [
     id: 'escrow',
     title: 'Escrow accounts',
     desc: 'Also known as tri-party agreements',
+    cutout: 'wide',
     images: [
+      { src: triCutout, w: 1600, h: 688 },
       { src: triDetail, w: 2400, h: 1820 },
       { src: triPanel, w: 2400, h: 1820 },
     ],

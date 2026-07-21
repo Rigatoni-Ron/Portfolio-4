@@ -427,19 +427,29 @@ a {
   object-position: top center;
 }
 
-/* Cut-out cards "poke out": a transparent stacked screen sits centered with
-   side margins and a gap at top, sized taller than the frame so its bottom
-   clips — it reads as a screen peeking up into the card, its panels floating
-   on the card surface (per the CM wireframe). Opt-in via `is-cutout` because
-   it needs a tall transparent cut-out image, not a landscape screenshot. */
+/* Cut-out cards: a transparent screen floats on the card surface, its panels
+   reading against the card via the alpha. Opt-in (needs a transparent cut-out,
+   not a landscape screenshot). Two orientations:
+   - tall  → sits top-aligned and taller than the frame so its bottom clips,
+             reading as a screen peeking up into the card (per the CM wireframe)
+   - wide  → a single wide panel, centered so it floats balanced in the frame */
 .card-media.is-cutout .media-img {
   position: absolute;
-  top: 9%;
   left: 50%;
-  transform: translateX(-50%);
-  width: 82%;
   height: auto;
   object-fit: contain;
+}
+
+.card-media.is-cutout-tall .media-img {
+  top: 9%;
+  transform: translateX(-50%);
+  width: 82%;
+}
+
+.card-media.is-cutout-wide .media-img {
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
 }
 
 .card-body {

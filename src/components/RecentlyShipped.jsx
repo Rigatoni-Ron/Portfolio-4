@@ -31,7 +31,7 @@ export default function RecentlyShipped({ onOpen, activeId, closingId }) {
               }}
             >
               <motion.div
-                className={`card-media${p.cutout ? ' is-cutout' : ''}`}
+                className={`card-media${p.cutout ? ` is-cutout is-cutout-${p.cutout}` : ''}`}
                 layoutId={`media-${p.id}`}
               >
                 {p.images?.[0] && (
