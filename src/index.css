@@ -401,12 +401,20 @@ a {
 }
 
 .card-media {
+  position: relative;
   aspect-ratio: 384 / 176;
   border-radius: var(--r-md);
   border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  /* Black stage with soft, wispy blue light — echoes the Atlas hero art.
+     Layered wide ellipses at low alpha so it reads as atmosphere, not shape. */
   background:
-    radial-gradient(120% 120% at 100% 0%, rgba(255, 255, 255, 0.05), transparent 55%),
-    var(--bg-raised);
+    radial-gradient(90% 46% at 18% 30%, rgba(59, 130, 246, 0.16), transparent 68%),
+    radial-gradient(110% 40% at 85% 62%, rgba(37, 99, 235, 0.12), transparent 70%),
+    radial-gradient(70% 30% at 55% 88%, rgba(96, 165, 250, 0.07), transparent 75%),
+    #050506;
   overflow: hidden;
 }
 
@@ -417,6 +425,24 @@ a {
   object-fit: cover;
   display: block;
   user-select: none;
+}
+
+/* Thumbnail floats as a framed panel on the card's wispy stage. */
+.thumb-panel {
+  width: 86%;
+  height: auto;
+  display: block;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 20px 44px -18px rgba(0, 0, 0, 0.85),
+    0 6px 18px -8px rgba(0, 0, 0, 0.6);
+  user-select: none;
+  transition: transform 0.3s var(--ease);
+}
+
+.card:hover .thumb-panel {
+  transform: translateY(-2px);
 }
 
 .card-body {
@@ -537,8 +563,8 @@ a {
 .modal {
   pointer-events: auto;
   width: 100%;
-  max-width: 560px;
-  max-height: min(90vh, 800px);
+  max-width: 800px;
+  max-height: min(92vh, 940px);
   overflow-y: auto;
   border: 1px solid var(--border-hover);
   border-radius: var(--r-lg);

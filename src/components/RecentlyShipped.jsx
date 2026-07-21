@@ -31,10 +31,10 @@ export default function RecentlyShipped({ onOpen, activeId, closingId }) {
               }}
             >
               <motion.div className="card-media" layoutId={`media-${p.id}`}>
-                {p.images?.[0] && (
+                {p.thumb && (
                   <img
-                    className="media-img"
-                    src={p.images[0].src}
+                    className="thumb-panel"
+                    src={p.thumb}
                     alt=""
                     draggable="false"
                   />
