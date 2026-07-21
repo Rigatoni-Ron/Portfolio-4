@@ -2,14 +2,26 @@
    Recently-shipped titles/descriptions come straight from the wireframe.
    Playground titles reference real builds so the tiles read as real work. */
 
-import collateralImg from './assets/collateral-management.webp'
+// Project screens exported from the Portfolio-4 Figma (2x → 1200w WebP).
+// Each carries its pixel dims so the modal carousel can preserve aspect.
+import colDashboard from './assets/collateral-dashboard.webp'
+import colLoanDetails from './assets/collateral-loan-details.webp'
+import colLoanDetails2 from './assets/collateral-loan-details-2.webp'
+import colEmptyState from './assets/collateral-empty-state.webp'
+import triDetail from './assets/triparty-detail.webp'
+import triPanel from './assets/triparty-panel.webp'
 
 export const projects = [
   {
     id: 'collateral',
     title: 'Collateral management',
     desc: 'Lending and borrowing of digital assets',
-    image: collateralImg,
+    images: [
+      { src: colDashboard, w: 1200, h: 813 },
+      { src: colLoanDetails, w: 1200, h: 816 },
+      { src: colLoanDetails2, w: 1200, h: 816 },
+      { src: colEmptyState, w: 1200, h: 861 },
+    ],
     year: '2025',
     role: 'Product Design',
     body: 'An institutional-grade collateral management experience for crypto-backed lending, part of Anchorage Digital’s Atlas platform. Lenders track loan health, loan-to-value (LTV), and margin thresholds in real time, so credit programs can scale through market volatility without losing visibility.',
@@ -38,6 +50,10 @@ export const projects = [
     id: 'escrow',
     title: 'Escrow accounts',
     desc: 'Also known as tri-party agreements',
+    images: [
+      { src: triDetail, w: 1200, h: 910 },
+      { src: triPanel, w: 1200, h: 910 },
+    ],
     year: '2024',
     role: 'Product Design',
     body: 'Tri-party escrow arrangements reimagined for a digital-asset context — clear roles, release conditions, and an audit trail that all three parties can trust. Designed the states and edge cases first, then the happy path.',

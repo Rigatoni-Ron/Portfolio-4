@@ -23,6 +23,18 @@ export const Close = (p) => (
   </svg>
 )
 
+export const ChevronLeft = (p) => (
+  <svg {...base} {...p}>
+    <path d="M14.5 6 8.5 12l6 6" />
+  </svg>
+)
+
+export const ChevronRight = (p) => (
+  <svg {...base} {...p}>
+    <path d="M9.5 6l6 6-6 6" />
+  </svg>
+)
+
 export const Globe = (p) => (
   <svg {...base} {...p}>
     <circle cx="12" cy="12" r="9" />

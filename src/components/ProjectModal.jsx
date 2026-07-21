@@ -1,7 +1,108 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Close, ArrowUpRight } from './icons.jsx'
+import { Close, ArrowUpRight, ChevronLeft, ChevronRight } from './icons.jsx'
 import { morph } from '../motion.js'
+
+/* Media carousel: slides through a project's screens. The media box takes
+   each image's own aspect ratio (from its stored pixel dims) and TRANSITIONS
+   between shapes — the modal adapts to the image instead of cropping it.
+   Slides travel horizontally in the direction of navigation; ←/→ keys work
+   while the modal is open. Single-image projects render with no chrome. */
+function MediaCarousel({ project }) {
+  const images = project.images ?? []
+  const [[idx, dir], setSlide] = useState([0, 0])
+  const many = images.length > 1
+  const img = images[idx] ?? null
+
+  const go = (delta) =>
+    setSlide(([i]) => [(i + delta + images.length) % images.length, delta])
+
+  useEffect(() => {
+    if (!many) return
+    const onKey = (e) => {
+      if (e.key === 'ArrowRight') go(1)
+      if (e.key === 'ArrowLeft') go(-1)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [many, images.length])
+
+  return (
+    <motion.div
+      className="modal-media"
+      layoutId={`media-${project.id}`}
+      // aspect-ratio transitions (see .modal-media CSS) — the box glides
+      // between image shapes as you navigate.
+      style={img ? { aspectRatio: `${img.w} / ${img.h}` } : undefined}
+    >
+      <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+        {img && (
+          <motion.img
+            key={idx}
+            className="media-img"
+            src={img.src}
+            alt={`${project.title} interface — screen ${idx + 1}`}
+            draggable="false"
+            custom={dir}
+            variants={{
+              enter: (d) => ({ opacity: 0, x: d > 0 ? 48 : d < 0 ? -48 : 0 }),
+              center: { opacity: 1, x: 0 },
+              exit: (d) => ({ opacity: 0, x: d > 0 ? -48 : d < 0 ? 48 : 0 }),
+            }}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+          />
+        )}
+      </AnimatePresence>
+
+      {many && (
+        <>
+          <button
+            type="button"
+            className="carousel-arrow prev"
+            aria-label="Previous image"
+            onClick={(e) => {
+              e.stopPropagation()
+              go(-1)
+            }}
+          >
+            <ChevronLeft />
+          </button>
+          <button
+            type="button"
+            className="carousel-arrow next"
+            aria-label="Next image"
+            onClick={(e) => {
+              e.stopPropagation()
+              go(1)
+            }}
+          >
+            <ChevronRight />
+          </button>
+          <div className="carousel-dots" role="tablist" aria-label="Images">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                role="tab"
+                aria-selected={i === idx}
+                aria-label={`Image ${i + 1}`}
+                className={`carousel-dot ${i === idx ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSlide(([cur]) => [i, i > cur ? 1 : -1])
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </motion.div>
+  )
+}
 
 export default function ProjectModal({ project, onClose }) {
   useEffect(() => {
@@ -68,16 +169,7 @@ export default function ProjectModal({ project, onClose }) {
               aria-modal="true"
               aria-labelledby="modal-title"
             >
-              <motion.div className="modal-media" layoutId={`media-${project.id}`}>
-                {project.image && (
-                  <img
-                    className="media-img"
-                    src={project.image}
-                    alt={`${project.title} interface`}
-                    draggable="false"
-                  />
-                )}
-              </motion.div>
+              <MediaCarousel project={project} />
 
               {/* Fades in on open. No exit animation on purpose: on close the
                   modal unmounts instantly so only the card's morph is visible,

@@ -547,13 +547,100 @@ a {
 }
 
 .modal-media {
+  position: relative;
+  /* Per-image ratio comes from inline style (carousel); this is the fallback
+     for projects with no images. The transition makes the box glide between
+     image shapes as you navigate. */
   aspect-ratio: 2 / 1;
+  transition: aspect-ratio 0.35s var(--ease);
   border-radius: var(--r-md);
   border: 1px solid var(--border);
   overflow: hidden;
   background:
     radial-gradient(120% 120% at 100% 0%, rgba(255, 255, 255, 0.06), transparent 55%),
     var(--bg);
+}
+
+/* Slides stack in the box; each fills it (aspect matches, so no crop). */
+.modal-media .media-img {
+  position: absolute;
+  inset: 0;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-hover);
+  border-radius: var(--r-sm);
+  background: rgba(10, 10, 11, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--text-muted);
+  opacity: 0;
+  transition:
+    opacity 0.18s var(--ease),
+    color 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    background-color 0.18s var(--ease);
+}
+
+.carousel-arrow.prev { left: 12px; }
+.carousel-arrow.next { right: 12px; }
+
+.modal-media:hover .carousel-arrow,
+.carousel-arrow:focus-visible {
+  opacity: 1;
+}
+
+.carousel-arrow:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: rgba(10, 10, 11, 0.75);
+}
+
+.carousel-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+.carousel-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: var(--r-pill);
+  background: rgba(10, 10, 11, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+  transition: background 0.18s var(--ease), transform 0.18s var(--ease);
+}
+
+.carousel-dot:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.carousel-dot.active {
+  background: var(--text);
+  transform: scale(1.15);
 }
 
 .modal-body {
