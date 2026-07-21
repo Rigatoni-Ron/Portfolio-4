@@ -557,8 +557,11 @@ a {
   position: relative;
   /* Per-image ratio comes from inline style (carousel); this is the fallback
      for projects with no images. The transition makes the box glide between
-     image shapes as you navigate. */
+     image shapes as you navigate. Capped so a tall poster-style screen shows
+     its top (cover + top-align) instead of forcing the modal to scroll —
+     landscape screens are shorter than the cap, so they stay uncropped. */
   aspect-ratio: 2 / 1;
+  max-height: 600px;
   transition: aspect-ratio 0.35s var(--ease);
   border-radius: var(--r-md);
   border: 1px solid var(--border);
@@ -568,10 +571,12 @@ a {
     var(--bg);
 }
 
-/* Slides stack in the box; each fills it (aspect matches, so no crop). */
+/* Slides stack in the box; landscape aspect matches (no crop). A tall poster
+   image exceeds the max-height cap → cover + top so its top of UI shows. */
 .modal-media .media-img {
   position: absolute;
   inset: 0;
+  object-position: top center;
 }
 
 .carousel-arrow {

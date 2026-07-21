@@ -4,6 +4,7 @@
 
 // Project screens exported from the Portfolio-4 Figma (2x → 1200w WebP).
 // Each carries its pixel dims so the modal carousel can preserve aspect.
+import colHero from './assets/collateral-hero.webp'
 import colDashboard from './assets/collateral-dashboard.webp'
 import colLoanDetails from './assets/collateral-loan-details.webp'
 import colLoanDetails2 from './assets/collateral-loan-details-2.webp'
@@ -17,6 +18,7 @@ export const projects = [
     title: 'Collateral management',
     desc: 'Lending and borrowing of digital assets',
     images: [
+      { src: colHero, w: 1600, h: 1982 },
       { src: colDashboard, w: 2400, h: 1625 },
       { src: colLoanDetails, w: 2400, h: 1632 },
       { src: colLoanDetails2, w: 2400, h: 1632 },
