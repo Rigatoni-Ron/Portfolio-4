@@ -30,7 +30,10 @@ export default function RecentlyShipped({ onOpen, activeId, closingId }) {
                 pointerEvents: isActive ? 'none' : 'auto',
               }}
             >
-              <motion.div className="card-media" layoutId={`media-${p.id}`}>
+              <motion.div
+                className={`card-media${p.cutout ? ' is-cutout' : ''}`}
+                layoutId={`media-${p.id}`}
+              >
                 {p.images?.[0] && (
                   <img
                     className="media-img"

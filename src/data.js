@@ -17,8 +17,9 @@ export const projects = [
     id: 'collateral',
     title: 'Collateral management',
     desc: 'Lending and borrowing of digital assets',
+    cutout: true,
     images: [
-      { src: colHero, w: 1600, h: 1982 },
+      { src: colHero, w: 1400, h: 1734 },
       { src: colDashboard, w: 2400, h: 1625 },
       { src: colLoanDetails, w: 2400, h: 1632 },
       { src: colLoanDetails2, w: 2400, h: 1632 },

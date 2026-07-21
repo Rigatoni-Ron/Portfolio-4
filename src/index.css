@@ -401,14 +401,16 @@ a {
 }
 
 .card-media {
-  aspect-ratio: 384 / 176;
+  position: relative;
+  /* Taller frame than the old strip so more of the screen shows before it
+     clips (per the CM layout wireframe). */
+  aspect-ratio: 384 / 209;
   border-radius: var(--r-md);
   border: 1px solid var(--border);
   overflow: hidden;
   background:
     radial-gradient(120% 120% at 100% 0%, rgba(255, 255, 255, 0.05), transparent 55%),
     var(--bg-raised);
-  overflow: hidden;
 }
 
 /* Project image — fills the media box in both card and modal so it morphs. */
@@ -420,10 +422,24 @@ a {
   user-select: none;
 }
 
-/* Card thumbnails: the screen fills the frame edge-to-edge and is
-   TOP-aligned, so the crop always shows the top of the UI. */
+/* Default card thumb: the screen fills the frame, top-aligned. */
 .card-media .media-img {
   object-position: top center;
+}
+
+/* Cut-out cards "poke out": a transparent stacked screen sits centered with
+   side margins and a gap at top, sized taller than the frame so its bottom
+   clips — it reads as a screen peeking up into the card, its panels floating
+   on the card surface (per the CM wireframe). Opt-in via `is-cutout` because
+   it needs a tall transparent cut-out image, not a landscape screenshot. */
+.card-media.is-cutout .media-img {
+  position: absolute;
+  top: 9%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 82%;
+  height: auto;
+  object-fit: contain;
 }
 
 .card-body {
