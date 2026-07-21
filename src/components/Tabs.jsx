@@ -6,9 +6,9 @@ const TABS = [
   { id: 'learnings', label: 'Learnings', Icon: Book },
 ]
 
-// Smooth, weighty spring — high damping (no wobble) + heavier mass for a
-// deliberate glide. Tuned live via DialKit, then baked in.
-const bouncy = { type: 'spring', stiffness: 480, damping: 50, mass: 3.1 }
+// Weighty-but-lively spring — a quick, near-critically-damped glide with just a
+// touch of life at the settle. Tuned live via DialKit, then baked in.
+const bouncy = { type: 'spring', stiffness: 480, damping: 30, mass: 1.5 }
 
 export default function Tabs({ current, onChange }) {
   return (
