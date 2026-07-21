@@ -9,6 +9,10 @@ const rectOf = (el) => {
   return { left: r.left, top: r.top, width: r.width, height: r.height }
 }
 
+// Module-level: survives Playground unmounting on tab switches. True after the
+// live tiles' first idle-gated boot, so remounts start with content in place.
+let tilesEverBooted = false
+
 export default function Playground() {
   const [active, setActive] = useState(null)
   const [originRect, setOriginRect] = useState(null)
@@ -20,10 +24,17 @@ export default function Playground() {
 
   // Live tiles (and their code-split chunks) mount only after the page goes
   // idle, so first paint never waits on a heavy tile like the node builder.
-  const [tilesReady, setTilesReady] = useState(false)
+  // Once they've booted, later mounts (Playground unmounts on every tab
+  // switch) skip the gate — the chunks are already loaded, so re-gating just
+  // made the tiles animate up empty and pop in a beat later.
+  const [tilesReady, setTilesReady] = useState(tilesEverBooted)
   useEffect(() => {
+    if (tilesEverBooted) return
     const ric = window.requestIdleCallback ?? ((cb) => setTimeout(cb, 350))
-    const id = ric(() => setTilesReady(true), { timeout: 2000 })
+    const id = ric(() => {
+      tilesEverBooted = true
+      setTilesReady(true)
+    }, { timeout: 2000 })
     return () => (window.cancelIdleCallback ?? clearTimeout)(id)
   }, [])
 
