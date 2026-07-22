@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Close, ArrowUpRight, ChevronLeft, ChevronRight } from './icons.jsx'
 import { morph } from '../motion.js'
+import LoanCard from './LoanCard.jsx'
 
 /* Media carousel: slides through a project's screens. The media box takes
    each image's own aspect ratio (from its stored pixel dims) and TRANSITIONS
@@ -9,6 +10,19 @@ import { morph } from '../motion.js'
    Slides travel horizontally in the direction of navigation; ←/→ keys work
    while the modal is open. Single-image projects render with no chrome. */
 function MediaCarousel({ project }) {
+  // Product-shot experiment: show the same landscape + floating Loan Card as
+  // the thumbnail, no carousel. The other screens stay in data for later.
+  if (project.heroBg) {
+    return (
+      <motion.div className="modal-media is-heroshot" layoutId={`media-${project.id}`}>
+        <img className="card-bg" src={project.heroBg} alt="" draggable="false" />
+        <div className="card-heroshot-overlay">
+          <LoanCard />
+        </div>
+      </motion.div>
+    )
+  }
+
   const images = project.images ?? []
   const [[idx, dir], setSlide] = useState([0, 0])
   const many = images.length > 1

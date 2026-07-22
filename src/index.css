@@ -452,14 +452,26 @@ a {
   width: 90%;
 }
 
-/* ── Product-shot experiment: landscape bg + a floating rebuilt UI card ── */
-.card-media.is-heroshot .card-bg {
+/* ── Product-shot experiment: landscape bg + a floating rebuilt UI card ──
+   Shared by the card thumbnail (.card-media) and the opened modal
+   (.modal-media) so they show the same shot and morph cleanly. */
+.is-heroshot .card-bg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* In the modal, hold the glacier's own aspect and give the floating card a bit
+   more breathing room around it. */
+.modal-media.is-heroshot {
+  aspect-ratio: 1264 / 843;
+}
+
+.modal-media.is-heroshot .card-heroshot-overlay {
+  padding: 0 12%;
 }
 
 .card-heroshot-overlay {
