@@ -5,6 +5,7 @@
 // Project screens exported from the Portfolio-4 Figma (2x → 1200w WebP).
 // Each carries its pixel dims so the modal carousel can preserve aspect.
 import colGlacier from './assets/collateral-glacier.webp'
+import escrowField from './assets/escrow-field.webp'
 import colHero from './assets/collateral-hero.webp'
 import colDashboard from './assets/collateral-dashboard.webp'
 import colLoanDetails from './assets/collateral-loan-details.webp'
@@ -67,6 +68,8 @@ export const projects = [
     id: 'escrow',
     title: 'Escrow accounts',
     desc: 'Also known as tri-party agreements',
+    heroBg: escrowField, // experiment: landscape product-shot thumbnail
+    heroComponent: 'agreement',
     cutout: 'wide',
     images: [
       { src: triCutout, w: 1600, h: 688 },

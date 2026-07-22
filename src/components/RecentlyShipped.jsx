@@ -2,6 +2,13 @@ import { motion } from 'motion/react'
 import { projects } from '../data.js'
 import { morph } from '../motion.js'
 import LoanCard from './LoanCard.jsx'
+import AgreementAssets from './AgreementAssets.jsx'
+
+// Maps a project's heroComponent flag to the rebuilt UI that floats on its
+// landscape (product-shot experiment).
+function HeroComponent({ name }) {
+  return name === 'agreement' ? <AgreementAssets /> : <LoanCard />
+}
 
 export default function RecentlyShipped({ onOpen, activeId, closingId }) {
   return (
@@ -41,7 +48,7 @@ export default function RecentlyShipped({ onOpen, activeId, closingId }) {
                   <>
                     <img className="card-bg" src={p.heroBg} alt="" draggable="false" />
                     <div className="card-heroshot-overlay">
-                      <LoanCard />
+                      <HeroComponent name={p.heroComponent} />
                     </div>
                   </>
                 ) : (

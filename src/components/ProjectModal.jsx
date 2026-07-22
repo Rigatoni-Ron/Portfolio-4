@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Close, ArrowUpRight, ChevronLeft, ChevronRight } from './icons.jsx'
 import { morph } from '../motion.js'
 import LoanCard from './LoanCard.jsx'
+import AgreementAssets from './AgreementAssets.jsx'
 
 /* Media carousel: slides through a project's screens. The media box takes
    each image's own aspect ratio (from its stored pixel dims) and TRANSITIONS
@@ -17,7 +18,7 @@ function MediaCarousel({ project }) {
       <motion.div className="modal-media is-heroshot" layoutId={`media-${project.id}`}>
         <img className="card-bg" src={project.heroBg} alt="" draggable="false" />
         <div className="card-heroshot-overlay">
-          <LoanCard />
+          {project.heroComponent === 'agreement' ? <AgreementAssets /> : <LoanCard />}
         </div>
       </motion.div>
     )

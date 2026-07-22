@@ -591,6 +591,258 @@ a {
   color: #fff;
 }
 
+/* Agreement Assets (Figma 413:19592) — the tri-party detail panel, rebuilt as
+   a frosted-glass product-shot panel. Renders at a fixed 880px design width;
+   the hero-shot overlay scales it to fit (card small, modal larger). */
+.agreement {
+  width: 880px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(16, 18, 22, 0.5);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  box-shadow:
+    0 24px 60px -20px rgba(0, 0, 0, 0.6),
+    0 2px 8px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  font-family: 'Geist', system-ui, sans-serif;
+  color: #fff;
+}
+
+/* Info row: pledgor / secured party / id / start date */
+.agreement-info {
+  display: flex;
+}
+
+.agr-cell {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.agr-cell + .agr-cell {
+  border-left: 1px solid rgba(244, 245, 245, 0.1);
+}
+
+.agr-avatar {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #313235;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.agr-cell-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.agr-cell-label {
+  font-size: 12px;
+  line-height: 16px;
+  color: #aaacb1;
+}
+
+.agr-cell-value {
+  font-size: 14px;
+  line-height: 24px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* Body: chart (left) + asset list (right) */
+.agreement-body {
+  display: flex;
+  border-top: 1px solid rgba(244, 245, 245, 0.1);
+}
+
+.agreement-graph {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  border-right: 1px solid rgba(244, 245, 245, 0.1);
+}
+
+.agreement-graph-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.agreement-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.agr-cur,
+.agr-dec {
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.agr-int {
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.agreement-sub {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 16px;
+  color: #aaacb1;
+}
+
+.agreement-toggle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(244, 245, 245, 0.04);
+  color: #aaacb1;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.agreement-chart {
+  width: 100%;
+  height: 156px;
+  display: block;
+  margin-top: auto;
+}
+
+/* Asset list */
+.agreement-list {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+}
+
+.agr-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.agr-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agr-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.agr-row-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.agr-row-amt {
+  font-size: 14px;
+  line-height: 24px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.agr-row-sym {
+  color: #fff;
+}
+
+.agr-row-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.agr-row-usd {
+  font-size: 12px;
+  line-height: 16px;
+  color: #aaacb1;
+  white-space: nowrap;
+}
+
+.agr-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.agr-change.is-up {
+  color: #85d6a0;
+}
+
+.agr-change.is-down {
+  color: #ea717b;
+}
+
+.agr-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #5580f6;
+  white-space: nowrap;
+}
+
+.agr-more {
+  display: grid;
+  place-items: center;
+  min-height: 40px;
+  border-radius: 8px;
+  background: rgba(244, 245, 245, 0.1);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Hero-shot scale of the agreement panel per context. `zoom` (not transform)
+   so the panel's layout footprint shrinks too and the overlay's grid can
+   center it — transform:scale leaves an 880px box that overflows/mis-centers. */
+.card-media.is-heroshot .agreement {
+  zoom: 0.4;
+}
+
+.modal-media.is-heroshot .agreement {
+  zoom: 0.72;
+}
+
 .card-body {
   padding: var(--s-4) var(--s-3) var(--s-3);
 }
