@@ -6,6 +6,7 @@
 // Each carries its pixel dims so the modal carousel can preserve aspect.
 import colGlacier from './assets/collateral-glacier.webp'
 import escrowField from './assets/escrow-field.webp'
+import settleRiver from './assets/settlements-river.webp'
 import colHero from './assets/collateral-hero.webp'
 import colDashboard from './assets/collateral-dashboard.webp'
 import colLoanDetails from './assets/collateral-loan-details.webp'
@@ -53,6 +54,8 @@ export const projects = [
     id: 'settlements',
     title: 'Settlements',
     desc: 'B2B payments — singular & multi-party settlements',
+    heroBg: settleRiver, // experiment: landscape product-shot thumbnail
+    heroComponent: 'send',
     cutout: 'tall',
     images: [{ src: setCutout, w: 1400, h: 1349 }],
     year: '2025',

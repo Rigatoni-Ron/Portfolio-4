@@ -3,11 +3,14 @@ import { projects } from '../data.js'
 import { morph } from '../motion.js'
 import LoanCard from './LoanCard.jsx'
 import AgreementAssets from './AgreementAssets.jsx'
+import SendTransfer from './SendTransfer.jsx'
 
 // Maps a project's heroComponent flag to the rebuilt UI that floats on its
 // landscape (product-shot experiment).
 function HeroComponent({ name }) {
-  return name === 'agreement' ? <AgreementAssets /> : <LoanCard />
+  if (name === 'agreement') return <AgreementAssets />
+  if (name === 'send') return <SendTransfer />
+  return <LoanCard />
 }
 
 export default function RecentlyShipped({ onOpen, activeId, closingId }) {
