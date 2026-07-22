@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { projects } from '../data.js'
 import { morph } from '../motion.js'
+import LoanCard from './LoanCard.jsx'
 
 export default function RecentlyShipped({ onOpen, activeId, closingId }) {
   return (
@@ -31,16 +32,27 @@ export default function RecentlyShipped({ onOpen, activeId, closingId }) {
               }}
             >
               <motion.div
-                className={`card-media${p.cutout ? ` is-cutout is-cutout-${p.cutout}` : ''}`}
+                className={`card-media${
+                  p.heroBg ? ' is-heroshot' : p.cutout ? ` is-cutout is-cutout-${p.cutout}` : ''
+                }`}
                 layoutId={`media-${p.id}`}
               >
-                {p.images?.[0] && (
-                  <img
-                    className="media-img"
-                    src={p.images[0].src}
-                    alt=""
-                    draggable="false"
-                  />
+                {p.heroBg ? (
+                  <>
+                    <img className="card-bg" src={p.heroBg} alt="" draggable="false" />
+                    <div className="card-heroshot-overlay">
+                      <LoanCard />
+                    </div>
+                  </>
+                ) : (
+                  p.images?.[0] && (
+                    <img
+                      className="media-img"
+                      src={p.images[0].src}
+                      alt=""
+                      draggable="false"
+                    />
+                  )
                 )}
               </motion.div>
               <div className="card-body">
