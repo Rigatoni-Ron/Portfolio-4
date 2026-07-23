@@ -6,16 +6,9 @@ import walletIcon from '../assets/set-icon-wallet.svg'
  * flow. Faithful content + tokens; the container is a frosted-glass panel
  * (same product-shot treatment as the other two). Renders at a fixed design
  * width and is scaled to fit by the hero-shot overlay.
+ * The USDT asset icon is the "network asset" export — it has the purple
+ * Ethereum sub-badge baked in, so no separate badge element is needed.
  */
-
-const EthBadge = () => (
-  <span className="send-net-badge" aria-hidden="true">
-    <svg width="7" height="7" viewBox="0 0 10 16" fill="#fff">
-      <path d="M5 0 L0 8.2 5 11.2 10 8.2Z" opacity="0.9" />
-      <path d="M5 12.2 L0 9.2 5 16 10 9.2Z" opacity="0.6" />
-    </svg>
-  </span>
-)
 
 export default function SendTransfer() {
   return (
@@ -44,10 +37,7 @@ export default function SendTransfer() {
 
         <div className="send-attached">
           <div className="send-cell">
-            <div className="send-net">
-              <img className="send-net-icon" src={usdtIcon} alt="" draggable="false" />
-              <EthBadge />
-            </div>
+            <img className="send-net-icon" src={usdtIcon} alt="" draggable="false" />
             <div className="send-cell-text">
               <div className="send-cell-title">Asset</div>
               <div className="send-desc">

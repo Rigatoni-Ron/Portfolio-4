@@ -957,31 +957,14 @@ a {
   border-left: 1px solid rgba(244, 245, 245, 0.1);
 }
 
-.send-net {
-  position: relative;
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-}
-
+/* USDT icon carries its Ethereum network sub-badge baked in, so it's a plain
+   img like the wallet icon (no positioned badge wrapper). */
 .send-net-icon,
 .send-cell-icon {
   width: 24px;
   height: 24px;
   display: block;
   flex-shrink: 0;
-}
-
-.send-net-badge {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #9745d6;
-  display: grid;
-  place-items: center;
 }
 
 .send-cell-text {
