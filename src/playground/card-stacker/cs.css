@@ -6,7 +6,7 @@
         --sans: 'Geist', -apple-system, system-ui, sans-serif;
 
         /* card tokens (from Figma 1:7) */
-        --card-bg: rgba(255, 255, 255, 0.02); /* hollow: outline card, site language */
+        --card-bg: transparent; /* outline-only: border-defined, no surface fill */
         --card-radius: 16px;
         --card-pad: 12px;
         --card-gap: 12px;
