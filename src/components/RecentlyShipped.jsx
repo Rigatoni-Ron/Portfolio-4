@@ -50,7 +50,7 @@ export default function RecentlyShipped({ onOpen, activeId, closingId }) {
                 {p.heroBg ? (
                   <>
                     <img className="card-bg" src={p.heroBg} alt="" draggable="false" />
-                    <div className="card-heroshot-overlay">
+                    <div className="card-heroshot-overlay ui-theme-light">
                       <HeroComponent name={p.heroComponent} />
                     </div>
                   </>
