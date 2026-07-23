@@ -69,7 +69,10 @@ body {
 }
 
 ::selection {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(59, 130, 246, 0.4);
+}
+::-moz-selection {
+  background: rgba(59, 130, 246, 0.4);
 }
 
 /* In @layer base so component utility classes (which live in Tailwind's
