@@ -62,8 +62,8 @@ export const projects = [
     role: 'Product Design',
     body: 'End-to-end settlement rails for business payments, covering single and multi-party flows. Focused on making counterparties, amounts, and status legible at a glance, and on reducing the failure modes that make B2B payments stressful.',
     link: {
-      label: 'View the Atlas platform',
-      href: 'https://www.anchorage.com/platform/atlas',
+      label: 'View the Settlement network',
+      href: 'https://www.anchorage.com/platform/settlement',
     },
     tags: ['Payments', 'Fintech', 'Flows', 'Usability'],
     metrics: [
@@ -88,7 +88,7 @@ export const projects = [
     body: 'Tri-party escrow arrangements reimagined for a digital-asset context — clear roles, release conditions, and an audit trail that all three parties can trust. Designed the states and edge cases first, then the happy path.',
     link: {
       label: 'View the Atlas platform',
-      href: 'https://www.anchorage.com/platform/atlas#:~:text=moving%20assets%20offshore.-,Manage%20collateral,-and%20power%20lending',
+      href: 'https://www.anchorage.com/platform/atlas',
     },
     tags: ['Escrow', 'DeFi', 'Systems', 'Edge cases'],
     metrics: [
