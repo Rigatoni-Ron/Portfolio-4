@@ -18,7 +18,7 @@ function MediaCarousel({ project }) {
     return (
       <motion.div className="modal-media is-heroshot" layoutId={`media-${project.id}`}>
         <img className="card-bg" src={project.heroBg} alt="" draggable="false" />
-        <div className="card-heroshot-overlay ui-theme-light">
+        <div className="card-heroshot-overlay">
           {project.heroComponent === 'agreement' ? (
             <AgreementAssets />
           ) : project.heroComponent === 'send' ? (
