@@ -53,7 +53,7 @@ export const projects = [
   {
     id: 'settlements',
     title: 'Settlements',
-    desc: 'B2B payments — singular & multi-party settlements',
+    desc: 'B2B payments, singular & multi-party settlements',
     heroBg: settleRiver, // experiment: landscape product-shot thumbnail
     heroComponent: 'send',
     cutout: 'tall',
@@ -85,7 +85,7 @@ export const projects = [
     ],
     year: '2024',
     role: 'Product Design',
-    body: 'Tri-party escrow arrangements reimagined for a digital-asset context — clear roles, release conditions, and an audit trail that all three parties can trust. Designed the states and edge cases first, then the happy path.',
+    body: 'Tri-party escrow arrangements reimagined for a digital-asset context: clear roles, release conditions, and an audit trail that all three parties can trust. Designed the states and edge cases first, then the happy path.',
     link: {
       label: 'View the Atlas platform',
       href: 'https://www.anchorage.com/platform/atlas',

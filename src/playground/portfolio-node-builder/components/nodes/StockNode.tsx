@@ -94,7 +94,7 @@ export function StockNode({ id, data, selected }: NodeProps<StockNodeT>) {
 
           {feedsPortfolio && (
             <p className="rounded-md border border-negative/40 bg-negative/10 p-2 text-[11px] leading-snug text-negative">
-              An asset can't feed a Portfolio directly — connect it to a
+              An asset can't feed a Portfolio directly. Connect it to a
               Timeline node instead.
             </p>
           )}

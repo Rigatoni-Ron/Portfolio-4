@@ -64,7 +64,7 @@ function MediaCarousel({ project }) {
             key={idx}
             className="media-img"
             src={img.src}
-            alt={`${project.title} interface — screen ${idx + 1}`}
+            alt={`${project.title} interface, screen ${idx + 1}`}
             draggable="false"
             custom={dir}
             variants={{

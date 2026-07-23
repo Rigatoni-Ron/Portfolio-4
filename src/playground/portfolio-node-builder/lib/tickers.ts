@@ -85,7 +85,7 @@ export const TICKERS: TickerInfo[] = [
   { symbol: 'LINK', name: 'Chainlink', type: 'Crypto', description: 'Oracle network feeding real-world data on-chain', apiSymbol: 'LINK/USD' },
   { symbol: 'DOT', name: 'Polkadot', type: 'Crypto', description: 'Interoperability network connecting blockchains', apiSymbol: 'DOT/USD' },
   { symbol: 'LTC', name: 'Litecoin', type: 'Crypto', description: 'Early Bitcoin fork focused on cheap payments', apiSymbol: 'LTC/USD' },
-  { symbol: 'USDC', name: 'USD Coin', type: 'Crypto', description: 'Dollar-pegged stablecoin — pair with Lend for yield', apiSymbol: 'USDC/USD' },
+  { symbol: 'USDC', name: 'USD Coin', type: 'Crypto', description: 'Dollar-pegged stablecoin, pair with Lend for yield', apiSymbol: 'USDC/USD' },
 
   // --- Commodities (spot) ---
   { symbol: 'XAU', name: 'Gold', type: 'Commodity', description: 'Spot price of gold per troy ounce', apiSymbol: 'XAU/USD' },

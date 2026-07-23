@@ -215,7 +215,7 @@ export function Toolbar() {
         <div ref={measureRef} className="flex w-max items-center gap-1 p-1">
       <ToolButton
         active={tool === 'select' && !addOpen}
-        title="Select — V"
+        title="Select (V)"
         onClick={() => selectTool('select')}
       >
         <MousePointer2 size={16} />
@@ -223,7 +223,7 @@ export function Toolbar() {
 
       <ToolButton
         active={tool === 'hand'}
-        title="Hand — H"
+        title="Hand (H)"
         onClick={() => selectTool('hand')}
       >
         <Hand size={16} />
@@ -232,7 +232,7 @@ export function Toolbar() {
       <ToolButton
         ref={addBtnRef}
         active={addOpen}
-        title="Add node — A"
+        title="Add node (A)"
         onClick={() => setAddOpen((o) => !o)}
       >
         <Plus size={16} />

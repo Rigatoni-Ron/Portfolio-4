@@ -70,7 +70,7 @@ export function TimelineNode({ id, data, selected }: NodeProps<TimelineNodeT>) {
 
           {edgeIgnored && (
             <p className="rounded-md border border-negative/40 bg-negative/10 p-2 text-[11px] leading-snug text-negative">
-              That Portfolio already reads another Timeline — this connection
+              That Portfolio already reads another Timeline. This connection
               is ignored.
             </p>
           )}
