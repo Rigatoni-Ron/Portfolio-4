@@ -1,0 +1,175 @@
+/* ============================================================
+   LIGHT-MODE PREVIEW (throwaway) — dev-only page at /preview.html.
+   Renders the rebuilt Anchorage product components in dark vs light so we
+   can audition a light theme. `.ui-theme-light` overrides the panels' baked
+   dark colors; nothing here affects the live site (no component imports it).
+   ============================================================ */
+
+.pv {
+  min-height: 100vh;
+  padding: 48px 32px 96px;
+  background: #17181b;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #ededef;
+}
+
+.pv-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+}
+
+.pv-sub {
+  font-size: 13px;
+  color: #8a8f98;
+  margin: 0 0 40px;
+}
+
+.pv-row {
+  margin-bottom: 44px;
+}
+
+.pv-label {
+  font: 500 12px/1 ui-monospace, Menlo, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a8f98;
+  margin-bottom: 14px;
+}
+
+.pv-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.pv-stage {
+  border-radius: 16px;
+  padding: 40px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pv-dark {
+  background: #0a0a0b;
+}
+
+.pv-light {
+  background: #eceef1;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.pv-tag {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  font: 500 11px/1 ui-monospace, Menlo, monospace;
+  letter-spacing: 0.08em;
+  color: #565a63;
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   LIGHT THEME — overrides the panels' dark colors.
+   ============================================================ */
+
+/* --- shared panel surfaces --- */
+.ui-theme-light .loancard,
+.ui-theme-light .agreement,
+.ui-theme-light .send-to,
+.ui-theme-light .send-source {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 18px 40px -20px rgba(20, 24, 34, 0.28),
+    0 2px 6px rgba(20, 24, 34, 0.08);
+  color: #16181d;
+}
+
+/* strong / muted text tokens */
+.ui-theme-light .loancard-amount-value,
+.ui-theme-light .loancard-ltv-label,
+.ui-theme-light .agr-cell-value,
+.ui-theme-light .agr-cur,
+.ui-theme-light .agr-int,
+.ui-theme-light .agr-dec,
+.ui-theme-light .agr-row-amt,
+.ui-theme-light .agr-row-sym,
+.ui-theme-light .agr-more,
+.ui-theme-light .send-to-label,
+.ui-theme-light .send-digit,
+.ui-theme-light .send-cell-title {
+  color: #16181d;
+}
+
+.ui-theme-light .loancard-amount-unit,
+.ui-theme-light .loancard-account,
+.ui-theme-light .agr-cell-label,
+.ui-theme-light .agreement-sub,
+.ui-theme-light .agreement-toggle,
+.ui-theme-light .agr-row-usd,
+.ui-theme-light .send-desc,
+.ui-theme-light .send-usd,
+.ui-theme-light .send-unit {
+  color: #6b7280;
+}
+
+/* dividers / borders inside panels */
+.ui-theme-light .agr-cell + .agr-cell,
+.ui-theme-light .agreement-body,
+.ui-theme-light .agreement-graph,
+.ui-theme-light .send-amount,
+.ui-theme-light .send-cell-from {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.ui-theme-light .send-sep {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+/* asset icons are white monochrome (built for dark) → invert to dark for light.
+   Leaves the inline ETH badge glyph (on its purple chip) untouched. */
+.ui-theme-light .agr-icon,
+.ui-theme-light .send-net-icon,
+.ui-theme-light .send-cell-icon {
+  filter: invert(1) brightness(0.25);
+}
+
+/* status colors nudged darker for contrast on white */
+.ui-theme-light .agr-change.is-up {
+  color: #1a9d5a;
+}
+.ui-theme-light .agr-change.is-down {
+  color: #d92d20;
+}
+.ui-theme-light .agr-pending,
+.ui-theme-light .send-max {
+  color: #3157e0;
+}
+
+/* LTV badge (Healthy) + health bars */
+.ui-theme-light .loancard-badge {
+  background: #e7f5ec;
+  border-color: rgba(19, 122, 63, 0.2);
+  color: #137a3f;
+}
+.ui-theme-light .loancard-bar {
+  background: rgba(0, 0, 0, 0.08);
+}
+.ui-theme-light .loancard-bar-fill {
+  background: #35b877;
+}
+
+/* neutral fills (toggle chip, +7 more button) */
+.ui-theme-light .agreement-toggle {
+  background: rgba(0, 0, 0, 0.05);
+}
+.ui-theme-light .agr-more {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* caret stays blue; avatars stay dark chips (read on white). */
