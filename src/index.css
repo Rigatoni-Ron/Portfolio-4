@@ -1469,102 +1469,32 @@ a {
 /* ============================================================
    Learnings panel
    ============================================================ */
-.learnings {
+/* Notes tab: one narrow, left-aligned prose column, centered on the page. */
+.notes {
   display: flex;
-  flex-direction: column;
-  gap: var(--s-7);
-  max-width: 720px;
-  margin: 0 auto;
+  justify-content: center;
 }
 
-.learn-block {
+.notes-col {
+  max-width: 440px;
   display: flex;
   flex-direction: column;
-  /* Matches the 24px below .section-title in the Work columns. */
-  gap: var(--s-5);
+  gap: var(--s-4);
+  text-align: left;
 }
 
-/* Same treatment as the Work section titles (.section-title). */
-.learn-heading {
+.notes-col p {
   margin: 0;
   font-size: 15px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  line-height: 1.7;
   color: var(--text-muted);
 }
 
-.learn-chart {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-  padding: var(--s-4);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  transition:
-    border-color 0.2s var(--ease),
-    background-color 0.2s var(--ease),
-    transform 0.2s var(--ease);
-}
-
-.learn-chart:hover {
-  border-color: var(--border-hover);
-  background: var(--fill-hover);
-  transform: translateY(-2px);
-}
-
-/* Chart art is authored for light mode (light empty cells). Inverting it
-   makes empty cells recede into the dark card; the source color is the
-   inverse of the target orange so it flips back to orange here. */
-.learn-chart-img {
-  width: 100%;
-  height: auto;
-  display: block;
-  filter: invert(1);
-  opacity: 0.95;
-}
-
-.learn-chart-foot {
-  font-size: 13px;
-  color: var(--text-faint);
-}
-
-/* Same gap as the Playground grid (.play-grid). */
-.learn-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--s-2);
-}
-
-/* Same border / radius / hover-lift pattern as the Playground tiles. */
-.learn-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-1);
-  padding: var(--s-4);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  transition:
-    border-color 0.2s var(--ease),
-    background-color 0.2s var(--ease),
-    transform 0.2s var(--ease);
-}
-
-.learn-card:hover {
-  border-color: var(--border-hover);
-  background: var(--fill-hover);
-  transform: translateY(-2px);
-}
-
-.learn-card-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text);
-  letter-spacing: -0.01em;
-}
-
-.learn-card-host {
-  font-size: 13px;
-  color: var(--text-faint);
+/* Sign-off line, quieter and set apart from the prose. */
+.notes-sign {
+  margin-top: var(--s-2) !important;
+  color: var(--text-faint) !important;
+  font-style: italic;
 }
 
 /* ============================================================
@@ -1578,8 +1508,7 @@ a {
 }
 
 @media (max-width: 560px) {
-  .play-grid,
-  .learn-grid {
+  .play-grid {
     grid-template-columns: 1fr;
   }
   .header {
