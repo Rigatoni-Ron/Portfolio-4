@@ -3,7 +3,7 @@ import { Grid, Book } from './icons.jsx'
 
 const TABS = [
   { id: 'work', label: 'Work', Icon: Grid },
-  { id: 'learnings', label: 'Learnings', Icon: Book },
+  { id: 'learnings', label: 'Notes', Icon: Book },
 ]
 
 // Weighty-but-lively spring — a quick, near-critically-damped glide with just a

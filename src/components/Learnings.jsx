@@ -53,7 +53,7 @@ export default function Learnings() {
       </div>
 
       <div className="learn-block">
-        <h2 className="learn-heading">Courses</h2>
+        <h2 className="learn-heading">Recent courses</h2>
         <div className="learn-grid">
           {COURSES.map((c) => (
             <LinkCard key={c.url} item={c} />
@@ -62,7 +62,7 @@ export default function Learnings() {
       </div>
 
       <div className="learn-block">
-        <h2 className="learn-heading">Podcasts</h2>
+        <h2 className="learn-heading">Podcasts I like</h2>
         <div className="learn-grid">
           {PODCASTS.map((p) => (
             <LinkCard key={p.url} item={p} />
