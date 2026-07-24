@@ -6,9 +6,9 @@ export default function Learnings() {
       <div className="notes-col">
         <p>
           Design is a lot of things to a lot of people, and everyone has strong
-          opinions on what it is and how the process should work. I approach it
-          like a cold case I&rsquo;m trying to solve. I interview users and
-          subject matter experts. I map out what I find. I tell people what I
+          opinions on what it is and how the process should work. I interview
+          users and subject matter experts. I map out what I find. I tell people
+          what I
           find. And when I get to the UI, I put as much effort into it as any
           other part of the process.
         </p>
