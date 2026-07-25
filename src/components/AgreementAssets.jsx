@@ -4,61 +4,37 @@ import hypeIcon from '../assets/tri-icon-hype.svg'
 import usdtIcon from '../assets/tri-icon-usdt.svg'
 import solIcon from '../assets/tri-icon-sol.svg'
 
-/* Real, drawn chart — same approach as the Trading Widget: a seeded series
-   turned into an SVG path, rather than a flat SVG export. Jagged (straight
-   segments, densely sampled) riding a trend that starts mid, dips early, then
-   climbs to the right (matches the "+10.00% past 24h" the panel shows). Fixed
-   seed = deterministic, so it's a still product shot with no animation. */
-const CHART = { w: 424, h: 200, n: 200, seed: 20261103, pad: 4 }
+/* Real, drawn chart — same approach as the Trading Widget, but fed a genuine
+   price window instead of synthetic noise: 167 daily ETH/USD closes from
+   Oct 2023 to Mar 2024 (Binance), a real up-and-to-the-right trend with a
+   natural early dip. Static/deterministic, so it's a still product shot.
+   Keeps the Figma styling (purple line, translucent fill, dotted texture).
+   The x-axis spans the full width (only y is padded) so the edges are vertical. */
+const CHART = { w: 424, h: 200, pad: 4 }
 
-// Shape the chart rides: [progress 0..1, height 0(low)..1(high)]. Smoothstep
-// between anchors → start in the middle, dip, then up-and-to-the-right.
-const TREND = [
-  [0, 0.55],
-  [0.3, 0.26],
-  [1, 0.95],
+// prettier-ignore
+const ETH_SERIES = [
+  1734, 1662, 1657, 1647, 1612, 1645, 1634, 1633, 1580, 1568, 1567, 1540, 1552, 1555, 1558, 1599,
+  1565, 1563, 1567, 1604, 1629, 1664, 1765, 1785, 1787, 1803, 1779, 1776, 1795, 1809, 1815, 1847,
+  1801, 1833, 1856, 1892, 1901, 1885, 1888, 2121, 2078, 2053, 2045, 2054, 1979, 2058, 1962, 1961,
+  1963, 2011, 2021, 1933, 2063, 2062, 2081, 2083, 2062, 2028, 2048, 2029, 2052, 2087, 2165, 2193,
+  2243, 2293, 2233, 2356, 2359, 2340, 2352, 2225, 2203, 2260, 2315, 2221, 2229, 2197, 2219, 2178,
+  2202, 2240, 2325, 2308, 2264, 2271, 2231, 2378, 2344, 2299, 2292, 2282, 2352, 2355, 2210, 2267,
+  2269, 2241, 2221, 2330, 2344, 2584, 2618, 2523, 2578, 2473, 2512, 2587, 2530, 2471, 2492, 2472,
+  2457, 2314, 2243, 2235, 2219, 2268, 2268, 2257, 2318, 2343, 2283, 2304, 2309, 2296, 2290, 2302,
+  2373, 2425, 2420, 2487, 2500, 2507, 2660, 2640, 2775, 2823, 2802, 2786, 2881, 2945, 3015, 2968,
+  2971, 2922, 2993, 3113, 3176, 3242, 3383, 3340, 3433, 3421, 3488, 3628, 3554, 3819, 3869, 3883,
+  3905, 3878, 4065, 3980, 4005, 3882, 3742,
 ]
 
-function mulberry32(a) {
-  return () => {
-    a |= 0
-    a = (a + 0x6d2b79f5) | 0
-    let t = Math.imul(a ^ (a >>> 15), 1 | a)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-
-function trendAt(u) {
-  for (let k = 0; k < TREND.length - 1; k++) {
-    const [u0, v0] = TREND[k]
-    const [u1, v1] = TREND[k + 1]
-    if (u <= u1) {
-      const t = (u - u0) / (u1 - u0)
-      return v0 + (v1 - v0) * (t * t * (3 - 2 * t)) // smoothstep
-    }
-  }
-  return TREND[TREND.length - 1][1]
-}
-
-function jaggedPaths({ w, h, n, seed, pad }) {
-  const rnd = mulberry32(seed)
-  const series = new Array(n)
-  let noise = 0
-  for (let i = 0; i < n; i++) {
-    // Mean-reverting noise keeps the spikes bounded so the trend still reads.
-    noise = noise * 0.6 + (rnd() - 0.5) * 0.16
-    series[i] = trendAt(i / (n - 1)) + noise
-  }
+function toPaths(series, { w, h, pad }) {
   const min = Math.min(...series)
   const max = Math.max(...series)
   const span = max - min || 1
-  // x spans the full width (only y is padded) so the left/right edges of the
-  // area are dead vertical — no inward lean.
-  const dx = w / (n - 1)
+  const dx = w / (series.length - 1)
   const pt = (i) => [i * dx, pad + (h - pad * 2) * (1 - (series[i] - min) / span)]
   let line = ''
-  for (let i = 0; i < n; i++) {
+  for (let i = 0; i < series.length; i++) {
     const [x, y] = pt(i)
     line += `${i === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`
   }
@@ -108,7 +84,7 @@ const Clock = () => (
 )
 
 export default function AgreementAssets() {
-  const { line, area } = useMemo(() => jaggedPaths(CHART), [])
+  const { line, area } = useMemo(() => toPaths(ETH_SERIES, CHART), [])
   return (
     <div className="agreement">
       <div className="agreement-info">
