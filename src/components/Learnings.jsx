@@ -8,12 +8,11 @@ export default function Learnings() {
           Design is a lot of things to a lot of people, and everyone has strong
           opinions on what it is and how the process should work. I interview
           users and subject matter experts. I map out what I find. I tell people
-          what I
-          find. And when I get to the UI, I put as much effort into it as any
-          other part of the process.
+          what I find. And when I get to the interface, I put as much effort
+          into it as any other part of the process.
         </p>
         <p>
-          The UI is not an afterthought. It is the pure distillation of
+          The interface is not an afterthought. It is the pure distillation of
           everything I&rsquo;ve learned about the project. It is the language the
           user understands. It is an opportunity: to lead users to their
           destination, to tell them a story, to connect with them, to help them,
