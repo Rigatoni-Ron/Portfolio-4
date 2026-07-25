@@ -1500,6 +1500,19 @@ a {
 /* ============================================================
    Responsive
    ============================================================ */
+/* Playground tiles collapse to one column early. The live previews are
+   calibrated for a ~428px-wide tile (the 428/218 ratio); once a 2-up tile
+   drops below ~400px the preview starts colliding with the tile title/desc.
+   From here down it's two single-column lists side by side: Recently shipped
+   on the left, Playground on the right. */
+@media (max-width: 1300px) {
+  .play-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Below this the two Work columns stack. Recently shipped leads (it comes
+   first in source order), Playground follows underneath. */
 @media (max-width: 900px) {
   .work {
     grid-template-columns: 1fr;
@@ -1508,9 +1521,6 @@ a {
 }
 
 @media (max-width: 560px) {
-  .play-grid {
-    grid-template-columns: 1fr;
-  }
   .header {
     padding: var(--s-8) 0 var(--s-9);
   }

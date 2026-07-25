@@ -1,3 +1,4 @@
+import { useFitScale } from '../useFitScale.js'
 import usdtIcon from '../assets/set-icon-usdt.svg'
 import walletIcon from '../assets/set-icon-wallet.svg'
 
@@ -10,9 +11,11 @@ import walletIcon from '../assets/set-icon-wallet.svg'
  * Ethereum sub-badge baked in, so no separate badge element is needed.
  */
 
-export default function SendTransfer() {
+export default function SendTransfer({ variant = 'modal' }) {
+  // 460px design width; cap at the tuned per-context size, shrink to fit below.
+  const fitRef = useFitScale(460, variant === 'card' ? 0.62 : 1)
   return (
-    <div className="send">
+    <div className="send" ref={fitRef}>
       <div className="send-to">
         <div className="send-to-label">To</div>
         <div className="send-desc">

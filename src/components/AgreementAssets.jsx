@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useFitScale } from '../useFitScale.js'
 import btcIcon from '../assets/tri-icon-btc.svg'
 import hypeIcon from '../assets/tri-icon-hype.svg'
 import usdtIcon from '../assets/tri-icon-usdt.svg'
@@ -83,10 +84,12 @@ const Clock = () => (
   </svg>
 )
 
-export default function AgreementAssets() {
+export default function AgreementAssets({ variant = 'modal' }) {
   const { line, area } = useMemo(() => toPaths(ETH_SERIES, CHART), [])
+  // 880px design width; cap at the tuned per-context size, shrink to fit below.
+  const fitRef = useFitScale(880, variant === 'card' ? 0.4 : 0.72)
   return (
-    <div className="agreement">
+    <div className="agreement" ref={fitRef}>
       <div className="agreement-info">
         {INFO.map((c) => (
           <div className="agr-cell" key={c.label}>

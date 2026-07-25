@@ -9,8 +9,8 @@ import SendTransfer from './SendTransfer.jsx'
 // Maps a project's heroComponent flag to the rebuilt UI that floats on its
 // landscape (product-shot experiment).
 function HeroComponent({ name }) {
-  if (name === 'agreement') return <AgreementAssets />
-  if (name === 'send') return <SendTransfer />
+  if (name === 'agreement') return <AgreementAssets variant="card" />
+  if (name === 'send') return <SendTransfer variant="card" />
   return <LoanCard />
 }
 
