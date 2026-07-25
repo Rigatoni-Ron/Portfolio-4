@@ -6,7 +6,7 @@ export default function Learnings() {
       <div className="notes-col">
         <p>
           Interview users and subject matter experts, map out what you find,
-          socialize it, and when you get to the interface, put as much care
+          socialize it, and when you work on the interface, put as much care
           into it as any other part of the process.
         </p>
         <p>
