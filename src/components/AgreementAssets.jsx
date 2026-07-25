@@ -109,8 +109,8 @@ export default function AgreementAssets() {
                 <span className="agr-dec">.54</span>
               </div>
               <div className="agreement-sub">
-                <span>+$4,449,798.05</span>
-                <span>(+10.00%)</span>
+                <span>+$3,474,182.72</span>
+                <span>(+7.64%)</span>
                 <span>past 24h</span>
               </div>
             </div>
