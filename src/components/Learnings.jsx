@@ -5,11 +5,9 @@ export default function Learnings() {
     <section className="notes">
       <div className="notes-col">
         <p>
-          Here&rsquo;s some things that work: interviewing users and subject
-          matter experts,
-          mapping out what you find, socializing what you find, and when you
-          get to the interface, put as much effort into it as any other part of
-          the process.
+          Interview users and subject matter experts, map out what you find,
+          socialize what you find, and when you get to the interface, put as
+          much care into it as any other part of the process.
         </p>
         <p>
           The interface is not an afterthought. It is the pure distillation of
