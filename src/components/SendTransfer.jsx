@@ -46,7 +46,7 @@ export default function SendTransfer({ variant = 'modal' }) {
               <div className="send-desc">
                 <span>USDT</span>
                 <span className="send-sep" />
-                <span>Ethereum regnet</span>
+                <span>Ethereum</span>
               </div>
             </div>
           </div>
@@ -56,9 +56,7 @@ export default function SendTransfer({ variant = 'modal' }) {
             <div className="send-cell-text">
               <div className="send-cell-title">From</div>
               <div className="send-desc">
-                <span>USDT wallet 2</span>
-                <span className="send-sep" />
-                <span>Main vault</span>
+                <span>Stablecoin wallet</span>
               </div>
             </div>
           </div>

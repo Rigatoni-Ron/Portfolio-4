@@ -877,8 +877,11 @@ a {
   white-space: nowrap;
 }
 
+/* flex-shrink:0 — the spans are nowrap and can't shrink, so a long label made
+   flexbox crush this 1px rule to nothing instead. */
 .send-sep {
   width: 1px;
+  flex: 0 0 1px;
   align-self: stretch;
   min-height: 12px;
   background: rgba(244, 245, 245, 0.16);

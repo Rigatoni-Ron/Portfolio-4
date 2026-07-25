@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Close, ArrowUpRight, ChevronLeft, ChevronRight } from './icons.jsx'
 import { morph } from '../motion.js'
+import { cue } from '../sound.js'
 import LoanCard from './LoanCard.jsx'
 import AgreementAssets from './AgreementAssets.jsx'
 import SendTransfer from './SendTransfer.jsx'
@@ -224,6 +225,7 @@ export default function ProjectModal({ project, onClose }) {
                       target="_blank"
                       rel="noreferrer"
                       aria-label={project.link.label}
+                      onClick={() => cue('bloom')}
                     >
                       <ArrowUpRight />
                     </a>
