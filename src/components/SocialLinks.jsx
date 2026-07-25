@@ -1,4 +1,5 @@
 import { GitHub, LinkedIn, Mail } from './icons.jsx'
+import { cue } from '../sound.js'
 
 const links = [
   {
@@ -21,6 +22,7 @@ export default function SocialLinks() {
           target={href.startsWith('http') ? '_blank' : undefined}
           rel="noreferrer"
           aria-label={label}
+          onClick={() => cue('bloom')}
         >
           <Icon />
         </a>
