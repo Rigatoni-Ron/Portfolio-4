@@ -61,7 +61,7 @@ const ASSETS = [
   { icon: btcIcon, amount: '7.87', sym: 'BTC', usd: '$526,283.38', change: '2.34', dir: 'up' },
   { icon: hypeIcon, amount: '20,681.87', sym: 'HYPE', usd: '$1,283,849.38', change: '13.28', dir: 'up' },
   { icon: usdtIcon, amount: '2,374,957.03', sym: 'USDT', usd: '$2,374,957.03', change: '1.23', dir: 'down' },
-  { icon: solIcon, amount: '129,484.63', sym: 'SOL', usd: '$10,106,690.10', pending: '22.8294 pending release' },
+  { icon: solIcon, amount: '129,484.63', sym: 'SOL', usd: '$10,106,690.10', pending: '22.82 pending release' },
 ]
 
 const Arrow = ({ down }) => (
