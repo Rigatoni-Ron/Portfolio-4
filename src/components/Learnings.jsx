@@ -5,9 +5,8 @@ export default function Learnings() {
     <section className="notes">
       <div className="notes-col">
         <p>
-          Design is a lot of things to a lot of people, and everyone has strong
-          opinions on what it is and how the process should work. Here&rsquo;s
-          some things that work: interviewing users and subject matter experts,
+          Here&rsquo;s some things that work: interviewing users and subject
+          matter experts,
           mapping out what you find, socializing what you find, and when you
           get to the interface, put as much effort into it as any other part of
           the process.
