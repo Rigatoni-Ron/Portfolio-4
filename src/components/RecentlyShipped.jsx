@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { projects } from '../data.js'
 import { morph } from '../motion.js'
+import { cue } from '../sound.js'
 import LoanCard from './LoanCard.jsx'
 import AgreementAssets from './AgreementAssets.jsx'
 import SendTransfer from './SendTransfer.jsx'
@@ -29,7 +30,10 @@ export default function RecentlyShipped({ onOpen, activeId, closingId }) {
               // Shared identity with the modal — framer morphs between the two.
               layoutId={`card-${p.id}`}
               className="card"
-              onClick={() => onOpen(p)}
+              onClick={() => {
+                cue('press')
+                onOpen(p)
+              }}
               aria-label={`Open ${p.title}`}
               transition={morph}
               // Hidden while its modal is open (kept in flow so siblings don't shift).

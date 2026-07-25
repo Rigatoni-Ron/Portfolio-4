@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 import { playground } from '../data.js'
 import { nativeComponents } from '../playground/registry.js'
 import PlaygroundViewer from './PlaygroundViewer.jsx'
+import { cue } from '../sound.js'
 
 const rectOf = (el) => {
   const r = el.getBoundingClientRect()
@@ -42,6 +43,7 @@ export default function Playground() {
   // from this box using fixed-position transforms, so an in-flight scroll
   // can't shift the origin mid-morph (see PlaygroundViewer).
   const open = useCallback((item, el) => {
+    cue('press')
     setOriginRect(rectOf(el))
     setOpenSeq((s) => s + 1)
     setActive(item)

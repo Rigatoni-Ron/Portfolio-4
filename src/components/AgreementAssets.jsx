@@ -165,7 +165,7 @@ export default function AgreementAssets() {
               </div>
             ))}
           </div>
-          <div className="agr-more">+7 more assets</div>
+          <div className="agr-more">+3 more assets</div>
         </div>
       </div>
     </div>

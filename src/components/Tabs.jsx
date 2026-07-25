@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { Grid, Book } from './icons.jsx'
+import { cue } from '../sound.js'
 
 const TABS = [
   { id: 'work', label: 'Work', Icon: Grid },
@@ -22,7 +23,10 @@ export default function Tabs({ current, onChange }) {
               key={tab.id}
               type="button"
               className={`tab ${active ? 'tab-active' : ''}`}
-              onClick={() => onChange(tab.id)}
+              onClick={() => {
+                if (!active) cue('toggle')
+                onChange(tab.id)
+              }}
               aria-pressed={active}
             >
               {active && (
