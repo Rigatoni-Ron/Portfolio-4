@@ -2,35 +2,18 @@
    Recently-shipped titles/descriptions come straight from the wireframe.
    Playground titles reference real builds so the tiles read as real work. */
 
-// Project screens exported from the Portfolio-4 Figma (2x → 1200w WebP).
-// Each carries its pixel dims so the modal carousel can preserve aspect.
+// Landscape backdrops for the product shots. Each project pairs one with a
+// rebuilt UI panel (heroComponent), which the card and the modal both render.
 import colGlacier from './assets/collateral-glacier.webp'
 import escrowField from './assets/escrow-field.webp'
 import settleRiver from './assets/settlements-river.webp'
-import colHero from './assets/collateral-hero.webp'
-import colDashboard from './assets/collateral-dashboard.webp'
-import colLoanDetails from './assets/collateral-loan-details.webp'
-import colLoanDetails2 from './assets/collateral-loan-details-2.webp'
-import colEmptyState from './assets/collateral-empty-state.webp'
-import setCutout from './assets/settlements-cutout.webp'
-import triCutout from './assets/triparty-cutout.webp'
-import triDetail from './assets/triparty-detail.webp'
-import triPanel from './assets/triparty-panel.webp'
 
 export const projects = [
   {
     id: 'collateral',
     title: 'Collateral management',
     desc: 'Lending and borrowing of digital assets',
-    heroBg: colGlacier, // experiment: landscape product-shot thumbnail
-    cutout: 'tall',
-    images: [
-      { src: colHero, w: 1400, h: 1734 },
-      { src: colDashboard, w: 2400, h: 1625 },
-      { src: colLoanDetails, w: 2400, h: 1632 },
-      { src: colLoanDetails2, w: 2400, h: 1632 },
-      { src: colEmptyState, w: 2400, h: 1722 },
-    ],
+    heroBg: colGlacier,
     year: '2025',
     role: 'Product Design',
     body: 'An institutional-grade collateral management experience for crypto-backed lending, part of Anchorage Digital’s Atlas platform. Lenders track loan health, loan-to-value (LTV), and margin thresholds in real time, so credit programs can scale through market volatility without losing visibility.',
@@ -54,10 +37,8 @@ export const projects = [
     id: 'settlements',
     title: 'Settlements',
     desc: 'B2B payments, singular & multi-party settlements',
-    heroBg: settleRiver, // experiment: landscape product-shot thumbnail
+    heroBg: settleRiver,
     heroComponent: 'send',
-    cutout: 'tall',
-    images: [{ src: setCutout, w: 1400, h: 1349 }],
     year: '2025',
     role: 'Product Design',
     body: 'End-to-end settlement rails for business payments, covering single and multi-party flows. Focused on making counterparties, amounts, and status legible at a glance, and on reducing the failure modes that make B2B payments stressful.',
@@ -75,14 +56,8 @@ export const projects = [
     id: 'escrow',
     title: 'Escrow accounts',
     desc: 'Also known as tri-party agreements',
-    heroBg: escrowField, // experiment: landscape product-shot thumbnail
+    heroBg: escrowField,
     heroComponent: 'agreement',
-    cutout: 'wide',
-    images: [
-      { src: triCutout, w: 1600, h: 688 },
-      { src: triDetail, w: 2400, h: 1820 },
-      { src: triPanel, w: 2400, h: 1820 },
-    ],
     year: '2024',
     role: 'Product Design',
     body: 'Tri-party escrow arrangements reimagined for a digital-asset context: clear roles, release conditions, and an audit trail that all three parties can trust. Designed the states and edge cases first, then the happy path.',
