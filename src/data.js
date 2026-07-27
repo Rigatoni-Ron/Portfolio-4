@@ -10,6 +10,25 @@ import settleRiver from './assets/settlements-river.webp'
 
 export const projects = [
   {
+    id: 'settlements',
+    title: 'Settlements',
+    desc: 'B2B payments, singular & multi-party settlements',
+    heroBg: settleRiver,
+    heroComponent: 'send',
+    year: '2025',
+    role: 'Product Design',
+    body: 'End-to-end settlement rails for business payments, covering single and multi-party flows. Focused on making counterparties, amounts, and status legible at a glance, and on reducing the failure modes that make B2B payments stressful.',
+    link: {
+      label: 'View the Settlement network',
+      href: 'https://www.anchorage.com/platform/settlement',
+    },
+    tags: ['Payments', 'Fintech', 'Flows', 'Usability'],
+    metrics: [
+      { value: '+20%', label: 'volume' },
+      { value: '2\u00d7', label: 'settlements / mo' },
+    ],
+  },
+  {
     id: 'collateral',
     title: 'Collateral management',
     desc: 'Lending and borrowing of digital assets',
@@ -31,25 +50,6 @@ export const projects = [
     metrics: [
       { value: '+62%', label: 'pledged AUC' },
       { value: '4\u00d7', label: 'collateral deals' },
-    ],
-  },
-  {
-    id: 'settlements',
-    title: 'Settlements',
-    desc: 'B2B payments, singular & multi-party settlements',
-    heroBg: settleRiver,
-    heroComponent: 'send',
-    year: '2025',
-    role: 'Product Design',
-    body: 'End-to-end settlement rails for business payments, covering single and multi-party flows. Focused on making counterparties, amounts, and status legible at a glance, and on reducing the failure modes that make B2B payments stressful.',
-    link: {
-      label: 'View the Settlement network',
-      href: 'https://www.anchorage.com/platform/settlement',
-    },
-    tags: ['Payments', 'Fintech', 'Flows', 'Usability'],
-    metrics: [
-      { value: '+20%', label: 'volume' },
-      { value: '2\u00d7', label: 'settlements / mo' },
     ],
   },
   {
