@@ -4,7 +4,7 @@
 
 // Landscape backdrops for the product shots. Each project pairs one with a
 // rebuilt UI panel (heroComponent), which the card and the modal both render.
-import colGlacier from './assets/collateral-glacier.webp'
+import colShore from './assets/collateral-shore.webp'
 import escrowField from './assets/escrow-field.webp'
 import settleRiver from './assets/settlements-river.webp'
 
@@ -32,7 +32,7 @@ export const projects = [
     id: 'collateral',
     title: 'Collateral management',
     desc: 'Lending and borrowing of digital assets',
-    heroBg: colGlacier,
+    heroBg: colShore,
     year: '2025',
     role: 'Product Design',
     body: 'An institutional-grade collateral management experience for crypto-backed lending, part of Anchorage Digital’s Atlas platform. Lenders track loan health, loan-to-value (LTV), and margin thresholds in real time, so credit programs can scale through market volatility without losing visibility.',

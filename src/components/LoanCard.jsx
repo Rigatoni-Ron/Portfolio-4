@@ -2,7 +2,7 @@
  * Loan Card — rebuilt from Figma (node 402:19474), the Collateral-management
  * loan row. Faithful to the design's content + tokens, but the container is a
  * frosted-glass panel (the Figma fill is near-transparent white, meant to sit
- * on a dark app bg — over the bright glacier photo it needs its own backing to
+ * on a dark app bg — over the landscape photo it needs its own backing to
  * stay legible). Experiment: floats over a landscape as a "product shot".
  */
 export default function LoanCard() {

@@ -467,8 +467,9 @@ a {
   display: block;
 }
 
-/* In the modal, hold the glacier's own aspect and give the floating card a bit
-   more breathing room around it. */
+/* One fixed shape for every product shot in the modal (inherited from the
+   original collateral photo), so the landscapes cover-crop to a consistent
+   box and the floating panel keeps its breathing room. */
 .modal-media.is-heroshot {
   aspect-ratio: 1264 / 843;
 }
