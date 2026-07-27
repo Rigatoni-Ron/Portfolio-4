@@ -5,15 +5,15 @@
 // Landscape backdrops for the product shots. Each project pairs one with a
 // rebuilt UI panel (heroComponent), which the card and the modal both render.
 import colShore from './assets/collateral-shore.webp'
-import escrowField from './assets/escrow-field.webp'
-import settleRiver from './assets/settlements-river.webp'
+import escrowLake from './assets/escrow-lake.webp'
+import settleValley from './assets/settlements-valley.webp'
 
 export const projects = [
   {
     id: 'settlements',
     title: 'Settlements',
     desc: 'B2B payments, singular & multi-party settlements',
-    heroBg: settleRiver,
+    heroBg: settleValley,
     heroComponent: 'send',
     year: '2025',
     role: 'Product Design',
@@ -56,7 +56,7 @@ export const projects = [
     id: 'escrow',
     title: 'Escrow accounts',
     desc: 'Also known as tri-party agreements',
-    heroBg: escrowField,
+    heroBg: escrowLake,
     heroComponent: 'agreement',
     year: '2024',
     role: 'Product Design',
