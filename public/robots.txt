@@ -1,0 +1,7 @@
+# Crawling is deliberately ALLOWED here. This site is kept out of search by a
+# noindex directive (meta tag in index.html + X-Robots-Tag header in
+# vercel.json), and a crawler has to be able to fetch the page to read it.
+# Blocking with "Disallow: /" would hide the noindex and can leave the bare URL
+# listed anyway if anyone ever links to it.
+User-agent: *
+Allow: /
