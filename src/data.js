@@ -102,7 +102,7 @@ export const playground = [
   },
   {
     id: 'animated-menu',
-    title: 'Animated Menu',
+    title: 'Nested Menu',
     tag: 'Browse, drill in, and drop a line',
     mode: 'native',
     bg: 'var(--pg-canvas)', // shared opened-playground canvas token
