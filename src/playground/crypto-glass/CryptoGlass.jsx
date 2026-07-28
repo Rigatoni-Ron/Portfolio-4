@@ -26,7 +26,8 @@ const FILL_STEP = 110
 const FILL_HOLD = 650
 const FILL_TOTAL = 9 * FILL_STEP + FILL_HOLD
 const GAS_ETH = 0.0002638
-const FROM_OPTIONS = ['CB wallet 26', 'Vault 3', 'Treasury A']
+// Wallets only — a vault or treasury isn't somewhere funds are spent from.
+const FROM_OPTIONS = ['CB wallet 26', 'ETH wallet 4', 'Trading wallet 2']
 const TO_OPTIONS = ['Tri-party BNY', 'Cold storage', 'Fireblocks 2']
 const NETWORK_OPTIONS = ['Ethereum', 'Base', 'Arbitrum']
 
