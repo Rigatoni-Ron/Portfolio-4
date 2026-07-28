@@ -4,8 +4,95 @@ import { Close, ArrowUpRight, ChevronLeft, ChevronRight } from './icons.jsx'
 import { morph } from '../motion.js'
 import { cue } from '../sound.js'
 import LoanCard from './LoanCard.jsx'
+import LoanDetails from './LoanDetails.jsx'
 import AgreementAssets from './AgreementAssets.jsx'
 import SendTransfer from './SendTransfer.jsx'
+
+/* Rebuilt product UI, keyed by the name a project uses in data.js. */
+const HERO_PANELS = {
+  loan: LoanCard,
+  loanDetails: LoanDetails,
+  agreement: AgreementAssets,
+  send: SendTransfer,
+}
+
+/* Slide variants shared by the panel deck and the image carousel: travel
+   horizontally in the direction of navigation, transform + opacity only. */
+const slide = {
+  enter: (d) => ({ opacity: 0, x: d > 0 ? 48 : d < 0 ? -48 : 0 }),
+  center: { opacity: 1, x: 0 },
+  exit: (d) => ({ opacity: 0, x: d > 0 ? -48 : d < 0 ? 48 : 0 }),
+}
+const slideTransition = { duration: 0.32, ease: [0.22, 1, 0.36, 1] }
+
+/* Hero deck: the landscape holds still while the rebuilt UI panels slide
+   across it. Real components rather than screenshots, so they stay sharp at
+   any size — and since the background never re-renders and the panels are
+   static DOM, each move is a transform on one layer.
+   `heroPanels` lists them; a project with one panel renders no chrome. */
+function HeroDeck({ project }) {
+  const panels = project.heroPanels ?? [project.heroComponent ?? 'loan']
+  const [[idx, dir], setSlide] = useState([0, 0])
+  const many = panels.length > 1
+  const Panel = HERO_PANELS[panels[idx]] ?? LoanCard
+
+  const go = (delta) =>
+    setSlide(([i]) => [(i + delta + panels.length) % panels.length, delta])
+
+  useEffect(() => {
+    if (!many) return
+    const onKey = (e) => {
+      if (e.key === 'ArrowRight') go(1)
+      if (e.key === 'ArrowLeft') go(-1)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [many, panels.length])
+
+  return (
+    <motion.div className="modal-media is-heroshot" layoutId={`media-${project.id}`}>
+      <img className="card-bg" src={project.heroBg} alt="" draggable="false" />
+      <div className={`card-heroshot-overlay${many ? ' is-deck' : ''}`}>
+        <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+          <motion.div
+            key={idx}
+            className="hero-panel-slide"
+            custom={dir}
+            variants={slide}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={slideTransition}
+          >
+            <Panel />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Dots only — overlay arrows crowded the panel they sit on top of.
+          ←/→ still work, and the dots are direct targets. */}
+      {many && (
+        <div className="carousel-dots" role="tablist" aria-label="Screens">
+          {panels.map((name, i) => (
+            <button
+              key={name}
+              type="button"
+              role="tab"
+              aria-selected={i === idx}
+              aria-label={`Screen ${i + 1}`}
+              className={`carousel-dot ${i === idx ? 'active' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation()
+                setSlide(([cur]) => [i, i > cur ? 1 : -1])
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </motion.div>
+  )
+}
 
 /* Media carousel: slides through a project's screens. The media box takes
    each image's own aspect ratio (from its stored pixel dims) and TRANSITIONS
@@ -13,24 +100,9 @@ import SendTransfer from './SendTransfer.jsx'
    Slides travel horizontally in the direction of navigation; ←/→ keys work
    while the modal is open. Single-image projects render with no chrome. */
 function MediaCarousel({ project }) {
-  // Product-shot experiment: show the same landscape + floating Loan Card as
-  // the thumbnail, no carousel. The other screens stay in data for later.
-  if (project.heroBg) {
-    return (
-      <motion.div className="modal-media is-heroshot" layoutId={`media-${project.id}`}>
-        <img className="card-bg" src={project.heroBg} alt="" draggable="false" />
-        <div className="card-heroshot-overlay">
-          {project.heroComponent === 'agreement' ? (
-            <AgreementAssets />
-          ) : project.heroComponent === 'send' ? (
-            <SendTransfer />
-          ) : (
-            <LoanCard />
-          )}
-        </div>
-      </motion.div>
-    )
-  }
+  // Product shots: the landscape from the thumbnail with the rebuilt UI on top.
+  if (project.heroBg) return <HeroDeck project={project} />
+
 
   const images = project.images ?? []
   const [[idx, dir], setSlide] = useState([0, 0])
@@ -68,15 +140,11 @@ function MediaCarousel({ project }) {
             alt={`${project.title} interface, screen ${idx + 1}`}
             draggable="false"
             custom={dir}
-            variants={{
-              enter: (d) => ({ opacity: 0, x: d > 0 ? 48 : d < 0 ? -48 : 0 }),
-              center: { opacity: 1, x: 0 },
-              exit: (d) => ({ opacity: 0, x: d > 0 ? -48 : d < 0 ? 48 : 0 }),
-            }}
+            variants={slide}
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            transition={slideTransition}
           />
         )}
       </AnimatePresence>

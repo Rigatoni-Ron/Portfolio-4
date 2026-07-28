@@ -33,6 +33,8 @@ export const projects = [
     title: 'Collateral management',
     desc: 'Lending and borrowing of digital assets',
     heroBg: colShore,
+    // Card shows the loan card; the modal decks it with the loan detail view.
+    heroPanels: ['loan', 'loanDetails'],
     year: '2025',
     role: 'Product Design',
     body: 'An institutional-grade collateral management experience for crypto-backed lending, part of Anchorage Digital’s Atlas platform. Lenders track loan health, loan-to-value (LTV), and margin thresholds in real time, so credit programs can scale through market volatility without losing visibility.',

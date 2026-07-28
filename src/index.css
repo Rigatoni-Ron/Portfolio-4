@@ -482,8 +482,29 @@ a {
   position: absolute;
   inset: 0;
   display: grid;
+  /* minmax(0,1fr), not auto: an auto track grows to the panel's design width,
+     which then feeds that inflated width back into useFitScale and defeats the
+     fit. Clamping keeps the track at the real available width. */
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   padding: 0 7%;
+}
+
+/* A deck carries full product panels rather than one floating card, so it
+   gives them more of the frame. */
+.modal-media.is-heroshot .card-heroshot-overlay.is-deck {
+  padding: 0 6%;
+}
+
+/* The sliding layer. Full-size so the panel inside still measures the real
+   available width for its fit-scale, and so a popLayout exit (which goes
+   absolute) keeps the same box. Transform/opacity only — the landscape
+   underneath never repaints. */
+.hero-panel-slide {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
 }
 
 /* Rebuilt Loan Card (Figma 402:19474) as a frosted-glass product-shot panel. */
@@ -986,6 +1007,246 @@ a {
   font-weight: 700;
   line-height: 24px;
   color: #fff;
+}
+
+/* Loan Details (Figma 556:20101) — the collateral loan-detail view: LTV health
+   meter, LTV chart, and the loaned/collateral asset columns. Same glass shell
+   as the other rebuilt panels; the inner sections keep the product's own
+   card-list surfaces and 2px dividers. */
+.cmd {
+  width: 974px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(11, 12, 15, 0.84);
+  box-shadow:
+    0 24px 60px -20px rgba(0, 0, 0, 0.62),
+    0 2px 8px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #fff;
+}
+
+/* The product's own card-list surface (a 6% white fill per section) would sit
+   lighter than the Loan Card it decks with, so the sections stay transparent
+   and the glass shell is the only surface. Structure reads via the dividers. */
+
+.cmd-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+}
+
+.cmd-meter-row {
+  display: flex;
+  gap: 2px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.cmd-meter-row > span {
+  flex: 1 0 0;
+  min-width: 0;
+}
+
+.cmd-meter-states {
+  font-weight: 500;
+  color: #fff;
+}
+
+.cmd-meter-ranges {
+  color: #aaacb1;
+}
+
+.cmd-meter-bars {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  height: 4px;
+}
+
+.cmd-bar {
+  flex: 1 0 0;
+  min-width: 0;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(244, 245, 245, 0.14);
+}
+
+.cmd-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: #5580f6;
+}
+
+.cmd-graph {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border-top: 2px solid rgba(228, 229, 231, 0.08);
+  border-bottom: 2px solid rgba(228, 229, 231, 0.08);
+}
+
+.cmd-graph-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cmd-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.cmd-value-num {
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.cmd-value-unit {
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.cmd-value-sub {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 16px;
+  color: #aaacb1;
+}
+
+.cmd-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(244, 245, 245, 0.04);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: #aaacb1;
+}
+
+.cmd-chevron {
+  display: block;
+}
+
+/* No grid rules and no baseline — the fill's own edge ends the chart. */
+.cmd-chart-wrap {
+  position: relative;
+  height: 156px;
+}
+
+.cmd-chart {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cmd-cols {
+  display: flex;
+}
+
+.cmd-col {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.cmd-col + .cmd-col {
+  border-left: 2px solid rgba(228, 229, 231, 0.08);
+}
+
+.cmd-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Figma exports the asset glyphs tight-cropped, so their intrinsic size is
+   already the right size inside the 24px box — just centre them. */
+.cmd-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+}
+
+.cmd-icon img {
+  display: block;
+}
+
+.cmd-row-body {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cmd-row-amt {
+  font-size: 14px;
+  line-height: 24px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.cmd-row-total {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.cmd-row-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cmd-row-usd {
+  font-size: 12px;
+  line-height: 16px;
+  color: #aaacb1;
+  white-space: nowrap;
+}
+
+.cmd-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.cmd-change.is-up {
+  color: #85d6a0;
+}
+
+.cmd-change.is-down {
+  color: #ea717b;
+}
+
+.cmd-arrow {
+  display: block;
 }
 
 /* Hero-shot scale of a rebuilt panel per context. `zoom` (not transform) so
