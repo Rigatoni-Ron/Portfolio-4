@@ -1,13 +1,31 @@
-/* The "Notes" tab: Aaron's design-philosophy blurb.
+/* The "Words" tab: a short bio, then Aaron's design-philosophy blurb.
    One narrow, left-aligned column centered on the page. */
 export default function Learnings() {
   return (
     <section className="notes">
       <div className="notes-col">
         <p>
-          Interview users and subject matter experts, map out what you find,
-          socialize it, and when you work on the interface, put as much care
-          into it as any other part of the process.
+          I&rsquo;m a product designer based in Toronto. I currently work at
+          Anchorage Digital (your bank&rsquo;s bank for digital assets).
+        </p>
+        <p>
+          In my first year I founded the data visualization library, unified
+          operations like settle, swap, and stake into one simplified component
+          set. It&rsquo;s reusable and lives in Storybook now, so any operation
+          can plug into it. Withdrawals, deposits, pledging, are all able to
+          plug into it and use it.
+        </p>
+        <p>
+          I also designed two new business lines, collateral management and
+          escrow accounts. I was the largest contributor to our research
+          repository. And I ran workshops on agentic workflows, so the rest of
+          the design team could grow into the agentic era of design.
+        </p>
+        <p>
+          Here&rsquo;s some things I believe in: Interview users and subject
+          matter experts, map out what you find, socialize it, and when you work
+          on the interface, put as much care into it as any other part of the
+          process.
         </p>
         <p>
           The interface is not an afterthought. It is the pure distillation of
