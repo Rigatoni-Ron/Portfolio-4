@@ -36,8 +36,18 @@ function HeroDeck({ project }) {
   const many = panels.length > 1
   const Panel = HERO_PANELS[panels[idx]] ?? LoanCard
 
-  const go = (delta) =>
+  /* Cue fires outside the updater — the index has to stay functional or the
+     keydown handler's closure goes stale after the first press. */
+  const go = (delta) => {
+    cue('whisper')
     setSlide(([i]) => [(i + delta + panels.length) % panels.length, delta])
+  }
+
+  const goTo = (i) => {
+    if (i === idx) return // clicking the active dot changes nothing, so stay silent
+    cue('whisper')
+    setSlide([i, i > idx ? 1 : -1])
+  }
 
   useEffect(() => {
     if (!many) return
@@ -84,7 +94,7 @@ function HeroDeck({ project }) {
               className={`carousel-dot ${i === idx ? 'active' : ''}`}
               onClick={(e) => {
                 e.stopPropagation()
-                setSlide(([cur]) => [i, i > cur ? 1 : -1])
+                goTo(i)
               }}
             />
           ))}
