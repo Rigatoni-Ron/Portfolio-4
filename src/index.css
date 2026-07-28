@@ -815,33 +815,6 @@ a {
   white-space: nowrap;
 }
 
-.agr-change {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.agr-change.is-up {
-  color: #85d6a0;
-}
-
-.agr-change.is-down {
-  color: #ea717b;
-}
-
-.agr-pending {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #5580f6;
-  white-space: nowrap;
-}
-
 .agr-more {
   display: grid;
   place-items: center;
@@ -1225,28 +1198,6 @@ a {
   line-height: 16px;
   color: #aaacb1;
   white-space: nowrap;
-}
-
-.cmd-change {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 16px;
-  white-space: nowrap;
-}
-
-.cmd-change.is-up {
-  color: #85d6a0;
-}
-
-.cmd-change.is-down {
-  color: #ea717b;
-}
-
-.cmd-arrow {
-  display: block;
 }
 
 /* Hero-shot scale of a rebuilt panel per context. `zoom` (not transform) so
@@ -2597,13 +2548,6 @@ html.has-custom-cursor * {
 }
 
 /* status colors nudged darker for contrast on white */
-.ui-theme-light .agr-change.is-up {
-  color: #1a9d5a;
-}
-.ui-theme-light .agr-change.is-down {
-  color: #d92d20;
-}
-.ui-theme-light .agr-pending,
 .ui-theme-light .send-max {
   color: #3157e0;
 }

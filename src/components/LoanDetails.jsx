@@ -5,8 +5,6 @@ import usdcIcon from '../assets/cm-icon-usdc.svg'
 import usdtIcon from '../assets/cm-icon-usdt.svg'
 import btcIcon from '../assets/cm-icon-btc.svg'
 import aaveIcon from '../assets/cm-icon-aave.svg'
-import gainIcon from '../assets/cm-icon-gain.svg'
-import lossIcon from '../assets/cm-icon-loss.svg'
 import chevronIcon from '../assets/cm-icon-chevron.svg'
 
 /*
@@ -58,22 +56,15 @@ const BANDS = [
 ]
 
 const LOANED = [
-  { icon: usdcIcon, amount: '474,406.00', sym: 'USDC', usd: '$474,406.14', change: '43.42', dir: 'up' },
-  { icon: usdtIcon, amount: '526,283.38', sym: 'USDT', usd: '$1,000,283.24', change: '43.42', dir: 'down' },
+  { icon: usdcIcon, amount: '474,406.00', sym: 'USDC', usd: '$474,406.14' },
+  { icon: usdtIcon, amount: '526,283.38', sym: 'USDT', usd: '$1,000,283.24' },
 ]
 const COLLATERAL = [
-  { icon: btcIcon, amount: '115.27', sym: 'BTC', usd: '$7,692,407.49', change: '43.42', dir: 'up' },
-  { icon: aaveIcon, amount: '6,473.23', sym: 'AAVE', usd: '$612,373.76', change: '43.42', dir: 'up' },
+  { icon: btcIcon, amount: '115.27', sym: 'BTC', usd: '$7,692,407.49' },
+  { icon: aaveIcon, amount: '6,473.23', sym: 'AAVE', usd: '$612,373.76' },
 ]
 
-const Change = ({ change, dir }) => (
-  <span className={`cmd-change ${dir === 'down' ? 'is-down' : 'is-up'}`}>
-    <img className="cmd-arrow" src={dir === 'down' ? lossIcon : gainIcon} alt="" draggable="false" />
-    {change} %
-  </span>
-)
-
-const AssetRow = ({ icon, amount, sym, usd, change, dir }) => (
+const AssetRow = ({ icon, amount, sym, usd }) => (
   <div className="cmd-row">
     <span className="cmd-icon">
       <img src={icon} alt="" draggable="false" />
@@ -82,25 +73,19 @@ const AssetRow = ({ icon, amount, sym, usd, change, dir }) => (
       <div className="cmd-row-amt">
         {amount} <span className="cmd-row-sym">{sym}</span>
       </div>
-      <div className="cmd-row-sub">
-        <span className="cmd-row-usd">{usd}</span>
-        <Change change={change} dir={dir} />
-      </div>
+      <div className="cmd-row-usd">{usd}</div>
     </div>
   </div>
 )
 
-const TotalRow = ({ label, usd, change, dir }) => (
+const TotalRow = ({ label, usd }) => (
   <div className="cmd-row">
     <span className="cmd-icon">
       <img src={usdIcon} alt="" draggable="false" />
     </span>
     <div className="cmd-row-body">
       <div className="cmd-row-total">{label}</div>
-      <div className="cmd-row-sub">
-        <span className="cmd-row-usd">{usd}</span>
-        <Change change={change} dir={dir} />
-      </div>
+      <div className="cmd-row-usd">{usd}</div>
     </div>
   </div>
 )
@@ -173,13 +158,13 @@ export default function LoanDetails({ variant = 'modal' }) {
           {LOANED.map((a) => (
             <AssetRow key={a.sym} {...a} />
           ))}
-          <TotalRow label="Total loaned assets" usd="$1,474,689.38" change="31.22" dir="up" />
+          <TotalRow label="Total loaned assets" usd="$1,474,689.38" />
         </div>
         <div className="cmd-col">
           {COLLATERAL.map((a) => (
             <AssetRow key={a.sym} {...a} />
           ))}
-          <TotalRow label="Total collateral received" usd="$8,304,781.25" change="13.03" dir="down" />
+          <TotalRow label="Total collateral received" usd="$8,304,781.25" />
         </div>
       </div>
     </div>

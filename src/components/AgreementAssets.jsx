@@ -59,30 +59,11 @@ const INFO = [
 ]
 
 const ASSETS = [
-  { icon: btcIcon, amount: '7.87', sym: 'BTC', usd: '$526,283.38', change: '2.34', dir: 'up' },
-  { icon: hypeIcon, amount: '20,681.87', sym: 'HYPE', usd: '$1,283,849.38', change: '13.28', dir: 'up' },
-  { icon: usdtIcon, amount: '2,374,957.03', sym: 'USDT', usd: '$2,374,957.03', change: '1.23', dir: 'down' },
-  { icon: solIcon, amount: '129,484.63', sym: 'SOL', usd: '$10,106,690.10', pending: '22.82 pending release' },
+  { icon: btcIcon, amount: '7.87', sym: 'BTC', usd: '$526,283.38' },
+  { icon: hypeIcon, amount: '20,681.87', sym: 'HYPE', usd: '$1,283,849.38' },
+  { icon: usdtIcon, amount: '2,374,957.03', sym: 'USDT', usd: '$2,374,957.03' },
+  { icon: solIcon, amount: '129,484.63', sym: 'SOL', usd: '$10,106,690.10' },
 ]
-
-const Arrow = ({ down }) => (
-  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <path
-      d={down ? 'M5 5 L11 11 M11 6 v5 h-5' : 'M5 11 L11 5 M6 5 h5 v5'}
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-)
-
-const Clock = () => (
-  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.3" />
-    <path d="M8 5v3l2 1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-)
 
 export default function AgreementAssets({ variant = 'modal' }) {
   const { line, area } = useMemo(() => toPaths(ETH_SERIES, CHART), [])
@@ -154,15 +135,6 @@ export default function AgreementAssets({ variant = 'modal' }) {
                   </div>
                   <div className="agr-row-sub">
                     <span className="agr-row-usd">{a.usd}</span>
-                    {a.pending ? (
-                      <span className="agr-pending">
-                        <Clock /> {a.pending}
-                      </span>
-                    ) : (
-                      <span className={`agr-change ${a.dir === 'down' ? 'is-down' : 'is-up'}`}>
-                        <Arrow down={a.dir === 'down'} /> {a.change} %
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
