@@ -2,6 +2,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Close } from './icons.jsx'
 import { morph } from '../motion.js'
+import { cue } from '../sound.js'
 import { nativeComponents } from '../playground/registry.js'
 
 // Diagonal-wave loader: a 3×3 grid of squares where a diagonal band of light
@@ -100,7 +101,10 @@ export default function PlaygroundViewer({ item, originRect, openSeq, onClose })
           <motion.button
             key="pg-close"
             className="pg-close"
-            onClick={onClose}
+            onClick={() => {
+              cue('release')
+              onClose()
+            }}
             aria-label="Close"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

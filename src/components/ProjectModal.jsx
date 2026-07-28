@@ -239,7 +239,10 @@ export default function ProjectModal({ project, onClose }) {
           <motion.button
             key="close"
             className="modal-close"
-            onClick={onClose}
+            onClick={() => {
+              cue('release')
+              onClose()
+            }}
             aria-label="Close"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
