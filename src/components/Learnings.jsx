@@ -12,8 +12,8 @@ export default function Learnings() {
           In my first year I founded the data visualization library, unified
           operations like settle, swap, and stake into one simplified component
           set. It&rsquo;s reusable and lives in Storybook now, so any operation
-          can plug into it. Withdrawals, deposits, pledging, are all able to
-          plug into it and use it.
+          can plug into it. 20 fractured experiences were unified to all be able
+          to leverage this reusable component.
         </p>
         <p>
           I also designed two new business lines, collateral management and
