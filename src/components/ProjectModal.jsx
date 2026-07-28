@@ -39,13 +39,13 @@ function HeroDeck({ project }) {
   /* Cue fires outside the updater — the index has to stay functional or the
      keydown handler's closure goes stale after the first press. */
   const go = (delta) => {
-    cue('whisper')
+    cue('loading')
     setSlide(([i]) => [(i + delta + panels.length) % panels.length, delta])
   }
 
   const goTo = (i) => {
     if (i === idx) return // clicking the active dot changes nothing, so stay silent
-    cue('whisper')
+    cue('loading')
     setSlide([i, i > idx ? 1 : -1])
   }
 
