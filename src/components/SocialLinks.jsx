@@ -27,6 +27,17 @@ export default function SocialLinks() {
           <Icon />
         </a>
       ))}
+      {/* Same button shape as the icons, carrying a word instead of a glyph. */}
+      <a
+        className="icon-btn is-text"
+        /* .html so it resolves in dev too; Vercel's cleanUrls lands it on /cv */
+        href="/cv.html"
+        target="_blank"
+        rel="noreferrer"
+        onClick={() => cue('bloom')}
+      >
+        CV
+      </a>
     </nav>
   )
 }

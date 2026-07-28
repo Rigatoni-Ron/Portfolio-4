@@ -1,5 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "//": "cleanUrls serves cv.html at /cv, which is what the CV button links to.",
+  "cleanUrls": true,
   "headers": [
     {
       "source": "/(.*)",

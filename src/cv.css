@@ -1,0 +1,447 @@
+/* CV page styles. Self-contained rather than importing index.css: the site's
+   base rules (.card, button resets, layered utilities) would collide with a
+   page that shares none of its structure. Tokens mirror index.css so the two
+   stay visually identical. */
+
+:root {
+  --bg: #0a0a0b;
+  --text: #ededef;
+  --text-muted: #8a8f98;
+  --text-faint: #565a63;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-hover: rgba(255, 255, 255, 0.18);
+  --fill-hover: rgba(255, 255, 255, 0.04);
+  --accent: #3b82f6;
+  --r-md: 14px;
+  --r-pill: 999px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+body {
+  font-family: 'Geist', system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.4);
+}
+
+a {
+  color: inherit;
+}
+
+.cv {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 96px 32px 128px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+/* ---------- header ---------- */
+.cv-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.cv-id {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cv h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.cv-role {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.cv-blurb {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  /* wide enough to hold the sentence on one line at desktop width */
+  max-width: 60ch;
+}
+
+.cv-location {
+  margin: 2px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* Same shape language as the site's icon buttons, widened for a label. */
+.cv-dl {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition:
+    color 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    background-color 0.18s var(--ease),
+    transform 0.18s var(--ease);
+}
+
+.cv-dl:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+  background: var(--fill-hover);
+  transform: translateY(-1px);
+}
+
+.cv-dl:active {
+  transform: translateY(0);
+}
+
+.cv-dl svg {
+  width: 16px;
+  height: 16px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---------- contact ---------- */
+.cv-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cv-contact a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.18s var(--ease);
+}
+
+.cv-contact a:hover {
+  color: #6da4ff;
+}
+
+/* ---------- sections ---------- */
+.cv-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cv h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.cv-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.cv-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cv-entry-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cv h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.cv-meta {
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+.cv-roles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cv-role-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.cv-role-title {
+  color: var(--text);
+}
+
+.cv-dates {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Outline badges, same treatment as the project modal's metrics. */
+.cv-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.cv-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.cv-badge-value {
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.cv-points {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cv-points li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 78ch;
+}
+
+.cv-points li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 11px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-faint);
+}
+
+/* ---------- skills / stack ---------- */
+.cv-two-up {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.cv-two-up > div {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cv-tags {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cv-tags li {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ---------- footer ---------- */
+.cv-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+.cv-foot a {
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .cv {
+    padding: 48px 20px 72px;
+    gap: 36px;
+  }
+  .cv h1 {
+    font-size: 26px;
+  }
+  .cv-two-up {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .cv-role-row {
+    flex-direction: column;
+    gap: 1px;
+  }
+}
+
+/* ---------- print / PDF ----------
+   The screen page is dark, but a dark PDF depends on the reader leaving
+   "background graphics" on, and prints as a wall of ink when they don't.
+   So print gets a light sheet with the same type and hierarchy. */
+@media print {
+  :root {
+    --text: #101114;
+    --text-muted: #3d424b;
+    --text-faint: #6b7280;
+    --border: rgba(0, 0, 0, 0.16);
+  }
+
+  @page {
+    margin: 14mm 15mm;
+  }
+
+  html,
+  body {
+    background: #fff;
+  }
+
+  body {
+    color: var(--text);
+  }
+
+  .cv {
+    max-width: none;
+    padding: 0;
+    gap: 26px;
+  }
+
+  .cv-dl {
+    display: none;
+  }
+
+  .cv h1 {
+    font-size: 24px;
+  }
+  .cv-role {
+    font-size: 14px;
+  }
+  .cv-blurb,
+  .cv-location {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .cv-contact {
+    font-size: 11px;
+    padding-bottom: 14px;
+    gap: 4px 16px;
+  }
+  .cv h2 {
+    font-size: 10px;
+  }
+  .cv h3 {
+    font-size: 14px;
+  }
+  .cv-meta,
+  .cv-role-row,
+  .cv-badge,
+  .cv-tags li {
+    font-size: 11px;
+  }
+  .cv-points li {
+    font-size: 11.5px;
+    line-height: 1.5;
+    gap: 6px;
+    max-width: none;
+  }
+  .cv-points li::before {
+    top: 8px;
+  }
+  .cv-entries {
+    gap: 20px;
+  }
+  .cv-entry {
+    gap: 8px;
+    /* never split a job across a page boundary */
+    break-inside: avoid;
+  }
+  .cv-section {
+    gap: 14px;
+  }
+  .cv-two-up {
+    gap: 24px;
+    break-inside: avoid;
+  }
+  .cv-foot {
+    display: none;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
