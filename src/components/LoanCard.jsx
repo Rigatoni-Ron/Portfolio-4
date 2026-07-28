@@ -16,7 +16,6 @@ export default function LoanCard() {
           </div>
           <div className="loancard-account">Solana Foundation</div>
         </div>
-        <div className="loancard-badge">Healthy</div>
       </div>
 
       <div className="loancard-ltv">
