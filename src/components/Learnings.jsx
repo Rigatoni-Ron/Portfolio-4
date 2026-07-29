@@ -9,17 +9,14 @@ export default function Learnings() {
           Anchorage Digital (your bank&rsquo;s bank for digital assets).
         </p>
         <p>
-          In my first year I founded the data visualization library, unified
-          operations like settle, swap, and stake into one simplified component
-          set. It&rsquo;s reusable and lives in Storybook now, so any operation
-          can plug into it. 20 fractured experiences were unified to all be able
-          to leverage this reusable component.
-        </p>
-        <p>
-          I also designed two new business lines, collateral management and
-          escrow accounts. I was the largest contributor to our research
-          repository. And I ran workshops on agentic workflows, so the rest of
-          the design team could grow into the agentic era of design.
+          In my first year I founded the data visualization library, designed two
+          new business lines - collateral management and escrow accounts. I was
+          the largest contributor to our research repository. I ran workshops on
+          agentic workflows, enabling the design team to grow into the agentic
+          era of design. And I unified operations like settle, swap, and stake
+          into one simplified reusable component set that lives in Storybook. Any
+          operation can plug into it. 20 fractured experiences were unified to
+          all be able to leverage this reusable component.
         </p>
         <p>
           Here&rsquo;s some things I believe in: Interview users and subject
