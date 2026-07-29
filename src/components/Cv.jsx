@@ -31,7 +31,7 @@ const EXPERIENCE = [
   },
   {
     company: 'Rivalry Corp',
-    meta: 'Sportsbook and casino for a younger audience',
+    meta: 'Crypto prediction market',
     roles: [
       { title: 'Senior Product Designer', dates: 'Apr 2024 to Jul 2025' },
       { title: 'Product Designer', dates: 'May 2022 to Apr 2024' },
