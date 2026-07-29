@@ -26,7 +26,6 @@ const EXPERIENCE = [
       'Designed tri-party escrow accounts: clear roles, release conditions, and an audit trail all three parties can trust.',
       'Led the redesign of every operation into one reusable component set. Swap, bridge, convert, deposit, withdraw, settle, pledge, unlock collateral, and more than ten others.',
       'Founded the data visualization library, giving the org reusable charts fed by GraphQL.',
-      'Set the standard for design documentation and built the templates the rest of the team works from.',
       'Ran usability sessions and research interviews with clients holding $100MM and up.',
     ],
   },
@@ -47,7 +46,7 @@ const EXPERIENCE = [
       'Designed the staking experience, the crypto and fiat wallet, and the portfolio dashboard.',
       'Designed the SaaS dashboard tools: payment processing for fiat and crypto, data organization, permissions, promotions, bundle building, risk, and graphing.',
       'Built three design systems covering crypto, sports betting, and SaaS tooling, cutting design and development time by 46.2%.',
-      'Managed designers and mentored PMs. Shipped across iOS, Android, browser, and web.',
+      'Shipped across iOS, Android, browser, and web.',
     ],
   },
   {
