@@ -1,7 +1,11 @@
 import { defineConfig } from 'vite'
-import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+
+// This package is "type": "module", so __dirname doesn't exist — resolve the
+// entries from import.meta.url instead.
+const entry = (file) => fileURLToPath(new URL(file, import.meta.url))
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -10,8 +14,8 @@ export default defineConfig({
     // preview.html stays out of this on purpose — it's a dev-only scratch page.
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        cv: resolve(__dirname, 'cv.html'),
+        main: entry('./index.html'),
+        cv: entry('./cv.html'),
       },
     },
   },
