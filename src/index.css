@@ -109,6 +109,37 @@ a {
 }
 
 /* ============================================================
+   Load-in — top-level blocks lift 8px into place, staggered.
+   Transform and opacity only, so the compositor runs it and it stays smooth
+   while the main thread is still booting the header canvas and the live
+   Playground tiles. The transition lives on the .is-ready state, so the
+   hidden state applies without animating on first paint.
+   ============================================================ */
+.rise {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.is-ready .rise {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.42s var(--ease),
+    transform 0.42s var(--ease);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    transform: none;
+  }
+  .is-ready .rise {
+    transition: opacity 0.2s linear;
+    transition-delay: 0s;
+  }
+}
+
+/* ============================================================
    Top bar — social links (top right)
    ============================================================ */
 .topbar {
