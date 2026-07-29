@@ -151,7 +151,9 @@ export default function Cv() {
                 <span className="cv-meta">{job.meta}</span>
               </div>
 
-              <div className="cv-roles">
+              {/* Two titles at one company get a connector, so they read as a
+                  progression rather than two unrelated jobs. */}
+              <div className={`cv-roles${job.roles.length > 1 ? ' is-stacked' : ''}`}>
                 {job.roles.map((r) => (
                   <div className="cv-role-row" key={r.title}>
                     <span className="cv-role-title">{r.title}</span>

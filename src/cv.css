@@ -69,14 +69,14 @@ a {
 .cv h1 {
   margin: 0;
   font-size: 32px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
 
 .cv-role {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--text);
 }
 
@@ -105,7 +105,7 @@ a {
   height: 44px;
   padding: 0 16px;
   font: inherit;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-muted);
   background: transparent;
   border: 1px solid var(--border);
@@ -145,7 +145,7 @@ a {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 20px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-muted);
 }
 
@@ -202,7 +202,7 @@ a {
 }
 
 .cv-meta {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-faint);
 }
 
@@ -212,13 +212,42 @@ a {
   gap: 12px;
 }
 
+/* Rail for a company with more than one title: a dot per role, joined by a
+   line running between the two dot centres. */
+.cv-roles.is-stacked {
+  position: relative;
+  padding-left: 20px;
+}
+
+.cv-roles.is-stacked::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: var(--border-hover);
+}
+
 .cv-role-row {
+  position: relative;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-muted);
+}
+
+.cv-roles.is-stacked .cv-role-row::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-faint);
 }
 
 .cv-role-title {
@@ -251,7 +280,7 @@ a {
 
 .cv-badge-value {
   color: var(--text);
-  font-weight: 600;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
@@ -298,7 +327,7 @@ a {
   padding: 5px 10px;
   border: 1px solid var(--border);
   border-radius: var(--r-pill);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
 }
 
@@ -309,7 +338,7 @@ a {
   gap: 16px;
   padding-top: 24px;
   border-top: 1px solid var(--border);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-faint);
 }
 
@@ -373,17 +402,13 @@ a {
   .cv h1 {
     font-size: 24px;
   }
-  .cv-role {
-    font-size: 14px;
-  }
+  .cv-role,
   .cv-blurb,
-  .cv-location {
-    font-size: 12px;
-    margin-top: 4px;
+  .cv-location,
+  .cv-contact {
+    font-size: 11.5px;
   }
   .cv-contact {
-    font-size: 11px;
-    margin-top: 8px;
     gap: 4px 16px;
   }
   .cv h2 {
