@@ -33,20 +33,19 @@ const EXPERIENCE = [
     company: 'Rivalry Corp',
     meta: 'Crypto prediction market',
     roles: [
-      { title: 'Senior Product Designer', dates: 'Apr 2024 to Jul 2025' },
+      { title: 'Senior Product Designer', dates: 'Apr 2024 to Jun 2025' },
       { title: 'Product Designer', dates: 'May 2022 to Apr 2024' },
     ],
     badges: [
       { value: '+621%', label: 'wallet connect rate' },
+      { value: '40k+', label: 'wallets onboarded' },
       { value: '46.2%', label: 'less design and dev time' },
     ],
     points: [
-      'Designed the wallet connect experience. Ran a survey with over 2,000 responses, validated the direction in user testing, and raised crypto wallet connect rates by 621%.',
-      'Designed the airdrop experience for the company coin and co-authored the white paper.',
-      'Designed the staking experience, the crypto and fiat wallet, and the portfolio dashboard.',
-      'Designed the SaaS dashboard tools: payment processing for fiat and crypto, data organization, permissions, promotions, bundle building, risk, and graphing.',
-      'Built three design systems covering crypto, sports betting, and SaaS tooling, cutting design and development time by 46.2%.',
-      'Shipped across iOS, Android, and web.',
+      'Crypto onboarding, fiat and crypto ramps, wallets, staking, and airdrops. 40k+ wallets onboarded in the first month.',
+      'Wallet connect rebuilt from 2,000+ survey responses and user testing. Connect rates up 621%.',
+      'Fiat and crypto processing tools, and the analytics dashboard. iOS, Android, and web.',
+      'Three design systems, for crypto, betting, and SaaS tooling. 46.2% less design and dev time.',
     ],
   },
   {
