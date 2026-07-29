@@ -265,23 +265,10 @@ a {
 }
 
 .cv-points li {
-  position: relative;
-  padding-left: 18px;
   font-size: 15px;
   line-height: 1.6;
   color: var(--text-muted);
   max-width: 78ch;
-}
-
-.cv-points li::before {
-  content: '';
-  position: absolute;
-  left: 2px;
-  top: 11px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--text-faint);
 }
 
 /* ---------- skills / stack ---------- */
@@ -416,9 +403,6 @@ a {
     line-height: 1.5;
     gap: 6px;
     max-width: none;
-  }
-  .cv-points li::before {
-    top: 8px;
   }
   .cv-entries {
     gap: 20px;
