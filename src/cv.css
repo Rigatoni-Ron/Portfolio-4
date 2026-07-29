@@ -47,7 +47,8 @@ a {
   padding: 96px 32px 128px;
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  /* 56 between sections, 12 between the elements inside one */
+  gap: 56px;
 }
 
 /* ---------- header ---------- */
@@ -62,7 +63,7 @@ a {
 .cv-id {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
 }
 
 .cv h1 {
@@ -80,7 +81,7 @@ a {
 }
 
 .cv-blurb {
-  margin: 8px 0 0;
+  margin: 0;
   font-size: 15px;
   line-height: 1.6;
   color: var(--text-muted);
@@ -89,7 +90,7 @@ a {
 }
 
 .cv-location {
-  margin: 2px 0 0;
+  margin: 0;
   font-size: 15px;
   line-height: 1.6;
   color: var(--text-muted);
@@ -146,8 +147,6 @@ a {
   gap: 8px 20px;
   font-size: 14px;
   color: var(--text-muted);
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--border);
 }
 
 .cv-contact a {
@@ -164,7 +163,7 @@ a {
 .cv-section {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 12px;
 }
 
 .cv h2 {
@@ -179,7 +178,7 @@ a {
 .cv-entries {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 56px;
 }
 
 .cv-entry {
@@ -210,7 +209,7 @@ a {
 .cv-roles {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 12px;
 }
 
 .cv-role-row {
@@ -236,7 +235,6 @@ a {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 2px;
 }
 
 .cv-badge {
@@ -258,12 +256,12 @@ a {
 }
 
 .cv-points {
-  margin: 4px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .cv-points li {
@@ -297,7 +295,7 @@ a {
 .cv-two-up > div {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .cv-tags {
@@ -398,7 +396,7 @@ a {
   }
   .cv-contact {
     font-size: 11px;
-    padding-bottom: 14px;
+    margin-top: 8px;
     gap: 4px 16px;
   }
   .cv h2 {

@@ -114,6 +114,25 @@ export default function Cv() {
             Code based prototyping, user research, and design systems.
           </p>
           <p className="cv-location">Toronto, Canada</p>
+
+          {/* Part of the header block, so it sits on the same rhythm as the
+              lines above it rather than a section away. */}
+          <nav className="cv-contact" aria-label="Contact">
+            <a href="mailto:aaronchartrand1@gmail.com">aaronchartrand1@gmail.com</a>
+            <a href="https://www.aaronchartrand.me/" target="_blank" rel="noreferrer">
+              aaronchartrand.me
+            </a>
+            <a
+              href="https://www.linkedin.com/in/aaron-chartrand-495229217/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              LinkedIn
+            </a>
+            <a href="https://github.com/Rigatoni-Ron" target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+          </nav>
         </div>
 
         <button type="button" className="cv-dl" onClick={() => window.print()}>
@@ -121,23 +140,6 @@ export default function Cv() {
           Download PDF
         </button>
       </header>
-
-      <nav className="cv-contact" aria-label="Contact">
-        <a href="mailto:aaronchartrand1@gmail.com">aaronchartrand1@gmail.com</a>
-        <a href="https://www.aaronchartrand.me/" target="_blank" rel="noreferrer">
-          aaronchartrand.me
-        </a>
-        <a
-          href="https://www.linkedin.com/in/aaron-chartrand-495229217/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          LinkedIn
-        </a>
-        <a href="https://github.com/Rigatoni-Ron" target="_blank" rel="noreferrer">
-          GitHub
-        </a>
-      </nav>
 
       <section className="cv-section">
         <h2>Experience</h2>
