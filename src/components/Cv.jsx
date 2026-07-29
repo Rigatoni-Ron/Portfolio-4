@@ -46,7 +46,7 @@ const EXPERIENCE = [
       'Designed the staking experience, the crypto and fiat wallet, and the portfolio dashboard.',
       'Designed the SaaS dashboard tools: payment processing for fiat and crypto, data organization, permissions, promotions, bundle building, risk, and graphing.',
       'Built three design systems covering crypto, sports betting, and SaaS tooling, cutting design and development time by 46.2%.',
-      'Shipped across iOS, Android, browser, and web.',
+      'Shipped across iOS, Android, and web.',
     ],
   },
   {
