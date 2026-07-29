@@ -13,10 +13,9 @@ export default function Learnings() {
           new business lines - collateral management and escrow accounts. I was
           the largest contributor to our research repository. I ran workshops on
           agentic workflows, enabling the design team to grow into the agentic
-          era of design. And I unified operations like settle, swap, and stake
-          into one simplified reusable component set that lives in Storybook. Any
-          operation can plug into it. 20 fractured experiences were unified to
-          all be able to leverage this reusable component.
+          era of design. And I unified 20 fractured operation experiences
+          including settle, swap, and stake into one simplified reusable
+          component set that lives in Storybook.
         </p>
         <p>
           Here&rsquo;s some things I believe in: Interview users and subject
