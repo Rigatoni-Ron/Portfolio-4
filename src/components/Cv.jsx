@@ -193,7 +193,7 @@ export default function Cv() {
           </ul>
         </div>
         <div>
-          <h2>Tech stack</h2>
+          <h2>Current tech stack</h2>
           <ul className="cv-tags">
             {STACK.map((s) => (
               <li key={s}>{s}</li>
