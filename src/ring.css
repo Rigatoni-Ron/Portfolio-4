@@ -1,0 +1,132 @@
+/* Ring prototype styles. Dev-only page; not part of the production build. */
+
+.ring-stage {
+  padding: 40px 0 96px;
+}
+
+.ring {
+  position: relative;
+  width: 100%;
+  /* the cards sort among themselves from 0..200; isolate so that ordering
+     can't outrank the modal (60) or the playground viewer (70) */
+  isolation: isolate;
+  z-index: 0;
+  /* the cards are absolutely placed around the centre of this box */
+}
+
+.ring-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  /* Same container as the real cards: outline, radius, and an 8px inset around
+     the preview, so these read as contained objects rather than floating art. */
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-2);
+  background: transparent;
+  /* transform/opacity/filter are written inline every frame, so only the hover
+     treatment transitions and the drift stays a pure compositor job */
+  transition:
+    border-color 0.2s var(--ease),
+    background-color 0.2s var(--ease);
+  will-change: transform;
+}
+
+.ring-card.is-hover {
+  border-color: var(--border-hover);
+  background: var(--fill-hover);
+}
+
+.ring-preview {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(255, 255, 255, 0.05), transparent 55%),
+    var(--bg-raised);
+}
+
+/* the shipped product shot, same treatment as the real card */
+.ring-preview .card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ring-preview .card-heroshot-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 7%;
+}
+
+.ring-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s-3) var(--s-2) var(--s-1);
+}
+
+.ring-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 22px;
+}
+
+.ring-title {
+  font-size: 15px;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ring-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ring-badge {
+  flex: none;
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ring-badge.is-shipped {
+  border-color: rgba(59, 130, 246, 0.35);
+  color: #8fb4fb;
+}
+
+/* the live playground tiles are previews here, not controls */
+.ring-preview > *:not(.card-bg):not(.card-heroshot-overlay) {
+  pointer-events: none;
+}
+
+.ring-note {
+  max-width: 640px;
+  margin: 0 auto 8px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-faint);
+}
