@@ -76,19 +76,28 @@ never reads the noindex and the bare URL can still get listed.
   type, selectable text, live links — so the `@media print` sheet in `cv.css`
   is what renders it and still matters.
 
-  **Regenerate with `npm run cv:pdf` whenever the CV changes,** and commit the
-  PDF with the change. It builds, serves `dist`, prints `/cv.html` through the
-  Chrome that's already on this Mac, and takes about seven seconds. No new
-  dependency; it can't run on Vercel, whose build image has no Chrome.
+  **There is nothing to remember.** `scripts/ensure-cv-pdf.mjs` runs on
+  `npm run dev`, on `npm run build`, and from a `pre-commit` hook — every point
+  the CV could have changed. It hashes `cv.html`, `src/cv.jsx`, `src/cv.css`,
+  and `Cv.jsx`, compares that against `scripts/cv-pdf.stamp.json`, and does
+  nothing at all when they agree (a third of a second). When they don't, it
+  rebuilds the PDF, and the hook stages it into the same commit. Regenerating
+  takes about seven seconds and adds no dependency: it prints through whatever
+  Chrome is already installed.
 
-  Staleness is handled rather than trusted to memory. The generator stamps a
-  hash of `cv.html`, `src/cv.jsx`, `src/cv.css`, and `Cv.jsx` into
-  `scripts/cv-pdf.stamp.json`, and a `prebuild` check compares it on every
-  `npm run build` — locally and on Vercel. Edit the CV without regenerating and
-  the build fails, telling you which command to run. Deliberate: a stale CV
-  reaching a recruiter beats a failed deploy. It does mean a forgotten
-  regeneration blocks the whole deploy, so the `vercel.json` gotcha below (check
-  the commit status, don't trust the push) applies to this too.
+  The hook is installed by the `prepare` script, which points
+  `core.hooksPath` at `.githooks/` on `npm install`. That's why the hook is
+  committed rather than living in `.git/hooks`, where it would die with the
+  worktree.
+
+  `npm run cv:pdf` still exists for regenerating by hand, but shouldn't be
+  needed.
+
+  **On Vercel it can only refuse,** because that build image has no Chrome to
+  print with — so a stale PDF fails the deploy rather than shipping. That's the
+  right trade (a stale CV reaching a recruiter is worse), but it means the
+  `vercel.json` gotcha below applies here too: check the commit status, don't
+  trust the push.
 
 - **Offscreen tile pausing.** Built, measured, reverted. Negligible saving on a
   page barely taller than the viewport.

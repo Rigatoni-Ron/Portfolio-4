@@ -107,8 +107,8 @@ const SKILLS = [
 const STACK = [
   'Figma',
   'Claude Code',
+  'Conductor',
   'VS Code',
-  'Apex',
   'Framer',
   'Supernova',
   'Notion',
@@ -153,8 +153,9 @@ export default function Cv() {
 
         {/* A real file, not window.print() — that opened a print dialog and
             tripped Safari's "this webpage is trying to print" warning. The PDF
-            is committed, so it needs `npm run cv:pdf` whenever this page
-            changes; the prebuild check enforces that. */}
+            is committed rather than generated on deploy, so edits to this page
+            leave it stale; scripts/ensure-cv-pdf.mjs rebuilds it on dev, build,
+            and commit, so there is nothing to remember. */}
         <a className="cv-dl" href="/aaron-chartrand-cv.pdf" download>
           <Download />
           Download PDF

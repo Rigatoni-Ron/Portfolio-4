@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 /*
@@ -19,6 +19,18 @@ export const CV_SOURCES = ['cv.html', 'src/cv.jsx', 'src/cv.css', 'src/component
 
 export const PDF_PATH = repoFile('public/aaron-chartrand-cv.pdf')
 export const STAMP_PATH = repoFile('scripts/cv-pdf.stamp.json')
+
+/* Whatever Chromium-based browser is already installed. Nothing is downloaded
+   for this, and on Vercel none of these exist — which is the point. */
+const CHROMES = [
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
+  '/Applications/Chromium.app/Contents/MacOS/Chromium',
+  '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+  '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
+]
+
+export const findChrome = () => CHROMES.find(existsSync)
 
 export function hashSources() {
   const hash = createHash('sha256')

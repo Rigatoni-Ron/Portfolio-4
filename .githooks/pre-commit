@@ -1,0 +1,9 @@
+#!/bin/sh
+# Rebuilds the CV download PDF if the CV page changed, and includes it in this
+# commit. Catches the case npm run dev can't: editing the CV while the dev
+# server is already running, then committing.
+#
+# Installed by the "prepare" script in package.json (git config core.hooksPath).
+
+node scripts/ensure-cv-pdf.mjs || exit 1
+git add public/aaron-chartrand-cv.pdf scripts/cv-pdf.stamp.json

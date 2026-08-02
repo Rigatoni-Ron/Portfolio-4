@@ -2,7 +2,7 @@ import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, mkdtempSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { PDF_PATH, STAMP_PATH, hashSources, repoFile } from './cv-sources.mjs'
+import { PDF_PATH, STAMP_PATH, findChrome, hashSources, repoFile } from './cv-sources.mjs'
 
 /*
  * Regenerates public/aaron-chartrand-cv.pdf, the file the CV's download button
@@ -15,17 +15,13 @@ import { PDF_PATH, STAMP_PATH, hashSources, repoFile } from './cv-sources.mjs'
  * dependency: it borrows the Chrome that's already installed.
  *
  * Afterwards it stamps a hash of the CV source files, which is how
- * check-cv-pdf.mjs knows the snapshot has fallen behind the page.
+ * ensure-cv-pdf.mjs knows the snapshot has fallen behind the page.
+ *
+ * Running this by hand is optional — ensure-cv-pdf.mjs calls it for you on
+ * npm run dev, npm run build, and git commit.
  */
 
 const PORT = 4319
-const CHROMES = [
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
-  '/Applications/Chromium.app/Contents/MacOS/Chromium',
-  '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
-  '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
-]
 
 const vite = repoFile('node_modules/vite/bin/vite.js')
 const runVite = (args, opts) => spawn(process.execPath, [vite, ...args], opts)
@@ -35,9 +31,9 @@ const die = (msg) => {
   process.exit(1)
 }
 
-const chrome = CHROMES.find(existsSync)
+const chrome = findChrome()
 if (!chrome) {
-  die('No Chrome found. Install Google Chrome, or add your browser to CHROMES in this file.')
+  die('No Chrome found. Install Google Chrome, or add your browser to CHROMES in cv-sources.mjs.')
 }
 
 /* vite build, not npm run build — npm would run the staleness check first, and
