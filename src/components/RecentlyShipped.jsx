@@ -5,12 +5,14 @@ import { cue } from '../sound.js'
 import LoanCard from './LoanCard.jsx'
 import AgreementAssets from './AgreementAssets.jsx'
 import SendTransfer from './SendTransfer.jsx'
+import SwapPanel from './SwapPanel.jsx'
 
 // Maps a project's heroComponent flag to the rebuilt UI that floats on its
 // landscape (product-shot experiment).
 function HeroComponent({ name }) {
   if (name === 'agreement') return <AgreementAssets variant="card" />
   if (name === 'send') return <SendTransfer variant="card" />
+  if (name === 'swap') return <SwapPanel variant="card" />
   return <LoanCard />
 }
 

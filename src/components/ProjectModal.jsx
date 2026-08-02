@@ -7,6 +7,7 @@ import LoanCard from './LoanCard.jsx'
 import LoanDetails from './LoanDetails.jsx'
 import AgreementAssets from './AgreementAssets.jsx'
 import SendTransfer from './SendTransfer.jsx'
+import SwapPanel from './SwapPanel.jsx'
 
 /* Rebuilt product UI, keyed by the name a project uses in data.js. */
 const HERO_PANELS = {
@@ -14,6 +15,7 @@ const HERO_PANELS = {
   loanDetails: LoanDetails,
   agreement: AgreementAssets,
   send: SendTransfer,
+  swap: SwapPanel,
 }
 
 /* Slide variants shared by the panel deck and the image carousel: travel

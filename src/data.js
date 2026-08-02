@@ -7,6 +7,7 @@
 import colShore from './assets/collateral-shore.webp'
 import escrowLake from './assets/escrow-lake.webp'
 import settleValley from './assets/settlements-valley.webp'
+import swapCoins from './assets/swap-coins.webp'
 
 export const projects = [
   {
@@ -71,6 +72,17 @@ export const projects = [
     metrics: [
       { value: '+90%', label: 'pledged AUC' },
     ],
+  },
+  {
+    id: 'swap',
+    title: 'Token swap',
+    desc: 'Consumer mobile app for self-custody token swaps',
+    heroBg: swapCoins,
+    heroComponent: 'swap',
+    year: '2024',
+    role: 'Product Design',
+    body: 'A consumer mobile app for swapping tokens straight from a self-custody wallet: pick two assets, set an amount, and read the quote before committing. The trade screen carries the two legs and one action, and everything about routing, slippage and fees moves to the review step, where it is the only thing being decided.',
+    tags: ['Consumer', 'Mobile', 'iOS', 'Trading'],
   },
 ]
 

@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client'
 import LoanCard from './components/LoanCard.jsx'
 import AgreementAssets from './components/AgreementAssets.jsx'
 import SendTransfer from './components/SendTransfer.jsx'
+import SwapPanel from './components/SwapPanel.jsx'
 
 // Throwaway preview: the rebuilt product UIs in dark vs light. Not part of the
 // site; reachable at /preview.html on the dev server.
@@ -12,6 +13,9 @@ const ROWS = [
   { name: 'Loan Card — Collateral', Comp: LoanCard, w: 460 },
   { name: 'Agreement Assets — Escrow', Comp: AgreementAssets, w: 880, zoom: 0.62 },
   { name: 'Send Transfer — Settlements', Comp: SendTransfer, w: 460 },
+  // Renders the same in both columns on purpose — the phone screen is a light
+  // iOS app and doesn't follow the site theme.
+  { name: 'Swap — Token swap (phone, unthemed)', Comp: SwapPanel, w: 417, zoom: 0.62 },
 ]
 
 function App() {
