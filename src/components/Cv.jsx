@@ -4,8 +4,10 @@ import { Download } from './icons.jsx'
  * CV page. Own entry (cv.html) so it opens in its own tab and prints cleanly.
  * Content comes from the Figma resume, with the Anchorage work enriched by the
  * numbers the site's recently-shipped section already carries.
- * The PDF is the browser's own print output: vector type, selectable text and
- * live links, no dependency. cv.css flips to a light sheet for print.
+ * The PDF is still the browser's own print output — vector type, selectable
+ * text and live links, no dependency — but printed ahead of time by
+ * scripts/cv-pdf.mjs and committed, because Vercel's build image has no
+ * Chrome. cv.css flips to a light sheet for print, and that's what renders it.
  */
 
 const EXPERIENCE = [
@@ -135,10 +137,14 @@ export default function Cv() {
           </nav>
         </div>
 
-        <button type="button" className="cv-dl" onClick={() => window.print()}>
+        {/* A real file, not window.print() — that opened a print dialog and
+            tripped Safari's "this webpage is trying to print" warning. The PDF
+            is committed, so it needs `npm run cv:pdf` whenever this page
+            changes; the prebuild check enforces that. */}
+        <a className="cv-dl" href="/aaron-chartrand-cv.pdf" download>
           <Download />
           Download PDF
-        </button>
+        </a>
       </header>
 
       <section className="cv-section">

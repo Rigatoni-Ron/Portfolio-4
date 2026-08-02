@@ -20,15 +20,6 @@ never reads the noindex and the bare URL can still get listed.
   phone widths, and confirming the four live Playground pieces are usable or
   degrade on touch. The custom cursor is already correctly gated off for touch.
 
-- **CV "Download PDF" doesn't download.** It calls `window.print()`, so it
-  opens a print dialog — a recruiter hit this and got Safari's "this webpage is
-  trying to print". Recommended fix: pre-generate the PDF, commit it to
-  `public/`, and make the button a plain `<a download>`. Cost is that it's a
-  snapshot needing regeneration when the CV changes (Vercel's Linux build has no
-  Chrome, so generate locally). Alternatives: rename the button to "Print"
-  (honest, no file), or client-side jsPDF (a dependency, worse output). Keep the
-  `@media print` light sheet either way — it's what renders the file.
-
 ### Features
 
 - **Email icon should copy to clipboard.** `SocialLinks.jsx` is a plain
@@ -77,6 +68,27 @@ never reads the noindex and the bare URL can still get listed.
 ---
 
 ## Settled — don't revisit
+
+- **CV "Download PDF".** Was `window.print()`, which opened a print dialog and
+  tripped Safari's "this webpage is trying to print" on a recruiter. Now a
+  committed file: `public/aaron-chartrand-cv.pdf`, served by a plain
+  `<a download>`. The file is still the browser's own print output — vector
+  type, selectable text, live links — so the `@media print` sheet in `cv.css`
+  is what renders it and still matters.
+
+  **Regenerate with `npm run cv:pdf` whenever the CV changes,** and commit the
+  PDF with the change. It builds, serves `dist`, prints `/cv.html` through the
+  Chrome that's already on this Mac, and takes about seven seconds. No new
+  dependency; it can't run on Vercel, whose build image has no Chrome.
+
+  Staleness is handled rather than trusted to memory. The generator stamps a
+  hash of `cv.html`, `src/cv.jsx`, `src/cv.css`, and `Cv.jsx` into
+  `scripts/cv-pdf.stamp.json`, and a `prebuild` check compares it on every
+  `npm run build` — locally and on Vercel. Edit the CV without regenerating and
+  the build fails, telling you which command to run. Deliberate: a stale CV
+  reaching a recruiter beats a failed deploy. It does mean a forgotten
+  regeneration blocks the whole deploy, so the `vercel.json` gotcha below (check
+  the commit status, don't trust the push) applies to this too.
 
 - **Offscreen tile pausing.** Built, measured, reverted. Negligible saving on a
   page barely taller than the viewport.

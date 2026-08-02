@@ -107,6 +107,7 @@ a {
   font: inherit;
   font-size: 15px;
   color: var(--text-muted);
+  text-decoration: none;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
