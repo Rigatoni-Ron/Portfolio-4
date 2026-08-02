@@ -1,0 +1,55 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+# Conductor config for Portfolio 4, committed so every workspace inherits it — Vite + React 19, npm,
+# static deploy to Vercel. A machine-local .conductor/settings.local.toml can
+# override any of this per machine; ~/.conductor/settings.toml still
+# supplies the git and model defaults.
+
+[scripts]
+# npm with a committed package-lock.json (lockfileVersion 3). `npm ci` gives a
+# clean, deterministic install in a fresh worktree. Nothing else to do here:
+# no .env, no generated files, no database, no services.
+setup = "npm ci"
+
+# Every workspace gets its own CONDUCTOR_PORT and the site is a self-contained
+# static build with no shared state, so workspaces can run side by side.
+run_mode = "concurrent"
+
+# Reclaim disk on archive. Gitignored build output only, scoped to this
+# workspace; the `:?` guard makes the command fail loudly rather than run
+# against `/` if the variable is ever empty.
+archive = 'rm -rf "${CONDUCTOR_WORKSPACE_PATH:?}/node_modules" "${CONDUCTOR_WORKSPACE_PATH:?}/dist"'
+
+[scripts.run.dev]
+# CONDUCTOR_PORT is unset in cloud workspaces, hence local-only.
+command = "npm run dev -- --port $CONDUCTOR_PORT --strictPort"
+default = true
+icon = "play"
+available_in = [ "local" ]
+
+[scripts.run.preview]
+# The production build served locally — the only way to check the two-entry
+# build (index.html + cv.html) and the CV print sheet. Runs on CONDUCTOR_PORT+1
+# so it can sit alongside the dev server.
+command = "npm run build && npm run preview -- --port $((CONDUCTOR_PORT + 1)) --strictPort"
+icon = "monitor"
+available_in = [ "local" ]
+
+[scripts.run.build]
+# NOTES.md records builds that pass locally and fail on deploy. This is the
+# cheap pre-push check, and it needs no port, so it works in cloud too.
+command = "npm run build"
+icon = "package"
+
+# The site is multi-page, so the Open button gets each entry point.
+[[preview_urls]]
+name = "Site"
+url = "http://localhost:$CONDUCTOR_PORT/"
+
+[[preview_urls]]
+name = "CV"
+url = "http://localhost:$CONDUCTOR_PORT/cv.html"
+
+[[preview_urls]]
+name = "Playground scratch"
+url = "http://localhost:$CONDUCTOR_PORT/preview.html"
