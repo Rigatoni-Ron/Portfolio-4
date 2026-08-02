@@ -23,12 +23,14 @@ const EXPERIENCE = [
       { value: '4×', label: 'collateral deals' },
     ],
     points: [
-      'Designed Collateral Management as a 0 to 1 product, letting institutions borrow and lend digital assets while managing interest accrual and liquidations.',
+      'Designed Collateral Management as a 0 to 1 product, letting institutions borrow and lend digital assets while managing interest accrual and liquidations. Took it from a planned reskin of a back office tool to a product that shows position state visually and recommends the next best action, so a margin call arrives with a top up or pay down already suggested.',
       'Designed off-exchange settlement, so institutions can trade on exchanges while their funds stay in bank custody. Over $1B settled.',
       'Designed tri-party escrow accounts: clear roles, release conditions, and an audit trail all three parties can trust.',
-      'Led the redesign of every operation into one reusable component set. Swap, bridge, convert, deposit, withdraw, settle, pledge, unlock collateral, and more than ten others.',
-      'Founded the data visualization library, giving the org reusable charts fed by GraphQL.',
-      'Ran usability sessions and research interviews with clients holding $100MM and up.',
+      'Put unified actions on the roadmap, where it had not been, then led the redesign of 20 operations into one reusable component set. Swap, bridge, convert, deposit, withdraw, settle, pledge, unlock collateral, and twelve more. A new operation now reuses it wholesale instead of starting from scratch, and flows people called hard to follow became short, clear steps.',
+      'Founded the data visualization library. Reusable charts fed by GraphQL, now used by the DeFi wallet, fiat banking, custody, and loans teams, and by dozens of designers and engineers.',
+      'Ran agentic workflow workshops for all 20 designers, then one to one sessions until it stuck. Designers now open PRs and change code in production.',
+      'Lead several weekly design critiques, and mentor designers as their onboarding buddy, elevating craft alongside ramp time.',
+      'Ran usability sessions and research interviews with clients holding $100MM and up, and became the largest contributor to the research repository.',
     ],
   },
   {
@@ -44,9 +46,9 @@ const EXPERIENCE = [
       { value: '46.2%', label: 'less design and dev time' },
     ],
     points: [
-      'Crypto onboarding, fiat and crypto ramps, wallets, staking, and airdrops. 40k+ wallets onboarded in the first month.',
+      'Crypto onboarding, fiat and crypto ramps, wallets, staking, and airdrops across iOS, Android, and mobile web. 40k+ wallets onboarded in the first month.',
       'Wallet connect rebuilt from 2,000+ survey responses and user testing. Connect rates up 621%.',
-      'Fiat and crypto processing tools, and the analytics dashboard. iOS, Android, and web.',
+      'Fiat and crypto processing tools, and the analytics dashboard.',
       'Three design systems, for crypto, betting, and SaaS tooling. 46.2% less design and dev time.',
     ],
   },
@@ -55,7 +57,7 @@ const EXPERIENCE = [
     meta: 'Contract',
     roles: [{ title: 'Lead Product Designer', dates: 'Nov 2024 to Feb 2025' }],
     points: [
-      'Built the MVP for a DeFi crypto wallet swapping app on iOS and Android.',
+      'Built the MVP for a DeFi crypto wallet swapping app on iOS.',
       'Used web data to steer the decisions, then took it from hi-fi designs to a working prototype in node based tools, Origami and Play.',
     ],
   },
@@ -65,6 +67,16 @@ const EXPERIENCE = [
     roles: [{ title: 'Branding Designer', dates: 'May 2022 to Aug 2022' }],
     points: [
       'Conceived and designed a 3D sculpture built for a fish tank as part of a creative campaign, working inside the brand guidelines. Seen by millions online.',
+    ],
+  },
+  {
+    company: 'Shop Okie Dokie',
+    meta: 'B2B and B2C e-commerce',
+    roles: [{ title: 'UX Designer', dates: 'Oct 2016 to Apr 2022' }],
+    points: [
+      'Designed the B2B and B2C e-commerce experiences.',
+      'Ran interviews to find user pain points, needs, and desires, and turned what surfaced into opportunities.',
+      'Validated solutions by analyzing metrics and running usability tests.',
     ],
   },
 ]
@@ -83,6 +95,8 @@ const SKILLS = [
   'Validating solutions',
   'User journeys',
   'Design systems',
+  'Design critique',
+  'Mentorship',
   'User personas',
   'Lottie and JSON animation',
   'Gamification',
