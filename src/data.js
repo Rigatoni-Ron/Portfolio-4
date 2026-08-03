@@ -12,13 +12,7 @@ import anchorageLogo from './assets/anchorage-logo.svg'
 import rivalryLogo from './assets/rivalry-logo.svg'
 
 // Client marks, shown under the description in the modal only — the tiles stay
-// clean. Heights look unrelated because they're chosen to land both marks at
-// the same rendered WIDTH (~113px) and so at roughly the same type size:
-// Anchorage stacks two lines into 157x36, Rivalry's wide lockup is one line at
-// 226x32, so matching their heights would have made Rivalry's type nearly three
-// times larger. Width stays auto; each keeps its own proportions.
-const ANCHORAGE = { src: anchorageLogo, height: 26 }
-const RIVALRY = { src: rivalryLogo, height: 16 }
+// clean. Both render at one height, set in .modal-client.
 
 export const projects = [
   {
@@ -26,7 +20,7 @@ export const projects = [
     title: 'Settlements',
     desc: 'B2B payments, singular & multi-party settlements',
     heroBg: settleValley,
-    client: ANCHORAGE,
+    client: anchorageLogo,
     heroComponent: 'send',
     year: '2025',
     role: 'Product Design',
@@ -46,7 +40,7 @@ export const projects = [
     title: 'Collateral management',
     desc: 'Lending and borrowing of digital assets',
     heroBg: colShore,
-    client: ANCHORAGE,
+    client: anchorageLogo,
     // Card shows the loan card; the modal decks it with the loan detail view.
     heroPanels: ['loan', 'loanDetails'],
     year: '2025',
@@ -73,7 +67,7 @@ export const projects = [
     title: 'Escrow accounts',
     desc: 'Also known as tri-party agreements',
     heroBg: escrowLake,
-    client: ANCHORAGE,
+    client: anchorageLogo,
     heroComponent: 'agreement',
     year: '2024',
     role: 'Product Design',
@@ -92,7 +86,7 @@ export const projects = [
     title: 'Token swap',
     desc: 'Consumer mobile app for self-custody token swaps',
     heroBg: swapCoins,
-    client: RIVALRY,
+    client: rivalryLogo,
     heroComponent: 'swap',
     year: '2024',
     role: 'Product Design',
