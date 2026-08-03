@@ -8,8 +8,8 @@ import batteryIcon from '../assets/ios-battery.svg'
 /*
  * Swap — the trade screen from the crypto swapping app, rebuilt from the
  * recorded flow as a full phone screen inside an iPhone outline: status bar,
- * both swap legs, the primary action, and the Wallet / Swap / History tab bar.
- * There is no nav bar; the tab bar already names the screen.
+ * the Swap title, both swap legs, the primary action, and the
+ * Wallet / Swap / History tab bar.
  *
  * Type scale is deliberately short — four sizes (12 / 15 / 17 / 34) on the
  * default weight plus 600 for the CTA and the status clock.
@@ -143,12 +143,12 @@ export default function SwapPanel({ variant = 'modal' }) {
   // 426px design width (the 402pt screen plus the 12px shell each side). Both
   // contexts fit to a design HEIGHT shorter than the phone's real 898 and let
   // the rest run off the bottom, which is what keeps the type legible. The
-  // button's bottom edge sits at 434 (measured in the browser, not derived —
+  // button's bottom edge sits at 496 (measured in the browser, not derived —
   // the line-heights don't sum to anything tidy), so both clear it: the tile by
   // a sliver, the modal by more. Expressing these as heights rather than fixed
   // zooms means the cut holds at any tile or modal size.
   const card = variant === 'card'
-  const fitRef = useFitScale(426, card ? 0.7 : 1, card ? 456 : 482)
+  const fitRef = useFitScale(426, card ? 0.7 : 1, card ? 518 : 544)
   return (
     <div className="swp" ref={fitRef}>
       {/* Side buttons sit outside the screen, on the shell — cheap, but they're
@@ -171,8 +171,10 @@ export default function SwapPanel({ variant = 'modal' }) {
           </div>
         </div>
 
-        {/* No nav bar: the tab bar already names the screen, so the content
-            field starts straight off the status bar. */}
+        <div className="swp-header">
+          <div className="swp-largetitle">Swap</div>
+        </div>
+
         <div className="swp-body">
           <div className="swp-card">
             <Leg

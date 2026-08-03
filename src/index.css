@@ -1167,6 +1167,22 @@ a {
   background: #000;
 }
 
+/* ── header ─────────────────────────────────────────────────── */
+
+.swp-header {
+  flex-shrink: 0;
+  padding: 8px 16px 12px;
+  background: #fafafa;
+}
+
+.swp-largetitle {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 42px;
+  letter-spacing: -0.02em;
+  color: #000;
+}
+
 /* ── content field ──────────────────────────────────────────── */
 
 .swp-body {
