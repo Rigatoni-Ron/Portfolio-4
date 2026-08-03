@@ -83,6 +83,14 @@ export const projects = [
     role: 'Product Design',
     body: 'A consumer mobile app for swapping tokens straight from a self-custody wallet: pick two assets, set an amount, and read the quote before committing. The trade screen carries the two legs and one action, and everything about routing, slippage and fees moves to the review step, where it is the only thing being decided.',
     tags: ['Consumer', 'Mobile', 'iOS', 'Trading'],
+    // Badges are pills on the title row and never wrap, so the labels are cut
+    // to two or three words. Full readings, from Figma: 63% is "of mobile users
+    // staying on mobile (instead of returning to web)"; 55% is the swap
+    // conversion rate. Absolute rates, so no "+" the way the deltas above have.
+    metrics: [
+      { value: '63%', label: 'stayed on mobile' },
+      { value: '55%', label: 'swap conversion' },
+    ],
   },
 ]
 
