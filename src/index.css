@@ -1937,8 +1937,9 @@ a {
 }
 
 /* Client mark under the description. No rule above it — spacing alone separates
-   it, and a divider read as extra furniture. One shared height across the
-   lockups; width auto, so each keeps its own proportions. */
+   it, and a divider read as extra furniture. Height here is the default; a
+   lockup whose proportions need an optical correction overrides it from
+   data.js. Width stays auto, so each keeps its own proportions. */
 .modal-client {
   margin-top: var(--s-5);
 }

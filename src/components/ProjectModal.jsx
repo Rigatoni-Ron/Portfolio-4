@@ -320,7 +320,12 @@ export default function ProjectModal({ project, onClose }) {
                     thumbnail fought the product shot. */}
                 {project.client && (
                   <div className="modal-client">
-                    <img src={project.client} alt="" draggable="false" />
+                    <img
+                      src={project.client}
+                      style={project.clientHeight ? { height: project.clientHeight } : undefined}
+                      alt=""
+                      draggable="false"
+                    />
                   </div>
                 )}
               </motion.div>

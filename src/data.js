@@ -12,7 +12,8 @@ import anchorageLogo from './assets/anchorage-logo.svg'
 import rivalryLogo from './assets/rivalry-logo.svg'
 
 // Client marks, shown under the description in the modal only — the tiles stay
-// clean. Both render at one height, set in .modal-client.
+// clean. .modal-client sets the default height; only a lockup that needs an
+// optical correction carries its own `clientHeight`.
 
 export const projects = [
   {
@@ -87,6 +88,11 @@ export const projects = [
     desc: 'Consumer mobile app for self-custody token swaps',
     heroBg: swapCoins,
     client: rivalryLogo,
+    // Anchorage stacks two lines into its box so its type is small relative to
+    // its height; Rivalry's wide lockup is one line filling the full height. At
+    // a shared 26 the Rivalry type comes out ~2.6x larger and swamps the modal.
+    // 18 was picked by eye against Anchorage, not derived.
+    clientHeight: 18,
     heroComponent: 'swap',
     year: '2024',
     role: 'Product Design',
