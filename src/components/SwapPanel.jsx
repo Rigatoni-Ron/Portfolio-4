@@ -183,14 +183,15 @@ function Leg({ amount, usd, icon, symbol, balance, muted }) {
 }
 
 export default function SwapPanel({ variant = 'modal' }) {
-  // 417px design width (the 393pt screen plus the 12px shell each side). The
-  // modal fits to 570px of height rather than the phone's full 876: that's
-  // everything down to the button plus a little air, so the phone comes out
-  // about half again as large and the crop falls in the empty field above the
-  // tab bar. The tile passes no height on purpose — it's a fixed, tighter crop
-  // that ends just past the swap card.
+  // 417px design width (the 393pt screen plus the 12px shell each side). Both
+  // contexts fit to a design HEIGHT shorter than the phone's real 876 and let
+  // the rest run off the bottom, which is what keeps the type legible. With no
+  // nav bar the button's bottom edge lands at 423 (measured, not derived — the
+  // line-heights don't sum to anything tidy), so both clear it: the tile by a
+  // sliver, the modal by more. Expressing these as heights rather than fixed
+  // zooms means the cut holds at any tile or modal size.
   const card = variant === 'card'
-  const fitRef = useFitScale(417, card ? 0.5 : 1, card ? undefined : 570)
+  const fitRef = useFitScale(417, card ? 0.7 : 1, card ? 445 : 470)
   return (
     <div className="swp" ref={fitRef}>
       {/* Side buttons sit outside the screen, on the shell — cheap, but they're
@@ -216,12 +217,8 @@ export default function SwapPanel({ variant = 'modal' }) {
           </div>
         </div>
 
-        <div className="swp-header">
-          <div className="swp-navtitle">Choose Tokens</div>
-          <div className="swp-settings">Settings</div>
-          <div className="swp-largetitle">Swap</div>
-        </div>
-
+        {/* No nav bar: the tab bar already names the screen, so the content
+            field starts straight off the status bar. */}
         <div className="swp-body">
           <div className="swp-card">
             <Leg
