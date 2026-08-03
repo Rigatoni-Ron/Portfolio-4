@@ -315,6 +315,19 @@ export default function ProjectModal({ project, onClose }) {
                   )}
                 </div>
                 <p className="modal-desc">{project.body}</p>
+
+                {/* Who the work was for. Modal only — the same mark in the
+                    thumbnail fought the product shot. */}
+                {project.client && (
+                  <div className="modal-client">
+                    <img
+                      src={project.client.src}
+                      style={{ height: project.client.height }}
+                      alt=""
+                      draggable="false"
+                    />
+                  </div>
+                )}
               </motion.div>
             </motion.div>
           )}

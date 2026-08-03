@@ -8,6 +8,16 @@ import colShore from './assets/collateral-shore.webp'
 import escrowLake from './assets/escrow-lake.webp'
 import settleValley from './assets/settlements-valley.webp'
 import swapCoins from './assets/swap-coins.webp'
+import anchorageLogo from './assets/anchorage-logo.svg'
+import rivalryLogo from './assets/rivalry-logo.svg'
+
+// Client marks, shown under the description in the modal only — the tiles stay
+// clean. Height is tuned per lockup rather than shared: Rivalry packs a brush
+// wordmark over a second line into its 393x149 box, so at the height Anchorage's
+// simpler 157x36 mark reads fine at, "TOKEN" turns to mush. Sized by height with
+// width auto, since the two shapes are nothing alike.
+const ANCHORAGE = { src: anchorageLogo, height: 26 }
+const RIVALRY = { src: rivalryLogo, height: 38 }
 
 export const projects = [
   {
@@ -15,6 +25,7 @@ export const projects = [
     title: 'Settlements',
     desc: 'B2B payments, singular & multi-party settlements',
     heroBg: settleValley,
+    client: ANCHORAGE,
     heroComponent: 'send',
     year: '2025',
     role: 'Product Design',
@@ -34,6 +45,7 @@ export const projects = [
     title: 'Collateral management',
     desc: 'Lending and borrowing of digital assets',
     heroBg: colShore,
+    client: ANCHORAGE,
     // Card shows the loan card; the modal decks it with the loan detail view.
     heroPanels: ['loan', 'loanDetails'],
     year: '2025',
@@ -60,6 +72,7 @@ export const projects = [
     title: 'Escrow accounts',
     desc: 'Also known as tri-party agreements',
     heroBg: escrowLake,
+    client: ANCHORAGE,
     heroComponent: 'agreement',
     year: '2024',
     role: 'Product Design',
@@ -78,6 +91,7 @@ export const projects = [
     title: 'Token swap',
     desc: 'Consumer mobile app for self-custody token swaps',
     heroBg: swapCoins,
+    client: RIVALRY,
     heroComponent: 'swap',
     year: '2024',
     role: 'Product Design',
