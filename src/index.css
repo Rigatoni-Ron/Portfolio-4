@@ -1936,13 +1936,11 @@ a {
   line-height: 1.65;
 }
 
-/* Client mark under the description. Height comes per-lockup from data.js (the
-   two are nothing alike in shape or density, so a shared height makes one of
-   them illegible); width stays auto so each keeps its own proportions. */
+/* Client mark under the description. No rule above it — spacing alone separates
+   it, and a divider read as extra furniture. Height comes per-lockup from
+   data.js; width stays auto so each keeps its own proportions. */
 .modal-client {
-  margin-top: var(--s-4);
-  padding-top: var(--s-4);
-  border-top: 1px solid var(--border);
+  margin-top: var(--s-5);
 }
 
 .modal-client img {

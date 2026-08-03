@@ -12,12 +12,13 @@ import anchorageLogo from './assets/anchorage-logo.svg'
 import rivalryLogo from './assets/rivalry-logo.svg'
 
 // Client marks, shown under the description in the modal only — the tiles stay
-// clean. Height is tuned per lockup rather than shared: Rivalry packs a brush
-// wordmark over a second line into its 393x149 box, so at the height Anchorage's
-// simpler 157x36 mark reads fine at, "TOKEN" turns to mush. Sized by height with
-// width auto, since the two shapes are nothing alike.
+// clean. Heights look unrelated because they're chosen to land both marks at
+// the same rendered WIDTH (~113px) and so at roughly the same type size:
+// Anchorage stacks two lines into 157x36, Rivalry's wide lockup is one line at
+// 226x32, so matching their heights would have made Rivalry's type nearly three
+// times larger. Width stays auto; each keeps its own proportions.
 const ANCHORAGE = { src: anchorageLogo, height: 26 }
-const RIVALRY = { src: rivalryLogo, height: 38 }
+const RIVALRY = { src: rivalryLogo, height: 16 }
 
 export const projects = [
   {
