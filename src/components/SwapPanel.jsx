@@ -1,16 +1,18 @@
 import { useFitScale } from '../useFitScale.js'
 import usdtIcon from '../assets/tri-icon-usdt.svg'
 import hypeIcon from '../assets/tri-icon-hype.svg'
+import cellularIcon from '../assets/ios-cellular.svg'
+import wifiIcon from '../assets/ios-wifi.svg'
+import batteryIcon from '../assets/ios-battery.svg'
 
 /*
  * Swap — the trade screen from the crypto swapping app, rebuilt from the
  * recorded flow as a full phone screen inside an iPhone outline: status bar,
- * the Choose Tokens / Settings / large-title header, both swap legs, the
- * primary action, and the Wallet / Swap / History tab bar.
+ * both swap legs, the primary action, and the Wallet / Swap / History tab bar.
+ * There is no nav bar; the tab bar already names the screen.
  *
- * Type scale is deliberately short — four sizes (12 / 15 / 17 / 34) and three
- * weights (400 body, 600 for the CTA and the status clock, 700 for the large
- * title). Anything that wanted a fifth size got folded into one of these.
+ * Type scale is deliberately short — four sizes (12 / 15 / 17 / 34) on the
+ * default weight plus 600 for the CTA and the status clock.
  *
  * Assets are USDT → HYPE using the monochrome marks the escrow panel already
  * ships, priced at HYPE ≈ $52.15 (2 Aug 2026). Fixed on purpose: it's a product
@@ -21,60 +23,15 @@ import hypeIcon from '../assets/tri-icon-hype.svg'
  * and only the device shell is dark. That contrast is the point: a lit phone
  * sitting on the dark backdrop.
  *
- * Laid out at 393pt (iPhone logical width) so the iOS metrics are literal;
- * proportions inside the cards are measured off the recording. The hero-shot
- * overlay scales the whole thing via useFitScale.
+ * Laid out at 402 × 874 (iPhone 16 Pro logical size) so the iOS metrics are
+ * literal. The status bar follows Apple's own component (Figma file
+ * CkIxQD8EkZ9EPnZ5OhMS6b, node 12406:2408) and its three indicator glyphs are
+ * Aaron's exports from it, not hand-drawn approximations. Proportions inside
+ * the cards are measured off the recording; the hero-shot overlay scales the
+ * whole thing via useFitScale.
  *
  * Static by design — this is a product shot, not a working swap.
  */
-
-/* ── status bar ─────────────────────────────────────────────── */
-
-function BellSlashIcon() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
-      <path
-        d="M4.1 4.9a3.6 3.6 0 0 1 6.9 1.4c0 2.6.9 3.4.9 3.4H3.2s.9-.8.9-3.4"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinejoin="round"
-      />
-      <path d="M6.2 12a1.5 1.5 0 0 0 2.6 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-      <path d="M2 2l11 11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function CellularIcon() {
-  return (
-    <svg width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden="true">
-      <rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor" />
-      <rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor" opacity="0.3" />
-      <rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor" opacity="0.3" />
-      <rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor" opacity="0.3" />
-    </svg>
-  )
-}
-
-function WifiIcon() {
-  return (
-    <svg width="17" height="12" viewBox="0 0 17 12" fill="none" aria-hidden="true">
-      <path d="M1 3.6a11 11 0 0 1 15 0" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M3.9 6.7a7 7 0 0 1 9.2 0" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M6.8 9.7a3 3 0 0 1 3.4 0" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function BatteryIcon() {
-  return (
-    <svg width="26" height="13" viewBox="0 0 26 13" fill="none" aria-hidden="true">
-      <rect x="0.6" y="0.6" width="22" height="11.8" rx="3.4" stroke="currentColor" strokeWidth="1.1" opacity="0.4" />
-      <rect x="2.2" y="2.2" width="12" height="8.6" rx="2.2" fill="currentColor" />
-      <path d="M24.4 4.6v3.8a2 2 0 0 0 0-3.8Z" fill="currentColor" opacity="0.4" />
-    </svg>
-  )
-}
 
 /* ── in-screen glyphs ───────────────────────────────────────── */
 
@@ -183,15 +140,15 @@ function Leg({ amount, usd, icon, symbol, balance, muted }) {
 }
 
 export default function SwapPanel({ variant = 'modal' }) {
-  // 417px design width (the 393pt screen plus the 12px shell each side). Both
-  // contexts fit to a design HEIGHT shorter than the phone's real 876 and let
-  // the rest run off the bottom, which is what keeps the type legible. With no
-  // nav bar the button's bottom edge lands at 423 (measured, not derived — the
-  // line-heights don't sum to anything tidy), so both clear it: the tile by a
-  // sliver, the modal by more. Expressing these as heights rather than fixed
+  // 426px design width (the 402pt screen plus the 12px shell each side). Both
+  // contexts fit to a design HEIGHT shorter than the phone's real 898 and let
+  // the rest run off the bottom, which is what keeps the type legible. The
+  // button's bottom edge sits at 434 (measured in the browser, not derived —
+  // the line-heights don't sum to anything tidy), so both clear it: the tile by
+  // a sliver, the modal by more. Expressing these as heights rather than fixed
   // zooms means the cut holds at any tile or modal size.
   const card = variant === 'card'
-  const fitRef = useFitScale(417, card ? 0.7 : 1, card ? 445 : 470)
+  const fitRef = useFitScale(426, card ? 0.7 : 1, card ? 456 : 482)
   return (
     <div className="swp" ref={fitRef}>
       {/* Side buttons sit outside the screen, on the shell — cheap, but they're
@@ -203,17 +160,14 @@ export default function SwapPanel({ variant = 'modal' }) {
 
       <div className="swp-screen">
         <div className="swp-status">
-          <div className="swp-status-left">
+          <div className="swp-status-time">
             <span className="swp-time">5:42</span>
-            <BellSlashIcon />
           </div>
-          <div className="swp-island">
-            <span className="swp-lens" />
-          </div>
-          <div className="swp-status-right">
-            <CellularIcon />
-            <WifiIcon />
-            <BatteryIcon />
+          <div className="swp-island" />
+          <div className="swp-status-levels">
+            <img className="swp-level is-cellular" src={cellularIcon} alt="" draggable="false" />
+            <img className="swp-level is-wifi" src={wifiIcon} alt="" draggable="false" />
+            <img className="swp-level is-battery" src={batteryIcon} alt="" draggable="false" />
           </div>
         </div>
 
