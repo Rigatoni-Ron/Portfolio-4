@@ -55,9 +55,11 @@ const BANDS = [
   { state: 'Critical', range: 'Over 80%', fill: 0 },
 ]
 
+/* Stablecoins price at their peg (USDC 1.0000003, USDT 1.0002), and the two
+   loaned rows have to total 12.8% of the collateral to match the LTV above. */
 const LOANED = [
   { icon: usdcIcon, amount: '474,406.00', sym: 'USDC', usd: '$474,406.14' },
-  { icon: usdtIcon, amount: '526,283.38', sym: 'USDT', usd: '$1,000,283.24' },
+  { icon: usdtIcon, amount: '588,488.16', sym: 'USDT', usd: '$588,605.86' },
 ]
 const COLLATERAL = [
   { icon: btcIcon, amount: '115.27', sym: 'BTC', usd: '$7,692,407.49' },
@@ -158,7 +160,7 @@ export default function LoanDetails({ variant = 'modal' }) {
           {LOANED.map((a) => (
             <AssetRow key={a.sym} {...a} />
           ))}
-          <TotalRow label="Total loaned assets" usd="$1,474,689.38" />
+          <TotalRow label="Total loaned assets" usd="$1,063,012.00" />
         </div>
         <div className="cmd-col">
           {COLLATERAL.map((a) => (
