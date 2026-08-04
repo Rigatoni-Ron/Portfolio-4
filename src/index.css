@@ -1397,6 +1397,67 @@ a {
   color: #1c1c1e;
 }
 
+/* ── confirmation screen ────────────────────────────────────── */
+
+.swp-done {
+  padding: 22px 16px 4px;
+  text-align: center;
+}
+
+/* The one place a fifth size earns its keep. At 17 this sat level with the
+   "You Pay" section labels a screen earlier, so the payoff of the whole flow
+   read as a caption. 22 makes it a headline. */
+.swp-done-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #000;
+}
+
+.swp-done-sub {
+  margin-top: 6px;
+  font-size: 15px;
+  color: #76767e;
+}
+
+/* Emphasis by colour weight, not iOS blue — the source links this, but blue is
+   spoken for by the active tab. */
+.swp-done-sub span,
+.swp-via span {
+  color: #1c1c1e;
+}
+
+/* No labels above the boxes here, so everything collapses to the first row. */
+.swp-quote.is-bare .swp-quote-box,
+.swp-quote.is-bare .swp-quote-arrow {
+  grid-row: 1;
+}
+
+.swp-via {
+  padding: 0 16px 20px;
+  text-align: center;
+  font-size: 15px;
+  color: #76767e;
+}
+
+/* Secondary beside the primary — the one place an outline reads right, because
+   it has a filled button next to it to be secondary TO. */
+.swp-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.swp-actions .swp-cta {
+  flex: 1;
+  min-width: 0;
+}
+
+.swp-cta.is-secondary {
+  border: 1px solid #d5d5df;
+  background: #ffffff;
+  color: #1c1c1e;
+}
+
 .swp-expiry {
   padding: 0 16px 20px;
   text-align: center;

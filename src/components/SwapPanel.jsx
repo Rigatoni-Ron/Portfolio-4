@@ -212,7 +212,7 @@ function TradeBody() {
 function QuoteSide({ side, label, icon, amount, usd }) {
   return (
     <>
-      <div className={`swp-quote-label is-${side}`}>{label}</div>
+      {label && <div className={`swp-quote-label is-${side}`}>{label}</div>}
       <div className={`swp-quote-box is-${side}`}>
         <img className="swp-quote-icon" src={icon} alt="" draggable="false" />
         <div className="swp-quote-amount">{amount}</div>
@@ -265,6 +265,42 @@ function ReviewBody() {
   )
 }
 
+/* Screen 3 — the confirmation. Same quote boxes as review but with no You Pay /
+   You Get headers over them, since by here it has already happened. */
+function SuccessBody() {
+  return (
+    <>
+      <div className="swp-card">
+        <div className="swp-done">
+          <div className="swp-done-title">Swap Complete!</div>
+          {/* The source sets "History Tab" in iOS blue. Held to weight and
+              colour instead — blue is the active tab's alone on these screens. */}
+          <div className="swp-done-sub">
+            You can view details in the <span>History Tab</span>
+          </div>
+        </div>
+
+        <div className="swp-quote is-bare">
+          <QuoteSide side="pay" icon={usdtIcon} amount="2,500 USDT" usd="($2,500.00)" />
+          <div className="swp-quote-arrow">
+            <ArrowIcon />
+          </div>
+          <QuoteSide side="get" icon={hypeIcon} amount="47.93 HYPE" usd="($2,499.55)" />
+        </div>
+
+        <div className="swp-via">
+          Swapped via <span>Hyperliquid</span>
+        </div>
+      </div>
+
+      <div className="swp-actions">
+        <div className="swp-cta is-secondary">Details</div>
+        <div className="swp-cta">Done</div>
+      </div>
+    </>
+  )
+}
+
 /* `scale` is what buys the extra room. useFitScale sizes the phone for the trade
    screen; review shrinks the whole device on top of that, so the same pixel box
    shows more of the screen and the taller content fits without the type being
@@ -279,6 +315,9 @@ function ReviewBody() {
 const SCREENS = [
   { title: 'Swap', Body: TradeBody, scale: 1 },
   { title: 'Review Order', Body: ReviewBody, scale: 0.59 },
+  // Same title and scale as review: in the app this is that screen's finished
+  // state, not a new destination, so only the content changes between them.
+  { title: 'Review Order', Body: SuccessBody, scale: 0.59 },
 ]
 
 /* The whole flow in ONE phone. The shell, status bar and tab bar stay mounted
