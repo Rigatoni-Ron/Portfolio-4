@@ -1451,7 +1451,7 @@ a {
    Transparent rather than white: the field behind it is grey, and a white fill
    here would compete with the card above. */
 .swp-cta.is-outline {
-  border: 1px solid #1c1c1e;
+  border: 2px solid #1c1c1e;
   background: transparent;
   color: #1c1c1e;
 }
