@@ -11,11 +11,37 @@ import swapCoins from './assets/swap-coins.webp'
 import anchorageLogo from './assets/anchorage-logo.svg'
 import rivalryLogo from './assets/rivalry-logo.svg'
 
-// Client marks, shown under the description in the modal only — the tiles stay
-// clean. .modal-client sets the default height; only a lockup that needs an
-// optical correction carries its own `clientHeight`.
-
+// Client marks (`client`) show under the description in the modal only — the
+// tiles stay clean. .modal-client sets the default height; only a lockup that
+// needs an optical correction carries its own `clientHeight`.
 export const projects = [
+  {
+    id: 'swap',
+    title: 'Token swap',
+    desc: 'Consumer mobile app for self-custody token swaps',
+    heroBg: swapCoins,
+    client: rivalryLogo,
+    // Anchorage stacks two lines into its box so its type is small relative to
+    // its height; Rivalry's wide lockup is one line filling the full height. At
+    // a shared 26 the Rivalry type comes out ~2.6x larger and swamps the modal.
+    // 18 was picked by eye against Anchorage, not derived.
+    clientHeight: 18,
+    // Card shows the trade screen; the modal decks it with the review step.
+    heroComponent: 'swap',
+    heroPanels: ['swap', 'swapReview'],
+    year: '2024',
+    role: 'Product Design',
+    body: 'A consumer mobile app for swapping tokens straight from a self-custody wallet: pick two assets, set an amount, and read the quote before committing. The trade screen carries the two legs and one action, and everything about routing, slippage and fees moves to the review step, where it is the only thing being decided.',
+    tags: ['Consumer', 'Mobile', 'iOS', 'Trading'],
+    // Badges are pills on the title row and never wrap, so the labels are cut
+    // to two or three words. Full readings, from Figma: 63% is "of mobile users
+    // staying on mobile (instead of returning to web)"; 55% is the swap
+    // conversion rate. Absolute rates, so no "+" the way the deltas above have.
+    metrics: [
+      { value: '63%', label: 'stayed on mobile' },
+      { value: '55%', label: 'swap conversion' },
+    ],
+  },
   {
     id: 'settlements',
     title: 'Settlements',
@@ -80,31 +106,6 @@ export const projects = [
     tags: ['Escrow', 'DeFi', 'Systems', 'Edge cases'],
     metrics: [
       { value: '+90%', label: 'pledged AUC' },
-    ],
-  },
-  {
-    id: 'swap',
-    title: 'Token swap',
-    desc: 'Consumer mobile app for self-custody token swaps',
-    heroBg: swapCoins,
-    client: rivalryLogo,
-    // Anchorage stacks two lines into its box so its type is small relative to
-    // its height; Rivalry's wide lockup is one line filling the full height. At
-    // a shared 26 the Rivalry type comes out ~2.6x larger and swamps the modal.
-    // 18 was picked by eye against Anchorage, not derived.
-    clientHeight: 18,
-    heroComponent: 'swap',
-    year: '2024',
-    role: 'Product Design',
-    body: 'A consumer mobile app for swapping tokens straight from a self-custody wallet: pick two assets, set an amount, and read the quote before committing. The trade screen carries the two legs and one action, and everything about routing, slippage and fees moves to the review step, where it is the only thing being decided.',
-    tags: ['Consumer', 'Mobile', 'iOS', 'Trading'],
-    // Badges are pills on the title row and never wrap, so the labels are cut
-    // to two or three words. Full readings, from Figma: 63% is "of mobile users
-    // staying on mobile (instead of returning to web)"; 55% is the swap
-    // conversion rate. Absolute rates, so no "+" the way the deltas above have.
-    metrics: [
-      { value: '63%', label: 'stayed on mobile' },
-      { value: '55%', label: 'swap conversion' },
     ],
   },
 ]

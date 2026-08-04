@@ -6,10 +6,15 @@ import wifiIcon from '../assets/ios-wifi.svg'
 import batteryIcon from '../assets/ios-battery.svg'
 
 /*
- * Swap — the trade screen from the crypto swapping app, rebuilt from the
- * recorded flow as a full phone screen inside an iPhone outline: status bar,
- * the Swap title, both swap legs, the primary action, and the
- * Wallet / Swap / History tab bar.
+ * Swap — two screens from the crypto swapping app, rebuilt from the recorded
+ * flow as full phone screens inside an iPhone outline. `SwapPanel` is the trade
+ * itself; `SwapReviewPanel` is the Review Order step it leads to, and the modal
+ * decks them as a carousel. Both share the Phone shell below: status bar, large
+ * title, content field and the Wallet / Swap / History tab bar.
+ *
+ * The split is the point. The trade screen carries two legs and one action; all
+ * the routing, slippage and fee detail lives on review, where it is the only
+ * thing being decided.
  *
  * Type scale is deliberately short — four sizes (12 / 15 / 17 / 34) on the
  * default weight plus 600 for the CTA and the status clock.
@@ -52,6 +57,21 @@ function FlipIcon() {
         d="M9 5v8m0 0 3-3m-3 3-3-3"
         stroke="currentColor"
         strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+/* Direction of the trade, between the two quote boxes on the review screen. */
+function ArrowIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path
+        d="M4 10h11m0 0-4-4m4 4-4 4"
+        stroke="currentColor"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -139,16 +159,18 @@ function Leg({ amount, usd, icon, symbol, balance, muted }) {
   )
 }
 
-export default function SwapPanel({ variant = 'modal' }) {
+/* Shared chrome for every screen in the flow: shell, side buttons, status bar,
+   large title and tab bar. Only the content field differs between screens, so
+   it comes in as children and each screen supplies its own fit heights (they
+   run to different lengths, and the crop is measured off the last element). */
+function Phone({ title, variant, cardHeight, modalHeight, children }) {
   // 426px design width (the 402pt screen plus the 12px shell each side). Both
   // contexts fit to a design HEIGHT shorter than the phone's real 898 and let
-  // the rest run off the bottom, which is what keeps the type legible. The
-  // button's bottom edge sits at 496 (measured in the browser, not derived —
-  // the line-heights don't sum to anything tidy), so both clear it: the tile by
-  // a sliver, the modal by more. Expressing these as heights rather than fixed
-  // zooms means the cut holds at any tile or modal size.
+  // the rest run off the bottom, which is what keeps the type legible.
+  // Expressing these as heights rather than fixed zooms means the cut holds at
+  // any tile or modal size.
   const card = variant === 'card'
-  const fitRef = useFitScale(426, card ? 0.7 : 1, card ? 518 : 544)
+  const fitRef = useFitScale(426, card ? 0.7 : 1, card ? cardHeight : modalHeight)
   return (
     <div className="swp" ref={fitRef}>
       {/* Side buttons sit outside the screen, on the shell — cheap, but they're
@@ -172,41 +194,10 @@ export default function SwapPanel({ variant = 'modal' }) {
         </div>
 
         <div className="swp-header">
-          <div className="swp-largetitle">Swap</div>
+          <div className="swp-largetitle">{title}</div>
         </div>
 
-        <div className="swp-body">
-          <div className="swp-card">
-            <Leg
-              amount="2,500"
-              usd="$2,500.00"
-              icon={usdtIcon}
-              symbol="USDT"
-              balance="10,728.82"
-            />
-
-            {/* The rule spans the card; the flip button sits on it, opaque so
-                it reads as a control rather than a badge floating over a line. */}
-            <div className="swp-divider">
-              <div className="swp-flip">
-                <FlipIcon />
-              </div>
-            </div>
-
-            {/* 2,500 USDT ÷ $52.15 = 47.93 HYPE, the rounding down standing in
-                for the spread. Its USD line is that back at the same price. */}
-            <Leg
-              amount="47.93"
-              usd="$2,499.55"
-              icon={hypeIcon}
-              symbol="HYPE"
-              balance="128.44"
-              muted
-            />
-          </div>
-
-          <div className="swp-cta">Review Order</div>
-        </div>
+        <div className="swp-body">{children}</div>
 
         <div className="swp-tabs">
           <Tab icon={<WalletTabIcon />} label="Wallet" />
@@ -216,5 +207,96 @@ export default function SwapPanel({ variant = 'modal' }) {
         </div>
       </div>
     </div>
+  )
+}
+
+/* Screen 1 — the trade itself. Button lands at 496. */
+export default function SwapPanel({ variant = 'modal' }) {
+  return (
+    <Phone title="Swap" variant={variant} cardHeight={518} modalHeight={544}>
+      <div className="swp-card">
+        <Leg amount="2,500" usd="$2,500.00" icon={usdtIcon} symbol="USDT" balance="10,728.82" />
+
+        {/* The rule spans the card; the flip button sits on it, opaque so it
+            reads as a control rather than a badge floating over a line. */}
+        <div className="swp-divider">
+          <div className="swp-flip">
+            <FlipIcon />
+          </div>
+        </div>
+
+        {/* 2,500 USDT ÷ $52.15 = 47.93 HYPE, the rounding down standing in for
+            the spread. Its USD line is that back at the same price. */}
+        <Leg
+          amount="47.93"
+          usd="$2,499.55"
+          icon={hypeIcon}
+          symbol="HYPE"
+          balance="128.44"
+          muted
+        />
+      </div>
+
+      <div className="swp-cta">Review Order</div>
+    </Phone>
+  )
+}
+
+/* One side of the quote. Label and box are separate grid children rather than a
+   wrapper, so the arrow can centre against the boxes instead of against the
+   label-plus-box block. `side` places them in column 1 or 3. */
+function QuoteSide({ side, label, icon, amount, usd }) {
+  return (
+    <>
+      <div className={`swp-quote-label is-${side}`}>{label}</div>
+      <div className={`swp-quote-box is-${side}`}>
+        <img className="swp-quote-icon" src={icon} alt="" draggable="false" />
+        <div className="swp-quote-amount">{amount}</div>
+        <div className="swp-quote-usd">{usd}</div>
+      </div>
+    </>
+  )
+}
+
+function DetailRow({ label, value }) {
+  return (
+    <div className="swp-row">
+      <span className="swp-row-label">{label}</span>
+      <span className="swp-row-value">{value}</span>
+    </div>
+  )
+}
+
+/* Screen 2 — Review Order. This is where the routing, slippage and fee detail
+   lives, which is the whole reason the trade screen gets to stay so bare. */
+export function SwapReviewPanel({ variant = 'modal' }) {
+  return (
+    <Phone title="Review Order" variant={variant} cardHeight={518} modalHeight={544}>
+      <div className="swp-card">
+        {/* 3 columns x 2 rows: the labels sit over their own boxes and the arrow
+            straddles the middle column across both. */}
+        <div className="swp-quote">
+          <QuoteSide side="pay" label="You Pay" icon={usdtIcon} amount="2,500 USDT" usd="($2,500.00)" />
+          <div className="swp-quote-arrow">
+            <ArrowIcon />
+          </div>
+          <QuoteSide side="get" label="You Get" icon={hypeIcon} amount="47.93 HYPE" usd="($2,499.55)" />
+        </div>
+
+        <div className="swp-expiry">
+          Quote expires in <span>11s</span>
+        </div>
+
+        <div className="swp-rows">
+          <DetailRow label="Network" value="Hyperliquid" />
+          <DetailRow label="Rate" value="1 HYPE = 52.15 USDT" />
+          <DetailRow label="Estimated Fees" value="$3.69" />
+          <DetailRow label="Max Slippage" value="5.5%" />
+          <DetailRow label="Order Routing" value="Best available" />
+        </div>
+      </div>
+
+      <div className="swp-cta">Place Order</div>
+    </Phone>
   )
 }

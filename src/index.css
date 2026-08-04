@@ -1297,6 +1297,125 @@ a {
    link, a fee glyph and a total row — three more type treatments for
    information the review screen repeats anyway — so it's gone and the action
    stands alone, the way the trading widget's review step does. */
+/* ── review screen ──────────────────────────────────────────── */
+
+/* 3 columns x 2 rows: "You Pay" / "You Get" sit over their own boxes and the
+   arrow straddles the middle column across both rows. */
+.swp-quote {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 12px;
+  padding: 18px 16px 16px;
+}
+
+.swp-quote-label {
+  grid-row: 1;
+  font-size: 17px;
+  font-weight: 600;
+  color: #000;
+  text-align: center;
+}
+
+.swp-quote-box {
+  grid-row: 2;
+}
+
+.swp-quote-label.is-pay,
+.swp-quote-box.is-pay {
+  grid-column: 1;
+}
+
+.swp-quote-label.is-get,
+.swp-quote-box.is-get {
+  grid-column: 3;
+}
+
+/* Same white-on-outline treatment as the token pills on the trade screen. */
+.swp-quote-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 10px;
+  border: 1px solid #d5d5df;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.swp-quote-icon {
+  width: 26px;
+  height: 26px;
+  display: block;
+  filter: invert(0.89);
+}
+
+.swp-quote-amount {
+  font-size: 17px;
+  color: #000;
+  white-space: nowrap;
+}
+
+.swp-quote-usd {
+  font-size: 15px;
+  color: #76767e;
+  white-space: nowrap;
+}
+
+/* Row 2 only, so it centres against the boxes rather than the whole block. */
+.swp-quote-arrow {
+  grid-row: 2;
+  grid-column: 2;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d5d5df;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #1c1c1e;
+}
+
+.swp-expiry {
+  padding: 0 16px 20px;
+  text-align: center;
+  font-size: 15px;
+  color: #000;
+}
+
+.swp-expiry span {
+  color: #76767e;
+}
+
+.swp-rows {
+  padding: 0 16px;
+  border-top: 1px solid #e9e9ee;
+}
+
+.swp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 48px;
+  font-size: 17px;
+}
+
+.swp-row + .swp-row {
+  border-top: 1px solid #e9e9ee;
+}
+
+.swp-row-label {
+  color: #000;
+}
+
+.swp-row-value {
+  color: #76767e;
+  white-space: nowrap;
+}
+
 .swp-cta {
   display: grid;
   place-items: center;
