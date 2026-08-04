@@ -48,17 +48,9 @@ const EXPERIENCE = [
     points: [
       'Crypto onboarding, fiat and crypto ramps, wallets, staking, and airdrops across iOS, Android, and mobile web. 40k+ wallets onboarded in the first month.',
       'Wallet connect rebuilt from 2,000+ survey responses and user testing. Connect rates up 621%.',
+      'Designed the DeFi swapping app and built its iOS MVP, steered by web data and taken from hi-fi designs to a working prototype in node based tools, Origami and Play.',
       'Fiat and crypto processing tools, and the analytics dashboard.',
       'Three design systems, for crypto, betting, and SaaS tooling. 46.2% less design and dev time.',
-    ],
-  },
-  {
-    company: 'DeFi Swapping App',
-    meta: 'Contract',
-    roles: [{ title: 'Lead Product Designer', dates: 'Nov 2024 to Feb 2025' }],
-    points: [
-      'Built the MVP for a DeFi crypto wallet swapping app on iOS.',
-      'Used web data to steer the decisions, then took it from hi-fi designs to a working prototype in node based tools, Origami and Play.',
     ],
   },
   {
