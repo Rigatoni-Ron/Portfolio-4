@@ -201,7 +201,7 @@ function TradeBody() {
         />
       </div>
 
-      <div className="swp-cta">Review Order</div>
+      <div className="swp-cta is-outline">Review</div>
     </>
   )
 }

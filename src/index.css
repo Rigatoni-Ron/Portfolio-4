@@ -1446,6 +1446,16 @@ a {
   font-weight: 600;
 }
 
+/* Outline for the step that only moves you forward, filled for the one that
+   actually commits — so "Review" doesn't read as final and "Place Order" does.
+   Transparent rather than white: the field behind it is grey, and a white fill
+   here would compete with the card above. */
+.swp-cta.is-outline {
+  border: 1px solid #1c1c1e;
+  background: transparent;
+  color: #1c1c1e;
+}
+
 /* ── tab bar ────────────────────────────────────────────────── */
 
 .swp-tabs {
