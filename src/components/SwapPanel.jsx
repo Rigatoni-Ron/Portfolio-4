@@ -315,9 +315,10 @@ function SuccessBody() {
 const SCREENS = [
   { title: 'Swap', Body: TradeBody, scale: 1 },
   { title: 'Review Order', Body: ReviewBody, scale: 0.59 },
-  // Same title and scale as review: in the app this is that screen's finished
-  // state, not a new destination, so only the content changes between them.
-  { title: 'Review Order', Body: SuccessBody, scale: 0.59 },
+  // Back to full size: this screen is short enough to fit without shrinking, so
+  // it returns to the trade screen's framing. Review is the only one that has
+  // to zoom out, and it zooms back in once the detail has been read.
+  { title: 'Review Order', Body: SuccessBody, scale: 1 },
 ]
 
 /* The whole flow in ONE phone. The shell, status bar and tab bar stay mounted
