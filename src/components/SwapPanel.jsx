@@ -265,15 +265,20 @@ function ReviewBody() {
   )
 }
 
-/* `scale` is what buys the extra room. useFitScale sizes the phone for screen 1;
-   review then shrinks the whole device on top of that, so the same pixel box
-   shows ~1.5x more of the screen and the taller content fits without the type
-   being sized down everywhere else. It's a transform, so it animates on the
-   compositor and doesn't relayout — unlike the zoom underneath it, which can't
-   be animated. */
+/* `scale` is what buys the extra room. useFitScale sizes the phone for the trade
+   screen; review shrinks the whole device on top of that, so the same pixel box
+   shows more of the screen and the taller content fits without the type being
+   sized down on both. It's a transform, so it animates on the compositor and
+   doesn't relayout — unlike the zoom underneath it, which can't be animated.
+
+   0.59 is not a taste call: it's the value that lands the ENTIRE 898px device
+   inside the hero box. At 0.67 it showed 812 of those 898, so the phone was
+   ~90% complete but had no bottom edge, and read as an iPhone stretched too
+   long. Anything between "clearly a top crop" and "the whole device" looks
+   wrong, so review goes all the way to whole. */
 const SCREENS = [
   { title: 'Swap', Body: TradeBody, scale: 1 },
-  { title: 'Review Order', Body: ReviewBody, scale: 0.67 },
+  { title: 'Review Order', Body: ReviewBody, scale: 0.59 },
 ]
 
 /* The whole flow in ONE phone. The shell, status bar and tab bar stay mounted
