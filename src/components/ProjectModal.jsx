@@ -7,7 +7,7 @@ import LoanCard from './LoanCard.jsx'
 import LoanDetails from './LoanDetails.jsx'
 import AgreementAssets from './AgreementAssets.jsx'
 import SendTransfer from './SendTransfer.jsx'
-import SwapPanel, { SwapReviewPanel } from './SwapPanel.jsx'
+import SwapPanel from './SwapPanel.jsx'
 
 /* Rebuilt product UI, keyed by the name a project uses in data.js. */
 const HERO_PANELS = {
@@ -16,7 +16,6 @@ const HERO_PANELS = {
   agreement: AgreementAssets,
   send: SendTransfer,
   swap: SwapPanel,
-  swapReview: SwapReviewPanel,
 }
 
 /* Slide variants shared by the panel deck and the image carousel: travel
@@ -36,8 +35,14 @@ const slideTransition = { duration: 0.32, ease: [0.22, 1, 0.36, 1] }
 function HeroDeck({ project }) {
   const panels = project.heroPanels ?? [project.heroComponent ?? 'loan']
   const [[idx, dir], setSlide] = useState([0, 0])
-  const many = panels.length > 1
-  const Panel = HERO_PANELS[panels[idx]] ?? LoanCard
+  /* `heroScreens` means the panel renders its own screens and handles its own
+     transition — the deck only drives the index. Used where the panels share
+     persistent chrome worth keeping mounted (the phone shell), so swapping
+     whole components would tear it down and rebuild it every move. */
+  const sticky = project.heroScreens ?? 0
+  const count = sticky || panels.length
+  const many = count > 1
+  const Panel = HERO_PANELS[panels[sticky ? 0 : idx]] ?? LoanCard
 
   /* Cue fires outside the updater — the index has to stay functional or the
      keydown handler's closure goes stale after the first press. */
@@ -61,35 +66,41 @@ function HeroDeck({ project }) {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [many, panels.length])
+  }, [many, count])
 
   return (
     <motion.div className="modal-media is-heroshot" layoutId={`media-${project.id}`}>
       <img className="card-bg" src={project.heroBg} alt="" draggable="false" />
       <div className={`card-heroshot-overlay${many ? ' is-deck' : ''}`}>
-        <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-          <motion.div
-            key={idx}
-            className="hero-panel-slide"
-            custom={dir}
-            variants={slide}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={slideTransition}
-          >
-            <Panel />
-          </motion.div>
-        </AnimatePresence>
+        {sticky ? (
+          <div className="hero-panel-slide">
+            <Panel screen={idx} dir={dir} />
+          </div>
+        ) : (
+          <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+            <motion.div
+              key={idx}
+              className="hero-panel-slide"
+              custom={dir}
+              variants={slide}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={slideTransition}
+            >
+              <Panel />
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
 
       {/* Dots only — overlay arrows crowded the panel they sit on top of.
           ←/→ still work, and the dots are direct targets. */}
       {many && (
         <div className="carousel-dots" role="tablist" aria-label="Screens">
-          {panels.map((name, i) => (
+          {Array.from({ length: count }, (_, i) => (
             <button
-              key={name}
+              key={i}
               type="button"
               role="tab"
               aria-selected={i === idx}

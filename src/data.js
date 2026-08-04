@@ -26,9 +26,10 @@ export const projects = [
     // a shared 26 the Rivalry type comes out ~2.6x larger and swamps the modal.
     // 18 was picked by eye against Anchorage, not derived.
     clientHeight: 18,
-    // Card shows the trade screen; the modal decks it with the review step.
+    // One panel renders both screens and animates between them itself; the deck
+    // just drives the index and draws the dots.
     heroComponent: 'swap',
-    heroPanels: ['swap', 'swapReview'],
+    heroScreens: 2,
     year: '2024',
     role: 'Product Design',
     body: 'A consumer mobile app for swapping tokens straight from a self-custody wallet: pick two assets, set an amount, and read the quote before committing. The trade screen carries the two legs and one action, and everything about routing, slippage and fees moves to the review step, where it is the only thing being decided.',

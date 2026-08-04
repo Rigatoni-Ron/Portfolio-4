@@ -1183,6 +1183,25 @@ a {
   color: #000;
 }
 
+/* The clipping box for the page transition. Sits between the status bar and the
+   tab bar, both of which stay put while pages slide through here. */
+.swp-stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Absolute so the outgoing and incoming pages overlap during the slide instead
+   of pushing each other around in flow. */
+.swp-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #dedfe5;
+}
+
 /* ── content field ──────────────────────────────────────────── */
 
 .swp-body {

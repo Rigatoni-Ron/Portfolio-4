@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'motion/react'
 import { useFitScale } from '../useFitScale.js'
 import usdtIcon from '../assets/tri-icon-usdt.svg'
 import hypeIcon from '../assets/tri-icon-hype.svg'
@@ -7,10 +8,14 @@ import batteryIcon from '../assets/ios-battery.svg'
 
 /*
  * Swap — two screens from the crypto swapping app, rebuilt from the recorded
- * flow as full phone screens inside an iPhone outline. `SwapPanel` is the trade
- * itself; `SwapReviewPanel` is the Review Order step it leads to, and the modal
- * decks them as a carousel. Both share the Phone shell below: status bar, large
- * title, content field and the Wallet / Swap / History tab bar.
+ * flow inside a single iPhone outline: the trade screen and the Review Order
+ * step it leads to. The modal's deck drives which one is showing (`screen`) and
+ * draws the dots; everything else happens in here.
+ *
+ * One phone, not two. The shell, status bar and tab bar stay mounted across
+ * screens and only the page between them slides, clipped by the screen. The
+ * device also scales down on the taller screen, which is what lets the review
+ * detail fit without shrinking the type on both.
  *
  * The split is the point. The trade screen carries two legs and one action; all
  * the routing, slippage and fee detail lives on review, where it is the only
@@ -159,61 +164,20 @@ function Leg({ amount, usd, icon, symbol, balance, muted }) {
   )
 }
 
-/* Shared chrome for every screen in the flow: shell, side buttons, status bar,
-   large title and tab bar. Only the content field differs between screens, so
-   it comes in as children and each screen supplies its own fit heights (they
-   run to different lengths, and the crop is measured off the last element). */
-function Phone({ title, variant, cardHeight, modalHeight, children }) {
-  // 426px design width (the 402pt screen plus the 12px shell each side). Both
-  // contexts fit to a design HEIGHT shorter than the phone's real 898 and let
-  // the rest run off the bottom, which is what keeps the type legible.
-  // Expressing these as heights rather than fixed zooms means the cut holds at
-  // any tile or modal size.
-  const card = variant === 'card'
-  const fitRef = useFitScale(426, card ? 0.7 : 1, card ? cardHeight : modalHeight)
-  return (
-    <div className="swp" ref={fitRef}>
-      {/* Side buttons sit outside the screen, on the shell — cheap, but they're
-          most of what makes the outline read as a phone rather than a rectangle. */}
-      <span className="swp-btn swp-btn-silent" />
-      <span className="swp-btn swp-btn-volup" />
-      <span className="swp-btn swp-btn-voldown" />
-      <span className="swp-btn swp-btn-power" />
-
-      <div className="swp-screen">
-        <div className="swp-status">
-          <div className="swp-status-time">
-            <span className="swp-time">5:42</span>
-          </div>
-          <div className="swp-island" />
-          <div className="swp-status-levels">
-            <img className="swp-level is-cellular" src={cellularIcon} alt="" draggable="false" />
-            <img className="swp-level is-wifi" src={wifiIcon} alt="" draggable="false" />
-            <img className="swp-level is-battery" src={batteryIcon} alt="" draggable="false" />
-          </div>
-        </div>
-
-        <div className="swp-header">
-          <div className="swp-largetitle">{title}</div>
-        </div>
-
-        <div className="swp-body">{children}</div>
-
-        <div className="swp-tabs">
-          <Tab icon={<WalletTabIcon />} label="Wallet" />
-          <Tab icon={<SwapTabIcon />} label="Swap" active />
-          <Tab icon={<HistoryTabIcon />} label="History" />
-          <div className="swp-home" />
-        </div>
-      </div>
-    </div>
-  )
+/* iOS push/pop: the incoming page comes in off the right edge while the
+   outgoing one drifts left at a third of the distance. Percentages, so it
+   travels relative to the phone rather than the viewport. */
+const page = {
+  enter: (d) => ({ x: d >= 0 ? '100%' : '-32%', opacity: d >= 0 ? 1 : 0.6 }),
+  center: { x: '0%', opacity: 1 },
+  exit: (d) => ({ x: d >= 0 ? '-32%' : '100%', opacity: d >= 0 ? 0.6 : 1 }),
 }
+const pageTransition = { duration: 0.42, ease: [0.22, 1, 0.36, 1] }
 
-/* Screen 1 — the trade itself. Button lands at 496. */
-export default function SwapPanel({ variant = 'modal' }) {
+/* Screen 1 — the trade itself. */
+function TradeBody() {
   return (
-    <Phone title="Swap" variant={variant} cardHeight={518} modalHeight={544}>
+    <>
       <div className="swp-card">
         <Leg amount="2,500" usd="$2,500.00" icon={usdtIcon} symbol="USDT" balance="10,728.82" />
 
@@ -238,7 +202,7 @@ export default function SwapPanel({ variant = 'modal' }) {
       </div>
 
       <div className="swp-cta">Review Order</div>
-    </Phone>
+    </>
   )
 }
 
@@ -269,12 +233,12 @@ function DetailRow({ label, value }) {
 
 /* Screen 2 — Review Order. This is where the routing, slippage and fee detail
    lives, which is the whole reason the trade screen gets to stay so bare. */
-export function SwapReviewPanel({ variant = 'modal' }) {
+function ReviewBody() {
   return (
-    <Phone title="Review Order" variant={variant} cardHeight={518} modalHeight={544}>
+    <>
       <div className="swp-card">
         {/* 3 columns x 2 rows: the labels sit over their own boxes and the arrow
-            straddles the middle column across both. */}
+            centres in the middle column against the boxes. */}
         <div className="swp-quote">
           <QuoteSide side="pay" label="You Pay" icon={usdtIcon} amount="2,500 USDT" usd="($2,500.00)" />
           <div className="swp-quote-arrow">
@@ -297,6 +261,94 @@ export function SwapReviewPanel({ variant = 'modal' }) {
       </div>
 
       <div className="swp-cta">Place Order</div>
-    </Phone>
+    </>
+  )
+}
+
+/* `scale` is what buys the extra room. useFitScale sizes the phone for screen 1;
+   review then shrinks the whole device on top of that, so the same pixel box
+   shows ~1.5x more of the screen and the taller content fits without the type
+   being sized down everywhere else. It's a transform, so it animates on the
+   compositor and doesn't relayout — unlike the zoom underneath it, which can't
+   be animated. */
+const SCREENS = [
+  { title: 'Swap', Body: TradeBody, scale: 1 },
+  { title: 'Review Order', Body: ReviewBody, scale: 0.67 },
+]
+
+/* The whole flow in ONE phone. The shell, status bar and tab bar stay mounted
+   across screens; only the page inside slides, with the screen acting as the
+   clipping box. Cheaper than swapping whole panels, and it lets the device
+   shrink into the taller screen instead of cutting to a different phone. */
+export default function SwapPanel({ variant = 'modal', screen = 0, dir = 0 }) {
+  // 426px design width (the 402pt screen plus the 12px shell each side); fitted
+  // to the trade screen's height, with review scaling down from there.
+  const card = variant === 'card'
+  const fitRef = useFitScale(426, card ? 0.7 : 1, card ? 518 : 544)
+  const idx = SCREENS[screen] ? screen : 0
+  const { title, Body, scale } = SCREENS[idx]
+
+  return (
+    <motion.div
+      className="swp"
+      ref={fitRef}
+      // Top-centre origin: the phone is pinned to the top of the hero box, so
+      // shrinking from the centre would pull it away from that anchor.
+      style={{ transformOrigin: 'top center' }}
+      animate={{ scale: card ? 1 : scale }}
+      transition={pageTransition}
+    >
+      {/* Side buttons sit outside the screen, on the shell — cheap, but they're
+          most of what makes the outline read as a phone rather than a rectangle. */}
+      <span className="swp-btn swp-btn-silent" />
+      <span className="swp-btn swp-btn-volup" />
+      <span className="swp-btn swp-btn-voldown" />
+      <span className="swp-btn swp-btn-power" />
+
+      <div className="swp-screen">
+        <div className="swp-status">
+          <div className="swp-status-time">
+            <span className="swp-time">5:42</span>
+          </div>
+          <div className="swp-island" />
+          <div className="swp-status-levels">
+            <img className="swp-level is-cellular" src={cellularIcon} alt="" draggable="false" />
+            <img className="swp-level is-wifi" src={wifiIcon} alt="" draggable="false" />
+            <img className="swp-level is-battery" src={batteryIcon} alt="" draggable="false" />
+          </div>
+        </div>
+
+        {/* Status bar and tab bar bracket the stage and never move; the pages
+            slide within it and are clipped by it. */}
+        <div className="swp-stage">
+          <AnimatePresence initial={false} custom={dir}>
+            <motion.div
+              key={idx}
+              className="swp-page"
+              custom={dir}
+              variants={page}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={pageTransition}
+            >
+              <div className="swp-header">
+                <div className="swp-largetitle">{title}</div>
+              </div>
+              <div className="swp-body">
+                <Body />
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="swp-tabs">
+          <Tab icon={<WalletTabIcon />} label="Wallet" />
+          <Tab icon={<SwapTabIcon />} label="Swap" active />
+          <Tab icon={<HistoryTabIcon />} label="History" />
+          <div className="swp-home" />
+        </div>
+      </div>
+    </motion.div>
   )
 }
