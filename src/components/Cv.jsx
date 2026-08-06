@@ -117,7 +117,9 @@ export default function Cv() {
       <header className="cv-head">
         <div className="cv-id">
           <h1>Aaron Chartrand</h1>
-          <p className="cv-role">Senior Product Designer</p>
+          {/* Discipline, not level — the job titles below carry the seniority,
+              and a level here would date the page every promotion. */}
+          <p className="cv-role">Product design</p>
           <p className="cv-blurb">
             Code based prototyping, user research, and design systems.
           </p>
