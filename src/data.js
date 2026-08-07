@@ -147,4 +147,12 @@ export const playground = [
     bg: 'var(--pg-canvas)', // shared opened-playground canvas token
     liveTile: true,
   },
+  {
+    id: 'wireframe',
+    title: 'Wireframe',
+    tag: 'Line shapes that turn to reveal the next one',
+    mode: 'native',
+    bg: 'var(--pg-canvas)', // shared opened-playground canvas token
+    liveTile: true,
+  },
 ]

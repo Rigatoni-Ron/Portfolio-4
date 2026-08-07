@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import Wireframe from './Wireframe.jsx'
-import { SHAPES } from './shapes.js'
+import Wireframe from '../playground/wireframe/Wireframe.jsx'
+import { SHAPES } from '../playground/wireframe/shapes.js'
 import './lab.css'
 
 const PRESETS = {

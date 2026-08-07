@@ -37,6 +37,8 @@ export default function Wireframe({
   morphMs = 1500,
   revealTurn = Math.PI, // extra rotation spent *during* a morph — the "reveal"
   drawIn = true,
+  interactive = true, // drag to orbit
+  paused = false, // for the backlog item: freeze the tiles while a modal is open
   // look
   depth = 0.78, // 0 = flat wireframe, 1 = back of the shape fades out entirely
   strokeWidth = 1.25,
@@ -52,7 +54,7 @@ export default function Wireframe({
   // Live tunables the loop reads. Mirrored into a ref so dragging a slider
   // doesn't tear down and restart the animation.
   const opts = useRef({})
-  opts.current = { spin, tilt, morphMs, revealTurn, depth, strokeWidth, rings, points, segments, verts, size }
+  opts.current = { spin, tilt, morphMs, revealTurn, depth, strokeWidth, rings, points, segments, verts, size, paused }
 
   // Mutable animation state, all outside React.
   const st = useRef({
@@ -111,9 +113,17 @@ export default function Wireframe({
 
     const frame = (now) => {
       raf = requestAnimationFrame(frame)
+      const o = opts.current
+      // Frozen: bail before any work, and swallow the elapsed time so the
+      // shape doesn't lurch forward when it resumes. (No offscreen check —
+      // NOTES has that under Settled: measured, and the saving is negligible
+      // on a page barely taller than the viewport.)
+      if (o.paused) {
+        last = now
+        return
+      }
       const dt = Math.min((now - last) / 1000, 0.05) // clamp tab-switch jumps
       last = now
-      const o = opts.current
       const paths = pathsRef.current
       if (!s.buf || !paths.length) return
 
@@ -257,7 +267,7 @@ export default function Wireframe({
   // exactly where you let go instead of snapping.
   useEffect(() => {
     const el = svgRef.current
-    if (!el) return
+    if (!el || !interactive) return
     const s = st.current
     const down = (e) => {
       el.setPointerCapture(e.pointerId)
@@ -285,7 +295,7 @@ export default function Wireframe({
       el.removeEventListener('pointerup', up)
       el.removeEventListener('pointercancel', up)
     }
-  }, [])
+  }, [interactive])
 
   const total = rings * segments + verts
   pathsRef.current.length = total
@@ -297,7 +307,7 @@ export default function Wireframe({
       width={size}
       height={size}
       viewBox={`0 0 ${size} ${size}`}
-      style={{ touchAction: 'none', cursor: 'grab', overflow: 'visible', display: 'block' }}
+      style={{ touchAction: 'none', cursor: interactive ? 'grab' : 'inherit', overflow: 'visible', display: 'block' }}
     >
       <g fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
         {Array.from({ length: total }, (_, i) => (

@@ -57,26 +57,6 @@ never reads the noindex and the bare URL can still get listed.
 
 ### Experiments
 
-- **Wireframe — vector line drawing.** Throwaway prototype at `/lab.html`
-  (dev only, `src/lab/`). A hand-rolled 3D pipeline into SVG: rotate points
-  with a matrix, divide by depth to project, write the result into a `d`
-  attribute every frame.
-
-  The idea that makes it work is that every shape is the *same object* — a
-  stack of closed contour rings along Y — so all shapes share point-for-point
-  topology and morphing is a plain lerp. No path parser, no flubber. A shape is
-  a radius profile, a superellipse exponent, a lobe count and a twist function
-  (`src/lab/shapes.js`); adding one is a row in a table, not a drawing.
-
-  Two tricks worth keeping: `pathLength="1"` normalises a path's length so one
-  dashoffset number drives a stroke-draw even while `d` changes every frame;
-  and a morph also spends a half-turn of extra rotation on the same easing
-  curve, so the new shape turns into view rather than cross-fading in place.
-
-  Not wired into the Playground. If it goes in: `<Wireframe>` takes only props,
-  runs one rAF loop through refs, and holds no state — the tile would own the
-  shape index and the autoplay timer.
-
 - Dark-brown tint for the Nested Menu piece.
 - Where to link the inspo garden (`inspo-canvas-v2.vercel.app`). Rejected as a
   Playground tile — too light, pulled focus on the dark page.
@@ -118,6 +98,37 @@ never reads the noindex and the bare URL can still get listed.
   right trade (a stale CV reaching a recruiter is worse), but it means the
   `vercel.json` gotcha below applies here too: check the commit status, don't
   trust the push.
+
+- **Wireframe — the fifth Playground piece.** `src/playground/wireframe/`. A
+  hand-rolled 3D pipeline into SVG: rotate points with a matrix, divide by
+  depth to project, write the result into a `d` attribute every frame. No
+  dependencies.
+
+  The idea that makes it work is that every shape is the *same object* — a
+  stack of closed contour rings along Y — so all shapes share point-for-point
+  topology and morphing is a plain lerp. No path parser, no flubber. A shape is
+  a radius profile, a superellipse exponent, a lobe count and a twist function
+  (`shapes.js`); adding one is a row in a table, not a drawing.
+
+  Two tricks worth reusing. `pathLength="1"` normalises a path's length to 1,
+  so a single dashoffset number drives a stroke-draw even while `d` changes
+  every frame — that's what lets the draw-on entrance coexist with the loop.
+  And a morph also spends a half-turn of *extra* rotation on the same easing
+  curve, so the new shape turns into view instead of cross-fading in place.
+
+  **Measured, don't re-litigate.** 0.28ms per frame at tile resolution
+  (48 paths), 0.57ms at full (120 paths) — 1.6% and 3.4% of a 60fps budget.
+  Against the whole page it's below noise: total rAF script time with the tile
+  and without it both land around 600ms/s in headless. It is by a wide margin
+  the cheapest live tile. Resolution is the only dial that matters; the presets
+  live at the top of `WireframePiece.jsx`.
+
+  Deliberately has no offscreen pause, per the entry below. It does take a
+  `paused` prop, unused, for the freeze-tiles-while-a-modal-is-open item.
+
+  Tuning harness at `/lab.html` (`src/lab/`, dev-only, kept out of the build) —
+  live sliders for every parameter, plus `?shape=cube&auto=0&draw=0` for
+  landing a screenshot on a settled frame.
 
 - **Offscreen tile pausing.** Built, measured, reverted. Negligible saving on a
   page barely taller than the viewport.
