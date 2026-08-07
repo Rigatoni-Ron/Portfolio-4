@@ -57,6 +57,26 @@ never reads the noindex and the bare URL can still get listed.
 
 ### Experiments
 
+- **Wireframe — vector line drawing.** Throwaway prototype at `/lab.html`
+  (dev only, `src/lab/`). A hand-rolled 3D pipeline into SVG: rotate points
+  with a matrix, divide by depth to project, write the result into a `d`
+  attribute every frame.
+
+  The idea that makes it work is that every shape is the *same object* — a
+  stack of closed contour rings along Y — so all shapes share point-for-point
+  topology and morphing is a plain lerp. No path parser, no flubber. A shape is
+  a radius profile, a superellipse exponent, a lobe count and a twist function
+  (`src/lab/shapes.js`); adding one is a row in a table, not a drawing.
+
+  Two tricks worth keeping: `pathLength="1"` normalises a path's length so one
+  dashoffset number drives a stroke-draw even while `d` changes every frame;
+  and a morph also spends a half-turn of extra rotation on the same easing
+  curve, so the new shape turns into view rather than cross-fading in place.
+
+  Not wired into the Playground. If it goes in: `<Wireframe>` takes only props,
+  runs one rAF loop through refs, and holds no state — the tile would own the
+  shape index and the autoplay timer.
+
 - Dark-brown tint for the Nested Menu piece.
 - Where to link the inspo garden (`inspo-canvas-v2.vercel.app`). Rejected as a
   Playground tile — too light, pulled focus on the dark page.
