@@ -109,38 +109,41 @@ never reads the noindex and the bare URL can still get listed.
   superellipse exponent (`shapes.js`); adding one is a row in a table.
 
   **The brief is a finance illustration language,** not a geometry demo — the
-  reference is Robinhood Chain's line drawings. Three things carry that read,
-  and all three took a rewrite to find:
+  reference is Robinhood Chain's line drawings. What carries that read:
 
   1. *Orthographic at 35.26°* (`ISO_TILT`, `atan(1/√2)`). Parallel projection is
      what makes it read as technical illustration; perspective read as a 3D
      render. Perspective is still there behind `ortho={false}`.
-  2. *The far side is hidden, not faded.* The surface normal comes from the
-     contour's own tangent — assuming it runs radially is true for a circle and
-     wrong for anything squared off, where the front/back boundary sits at the
-     corner. On top of that, a ring only hides its far half if something above
-     it does the hiding, and that depends on the elevation angle; it reduces to
-     one suffix max over `radius + y/tan(pitch)`. That rule is why a coin has a
-     whole top rim but a half-arc base, and why a stepped pyramid tucks each
-     tread under the step above.
-  3. *Line count is part of the drawing.* A coin wants two contour lines; a
-     sphere wants thirteen. Feeding a coin thirteen evenly-spaced rings makes a
-     hatched band. Most shapes place their rings explicitly via `bands()` and
-     let the spares pile up coincidentally, which costs nothing and keeps every
-     shape morph-compatible. The silhouette outline then does most of the work.
+  2. *A depth gradient, not a hard front/back split.* Each ring is cut into
+     `segments` pieces and each piece is dimmed by its own depth.
 
-  **Measured, don't re-litigate.** 0.34ms per frame at tile resolution
-  (20 paths), 0.53ms at full (28), 0.95ms at a 25-ring stress test — 2%, 3% and
-  6% of a 60fps budget. Against the whole page it is below noise. It is by a
-  wide margin the cheapest live tile. Deliberately has no offscreen pause, per
-  the entry below; it does take an unused `paused` prop for the
-  freeze-tiles-while-a-modal-is-open item.
+  **Hidden-line removal was built and reverted — don't rebuild it.** Drawing
+  one front arc and one back arc per ring, split at the silhouette, gives a
+  cleaner still frame and genuinely reads as a solid object. It fails in
+  motion, three ways, all from the same root: the split lands on a whole
+  sample, so it hops ~4° at a time as the shape turns, which reads as a shake
+  on any smooth circular edge (measured: max/median frame step 8.7 on the
+  cylinder, 5.0 on the hourglass — versus 2.5 and 1.4 with fixed segment
+  boundaries). The per-ring occlusion flag also flips discretely, popping whole
+  rings between half and whole mid-morph, and the hard boundary flattens the
+  dimensionality the gradient gives you. If it's ever revisited it needs
+  sub-sample interpolation on every boundary *and* a continuous occlusion term,
+  which is a lot of machinery to buy back a look the gradient already gets.
+
+  Same story for collapsing shapes onto two or three key rings: a tighter
+  diagram, but the set stopped reading as one material. Rings spread evenly now.
+
+  **Measured, don't re-litigate.** 0.45ms per frame at tile resolution
+  (96 paths), 0.71ms at full (192), 1.2ms at a 318-path stress test — 3%, 4%
+  and 7% of a 60fps budget. Against the whole page it is below noise.
+  Deliberately has no offscreen pause, per the entry below; it does take an
+  unused `paused` prop for the freeze-tiles-while-a-modal-is-open item.
 
   Shapes that were cut, and why, are listed at the bottom of `shapes.js` so
   they don't get re-proposed.
 
   Tuning harness at `/lab.html` (`src/lab/`, dev-only, kept out of the build) —
-  live sliders for every parameter, plus `?shape=vault&auto=0&draw=0&preset=Solid`
+  live sliders for every parameter, plus `?shape=vault&auto=0&draw=0&preset=Flat`
   for landing a screenshot on a settled frame.
 
 - **Offscreen tile pausing.** Built, measured, reverted. Negligible saving on a
