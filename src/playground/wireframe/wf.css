@@ -1,13 +1,13 @@
-/* Tile: the shape rides right of centre so the tile's own label keeps the
-   bottom-left corner (same arrangement as the Nested Menu tile). */
+/* Tile: centred, like the Trading Widget tile — the other piece whose preview
+   is a small self-contained object rather than a bleeding screenshot. The only
+   offset is upward, to sit clear of the tile's own title + tag. */
 .wf-tile {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  /* Clears the tile's own title + tag, which own the bottom-left corner. */
-  padding: 0 9% 34px 0;
+  justify-content: center;
+  padding-bottom: 34px;
   overflow: hidden;
   color: var(--text);
   pointer-events: none;
