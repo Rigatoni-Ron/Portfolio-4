@@ -17,18 +17,18 @@ import './wf.css'
  */
 
 // Ring counts are odd on purpose: the stepped forms want 1 + 2n rings so the
-// treads land exactly. `backface` is nudged just off zero — fully solid loses
-// the sense that you're looking at a drawn object rather than a filled one.
+// treads land exactly. `segments` is what smooths the depth gradient — it's
+// how many pieces each ring is cut into, each dimmed by its own depth.
 const TILE = {
-  rings: 9, points: 48, verts: 0,
-  spin: 0.2, tilt: ISO_TILT, ortho: true, backface: 0.16, strokeWidth: 1.1,
-  morphMs: 1600, revealTurn: Math.PI,
+  rings: 9, points: 60, segments: 10, verts: 6,
+  spin: 0.2, tilt: ISO_TILT, ortho: true, depth: 0.82, backface: 0.06,
+  strokeWidth: 1.1, morphMs: 1600, revealTurn: Math.PI,
 }
 
 const FULL = {
-  rings: 13, points: 84, verts: 0,
-  spin: 0.16, tilt: ISO_TILT, ortho: true, backface: 0.14, strokeWidth: 1.25,
-  morphMs: 1700, revealTurn: Math.PI,
+  rings: 13, points: 84, segments: 14, verts: 10,
+  spin: 0.16, tilt: ISO_TILT, ortho: true, depth: 0.82, backface: 0.06,
+  strokeWidth: 1.25, morphMs: 1700, revealTurn: Math.PI,
 }
 
 const TILE_HOLD = 2600

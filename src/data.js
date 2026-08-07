@@ -150,7 +150,7 @@ export const playground = [
   {
     id: 'wireframe',
     title: 'Wireframe',
-    tag: 'Spin one line shape into the next',
+    tag: 'Spin one financial operation into the next',
     mode: 'native',
     bg: 'var(--pg-canvas)', // shared opened-playground canvas token
     liveTile: true,

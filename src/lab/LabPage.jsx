@@ -3,11 +3,12 @@ import Wireframe, { ISO_TILT } from '../playground/wireframe/Wireframe.jsx'
 import { SHAPES } from '../playground/wireframe/shapes.js'
 import './lab.css'
 
+const BASE = { points: 84, spin: 0.16, tilt: ISO_TILT, morphMs: 1700, revealTurn: Math.PI, backface: 0.06 }
 const PRESETS = {
-  Piece: { rings: 13, points: 84, verts: 0, spin: 0.16, tilt: ISO_TILT, ortho: true, backface: 0.14, strokeWidth: 1.25, morphMs: 1700, revealTurn: Math.PI },
-  Solid: { rings: 13, points: 84, verts: 0, spin: 0.16, tilt: ISO_TILT, ortho: true, backface: 0, strokeWidth: 1.4, morphMs: 1700, revealTurn: Math.PI },
-  Mesh: { rings: 13, points: 84, verts: 14, spin: 0.16, tilt: ISO_TILT, ortho: true, backface: 1, strokeWidth: 1, morphMs: 1700, revealTurn: Math.PI },
-  Perspective: { rings: 13, points: 84, verts: 10, spin: 0.16, tilt: 0.3, ortho: false, backface: 0.3, strokeWidth: 1.25, morphMs: 1700, revealTurn: Math.PI },
+  Piece: { ...BASE, rings: 13, segments: 14, verts: 10, ortho: true, depth: 0.82, strokeWidth: 1.25 },
+  Flat: { ...BASE, rings: 13, segments: 6, verts: 10, ortho: true, depth: 0, strokeWidth: 1.25 },
+  Dense: { ...BASE, rings: 19, segments: 16, verts: 14, ortho: true, depth: 0.85, strokeWidth: 1 },
+  Perspective: { ...BASE, rings: 13, segments: 14, verts: 10, ortho: false, depth: 0.82, strokeWidth: 1.25 },
 }
 
 function Slider({ label, value, min, max, step, onChange, fmt }) {
@@ -118,12 +119,14 @@ export default function LabPage() {
             <h2>Geometry</h2>
             <Slider label="Rings" value={p.rings} min={2} max={33} step={1} onChange={set('rings')} />
             <Slider label="Points" value={p.points} min={12} max={144} step={12} onChange={set('points')} />
+            <Slider label="Segments" value={p.segments} min={1} max={20} step={1} onChange={set('segments')} />
             <Slider label="Meridians" value={p.verts} min={0} max={24} step={1} onChange={set('verts')} />
           </section>
 
           <section>
             <h2>Look</h2>
-            <Slider label="Backface" value={p.backface} min={0} max={1} step={0.01} onChange={set('backface')} />
+            <Slider label="Depth fade" value={p.depth} min={0} max={1} step={0.01} onChange={set('depth')} />
+            <Slider label="Backface floor" value={p.backface} min={0} max={0.5} step={0.01} onChange={set('backface')} />
             <div className="lab-chips">
               <button className={p.ortho ? 'on' : ''} onClick={() => setP((s) => ({ ...s, ortho: !s.ortho }))}>
                 {p.ortho ? 'Orthographic' : 'Perspective'}
@@ -133,7 +136,7 @@ export default function LabPage() {
           </section>
 
           <p className="lab-note">
-            {p.rings * 2 + 2 + p.verts} paths · {p.rings * p.points} points/frame
+            {p.rings * p.segments + p.verts} paths · {p.rings * p.points} points/frame
           </p>
         </aside>
       </div>

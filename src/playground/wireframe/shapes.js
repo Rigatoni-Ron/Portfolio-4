@@ -13,12 +13,11 @@
 //   lobes/amp   modulation around the contour
 //   height      total Y extent, when using `profile`
 //
-// The thing that took a rewrite to learn: **how many contour lines a form gets
-// is part of the drawing, not a resolution setting.** A globe wants every ring
-// it can get. A coin wants two. Feeding a coin thirteen evenly-spaced rings
-// produces a hatched band, not a coin. So most shapes here place their rings
-// explicitly with `bands`, and let the spares pile up coincidentally — which
-// costs nothing and keeps every shape morph-compatible.
+// Nearly every form here is a smooth `profile`, sampled at every ring. That
+// even spread is deliberate: the renderer fades each ring segment by its own
+// depth, so a full mesh reads as a shaded, dimensional object. Collapsing a
+// shape onto two or three key rings was tried and abandoned — it drew a
+// cleaner *diagram*, but the set lost the sense of being one material.
 
 const TAU = Math.PI * 2
 
@@ -61,17 +60,6 @@ export function buildShape(shape, rings, points) {
  * that steps back down would fold the meridians over themselves.
  */
 
-// Snap the available rings onto a short list of [y, radius] key rings. Two
-// keys at the same height make a flat annulus; two at the same radius make a
-// wall. This is how a shape asks for four lines instead of thirteen.
-function bands(keys) {
-  return (i, R) => {
-    const k = Math.round((i / Math.max(1, R - 1)) * (keys.length - 1))
-    const [y, r] = keys[k]
-    return { y, r }
-  }
-}
-
 // A stack of discs — a pair of rings at each disc's near and far rim, so every
 // coin reads as a doubled line rather than the stack reading as one cylinder.
 function coinStack(radius = 0.92, span = 1.9) {
@@ -102,15 +90,15 @@ function steppedPyramid(base = 1, top = 0.22, span = 1.8) {
 /*
  * The set. Every form has a financial referent — that's the constraint, and
  * it's tighter than "shapes the lathe can make". Anything only decorative (the
- * star, the flower, the twist) is gone, and so is a fluted column that read as
- * corn. This is meant to look like the start of a brand's illustration
- * language, not a geometry demo.
+ * star, the flower, the twist) is gone. This is meant to read as the start of
+ * a brand's illustration language, not a geometry demo.
+ *
+ * Five of the eight are lifted straight from the first pass, because those
+ * forms were already the strongest — they just needed the right names.
  */
 export const SHAPES = [
-  // The atom of the set. Two rims and an inset top face — that inset is the
-  // struck edge every real coin has, and it's what stops this reading as a
-  // plain cylinder.
-  { id: 'coin', label: 'Coin', n: 2, at: bands([[-0.17, 1], [0.17, 1], [0.17, 0.84]]) },
+  // The atom of the set. A wide, shallow disc.
+  { id: 'coin', label: 'Coin', n: 2, height: 0.34, profile: () => 1.02 },
 
   // Deposits — value accumulating.
   { id: 'stack', label: 'Deposits', n: 2, at: coinStack() },
@@ -118,17 +106,20 @@ export const SHAPES = [
   // Staking — tiers locking up. The reference's own staking illustration.
   { id: 'tiers', label: 'Staking', n: 14, at: steppedPyramid() },
 
-  // Custody: a canister with a lid, drawn in four lines.
-  { id: 'vault', label: 'Vault', n: 2, at: bands([[-0.8, 0.82], [0.5, 0.82], [0.5, 0.64], [0.82, 0.64]]) },
+  // Custody. A closed cylinder.
+  { id: 'vault', label: 'Vault', n: 2, height: 1.55, profile: () => 0.82 },
 
   // A bar of metal, squared off and drafted the way one is actually cast.
-  { id: 'ingot', label: 'Ingot', n: 14, at: bands([[-0.34, 1], [0.34, 0.78]]) },
+  { id: 'ingot', label: 'Ingot', n: 14, height: 0.78, profile: (v) => 1 - 0.19 * v },
 
-  // Order flow, routing, aggregation. A cone is two circles and its sides.
-  { id: 'funnel', label: 'Funnel', n: 2, at: bands([[-0.88, 0.1], [0.88, 1]]) },
+  // Order flow, routing, aggregation.
+  { id: 'funnel', label: 'Funnel', n: 2, profile: (v) => 0.08 + v * 0.95 },
 
   // Time — the other axis every financial product has.
-  { id: 'term', label: 'Term', n: 2, at: bands([[-0.9, 0.95], [0, 0.13], [0.9, 0.95]]) },
+  { id: 'term', label: 'Term', n: 2, profile: (v) => 0.14 + Math.abs(v - 0.5) * 1.62 },
+
+  // Global markets.
+  { id: 'globe', label: 'Markets', n: 2, profile: (v) => Math.sin(Math.PI * v) },
 ]
 
 /*
@@ -137,10 +128,4 @@ export const SHAPES = [
  *   Star, Bloom, Twist, Octahedron   decorative only, no financial referent.
  *   Column (fluted)                  read as corn on the cob, and duplicated
  *                                    the Vault's cylinder anyway.
- *   Globe (sphere)                   a sphere's true silhouette is a circle,
- *                                    but the outline here is stitched through
- *                                    each ring's screen-x extremes, which for
- *                                    a sphere falls *inside* that circle and
- *                                    renders it visibly squashed. Drawing it
- *                                    properly needs a real envelope solve.
  */

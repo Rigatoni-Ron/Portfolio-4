@@ -19,6 +19,9 @@ const CAM_F = 5.1
 // technical drawing is set at, and what makes these read as illustration
 // rather than as a 3D render.
 export const ISO_TILT = Math.atan(1 / Math.SQRT2)
+// Reference range for the depth fade. Fixed rather than measured per frame so
+// the gradient doesn't re-normalise (and visibly pump) mid-morph.
+const Z_RANGE = 1.4
 
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
 const easeOut = (t) => 1 - (1 - t) ** 3
@@ -30,7 +33,8 @@ export default function Wireframe({
   // geometry resolution
   rings = 9,
   points = 72,
-  verts = 0, // extra meridians; the outline usually does this job already
+  segments = 10, // depth slices per ring — more slices, smoother gradient
+  verts = 8, // meridian lines connecting the rings
   // motion
   spin = 0.34, // turns per second
   tilt = ISO_TILT, // radians on the X axis — positive looks down on the shape
@@ -41,7 +45,8 @@ export default function Wireframe({
   paused = false, // for the backlog item: freeze the tiles while a modal is open
   // look
   ortho = true, // parallel projection; false restores the perspective divide
-  backface = 0, // opacity of the hidden side. 0 = solid, 1 = full wireframe
+  depth = 0.8, // how hard the far side fades. 0 = flat wireframe
+  backface = 0.06, // floor on that fade, so the far side never fully vanishes
   strokeWidth = 1.25,
   className,
 }) {
@@ -55,7 +60,7 @@ export default function Wireframe({
   // Live tunables the loop reads. Mirrored into a ref so dragging a slider
   // doesn't tear down and restart the animation.
   const opts = useRef({})
-  opts.current = { spin, tilt, morphMs, revealTurn, ortho, backface, strokeWidth, rings, points, verts, size, paused }
+  opts.current = { spin, tilt, morphMs, revealTurn, ortho, depth, backface, strokeWidth, rings, points, segments, verts, size, paused }
 
   // Mutable animation state, all outside React.
   const st = useRef({
@@ -164,32 +169,10 @@ export default function Wireframe({
       const R = buf.length
       const P = buf[0].length
 
-      // Reuse one flat array: [screenX, screenY, facing] per point.
-      //
-      // `facing` is the z of the surface's outward normal after the yaw;
-      // negative means it points at the camera. It's the whole hidden-line
-      // system — one sign per point.
-      //
-      // The normal comes from the contour's own tangent, not from the radius.
-      // Assuming it runs radially is true for a circle and wrong for anything
-      // squared off: on a flat face the normal is constant, so the front/back
-      // boundary sits at the corner, not where the radius happens to peak.
-      // Taking it from the neighbours also means it stays correct mid-morph,
-      // while a circle is turning into a bar.
+      // Reuse one flat projected array: [screenX, screenY, depth] per point.
       const proj = s.proj && s.proj.length === R * P * 3 ? s.proj : (s.proj = new Float32Array(R * P * 3))
-      const lerpX = (i, j) => {
-        const a = from[i][j]
-        return a[0] + (to[i][j][0] - a[0]) * mp
-      }
-      const lerpZ = (i, j) => {
-        const a = from[i][j]
-        return a[2] + (to[i][j][2] - a[2]) * mp
-      }
-
-      const rad = s.rad && s.rad.length === R ? s.rad : (s.rad = new Float32Array(R))
 
       for (let i = 0; i < R; i++) {
-        let rmax = 0
         for (let j = 0; j < P; j++) {
           const a = from[i][j]
           const b = to[i][j]
@@ -201,167 +184,72 @@ export default function Wireframe({
           p[1] = y0
           p[2] = z0
 
-          // Outward normal in XZ: perpendicular to the contour tangent.
-          const jp = j + 1 === P ? 0 : j + 1
-          const jm = j === 0 ? P - 1 : j - 1
-          const nx = lerpZ(i, jp) - lerpZ(i, jm)
-          const nz = -(lerpX(i, jp) - lerpX(i, jm))
-
           // Yaw about Y, then pitch about X. The pitch tips the far side of
           // the object *down* the screen, which is what looking down on
           // something does — the other sign shows you its underside.
           const x1 = x0 * cy + z0 * sy
           const z1 = -x0 * sy + z0 * cy
           const y2 = y0 * cx + z1 * sx
-          const facing = -nx * sy + nz * cy
+          const z2 = z1 * cx - y0 * sx
 
           // Orthographic keeps parallel lines parallel — the projection every
           // technical illustration uses. Perspective is kept as an option.
-          const k = o.ortho ? scale : (CAM_F / (CAM_D + (z1 * cx - y0 * sx))) * scale
-          const rr = x0 * x0 + z0 * z0
-          if (rr > rmax) rmax = rr
+          const k = o.ortho ? scale : (CAM_F / (CAM_D + z2)) * scale
           const o3 = (i * P + j) * 3
           proj[o3] = half + x1 * k
           proj[o3 + 1] = half - y2 * k
-          proj[o3 + 2] = facing
+          proj[o3 + 2] = z2
         }
-        rad[i] = Math.sqrt(rmax)
-      }
-
-      // Which rings show a complete ellipse rather than just their near arc.
-      //
-      // A ring's far half is hidden only if there is material above it doing
-      // the hiding, and whether there is depends on the viewing angle: the
-      // sight line to a far point climbs as it comes toward the camera, so a
-      // ring above blocks it only if that ring is still wider than the line
-      // has moved inward by the time it gets there. Sliding up by dy moves the
-      // ray inward by dy/tan(pitch), which rearranges into a single suffix
-      // maximum over `radius + y / tan(pitch)`.
-      //
-      // This is what makes a coin read with a whole top rim but a half-arc at
-      // its base, a sphere show whole rings above the equator and arcs below,
-      // and a stepped pyramid tuck each tread behind the step above it.
-      const proud = s.proud && s.proud.length === R ? s.proud : (s.proud = new Uint8Array(R))
-      const slope = 1 / Math.max(0.02, Math.abs(Math.tan(pitch)))
-      let above = -Infinity
-      for (let i = R - 1; i >= 0; i--) {
-        const g = rad[i] + buf[i][0][1] * slope
-        proud[i] = g >= above - 1e-4 ? 1 : 0
-        if (g > above) above = g
       }
 
       // --- write paths ----------------------------------------------------
-      // Each ring becomes exactly two paths: the arc facing us and the arc
-      // behind. Splitting at the two points where `facing` changes sign puts
-      // the seam on the silhouette, so the boundary is exact rather than
-      // quantised to a segment — and it's far fewer paths than slicing every
-      // ring into fixed pieces.
-      const back = o.backface
+      // Each ring is sliced into a fixed number of segments and each segment
+      // is dimmed by its own depth. The slice boundaries are fixed indices,
+      // which is the whole point: an earlier version drew one front arc and
+      // one back arc split at the silhouette, and because that split lands on
+      // a whole sample it hopped a few degrees at a time as the shape turned —
+      // reading as a shake on anything with a smooth circular edge. Fixed
+      // boundaries can't hop, and a per-segment fade gives a gradient around
+      // the form instead of a hard front/back edge.
+      const per = P / o.segments
+      const fadeK = o.depth / (Z_RANGE * 2)
+      const dim = (z) => Math.max(o.backface, 1 - (z + Z_RANGE) * fadeK)
       let n = 0
-
-      const arc = (el, base, s0, count, dim) => {
-        if (!el) return
-        let d = ''
-        for (let q = 0; q <= count; q++) {
-          const o3 = base + ((s0 + q) % P) * 3
-          d += (q === 0 ? 'M' : 'L') + round(proj[o3]) + ' ' + round(proj[o3 + 1])
-        }
-        el.setAttribute('d', d)
-        el.style.opacity = dim ? back : 1
-      }
-
-      // The two silhouette points per ring, as [x, y] pairs, kept so the
-      // outline can be stitched down the object afterwards. These are
-      // interpolated rather than snapped to a sample: the true silhouette sits
-      // between two points, and rounding it to the nearer one lands up to a
-      // few degrees off, which shows as the outline crossing the arc ends.
-      const sil = s.sil && s.sil.length === R * 4 ? s.sil : (s.sil = new Float32Array(R * 4))
 
       for (let i = 0; i < R; i++) {
         const base = i * P * 3
-
-        // The longest run of front-facing points, and the ring's screen-x
-        // extremes, in one pass.
-        //
-        // "Longest run" rather than "first two sign flips": a squared-off
-        // cross-section is nearly flat across a face, so its facing hovers at
-        // zero there and chatters across it. Taking the longest run ignores
-        // that chatter and still finds the real front.
-        let bestStart = 0
-        let bestLen = 0
-        let runStart = -1
-        let runLen = 0
-        let lx = Infinity
-        let rx = -Infinity
-        let li = 0
-        let ri = 0
-        for (let q = 0; q < P * 2; q++) {
-          const j = q % P
-          const o3 = base + j * 3
-          if (q < P) {
-            const x = proj[o3]
-            if (x < lx) { lx = x; li = j }
-            if (x > rx) { rx = x; ri = j }
+        for (let sIdx = 0; sIdx < o.segments; sIdx++) {
+          const el = paths[n++]
+          if (!el) continue
+          const start = Math.round(sIdx * per)
+          const end = Math.round((sIdx + 1) * per)
+          let d = ''
+          let zSum = 0
+          for (let j = start; j <= end; j++) {
+            const o3 = base + (j % P) * 3
+            d += (j === start ? 'M' : 'L') + round(proj[o3]) + ' ' + round(proj[o3 + 1])
+            zSum += proj[o3 + 2]
           }
-          if (proj[o3 + 2] < 0) {
-            if (runStart < 0) { runStart = j; runLen = 0 }
-            runLen++
-            if (runLen > bestLen && runLen <= P) { bestLen = runLen; bestStart = runStart }
-          } else {
-            runStart = -1
-          }
+          el.setAttribute('d', d)
+          el.style.opacity = dim(zSum / (end - start + 1))
         }
-
-        if (proud[i] || bestLen === 0 || bestLen >= P) {
-          // Nothing above it to hide behind (or a degenerate pole): one whole
-          // ring, at full weight.
-          arc(paths[n++], base, 0, P, bestLen === 0 && !proud[i])
-          arc(paths[n++], base, 0, 0, true)
-        } else {
-          arc(paths[n++], base, bestStart, bestLen - 1, false)
-          arc(paths[n++], base, (bestStart + bestLen - 1) % P, P - bestLen + 1, true)
-        }
-
-        // The outline runs through each ring's leftmost and rightmost points
-        // on screen. Defining it that way rather than by the facing sign means
-        // the two runs can never swap sides and cross over — which is exactly
-        // what a corner-heavy cross-section made them do.
-        sil[i * 4] = proj[base + li * 3]
-        sil[i * 4 + 1] = proj[base + li * 3 + 1]
-        sil[i * 4 + 2] = proj[base + ri * 3]
-        sil[i * 4 + 3] = proj[base + ri * 3 + 1]
-      }
-
-      // The outline. With only two or three contour lines on most of these
-      // forms, the silhouette *is* the drawing — it's the line a technical
-      // illustrator draws first and the reason a cylinder reads as solid
-      // rather than as two floating ellipses.
-      for (let side = 0; side < 2; side++) {
-        const el = paths[n++]
-        if (!el) continue
-        let d = ''
-        for (let i = 0; i < R; i++) {
-          const o = i * 4 + side * 2
-          d += (i === 0 ? 'M' : 'L') + round(sil[o]) + ' ' + round(sil[o + 1])
-        }
-        el.setAttribute('d', d)
-        el.style.opacity = 1
       }
 
       // Meridians. A meridian sits at one angle, so its whole length shares a
-      // facing — one test at the widest ring decides it.
-      const mid = (R >> 1) * P * 3
+      // depth — one average decides it.
       for (let c = 0; c < o.verts; c++) {
         const el = paths[n++]
         if (!el) continue
         const col = Math.round((c * P) / o.verts) % P
         let d = ''
+        let zSum = 0
         for (let i = 0; i < R; i++) {
           const o3 = (i * P + col) * 3
           d += (i === 0 ? 'M' : 'L') + round(proj[o3]) + ' ' + round(proj[o3 + 1])
+          zSum += proj[o3 + 2]
         }
         el.setAttribute('d', d)
-        el.style.opacity = proj[mid + col * 3 + 2] < 0 ? 1 : back
+        el.style.opacity = dim(zSum / R) * 0.72
       }
 
       // --- draw-on entrance -------------------------------------------------
@@ -377,19 +265,15 @@ export default function Wireframe({
           const p = Math.max(0, Math.min(1, (age - i * STAG) / DUR))
           if (p < 1) done = false
           const off = 1 - easeOut(p)
-          for (let k = 0; k < 2; k++) {
-            const el = paths[i * 2 + k]
+          for (let sIdx = 0; sIdx < o.segments; sIdx++) {
+            const el = paths[i * o.segments + sIdx]
             if (el) el.style.strokeDashoffset = off
           }
         }
         const vp = Math.max(0, Math.min(1, (age - R * STAG) / DUR))
         if (vp < 1) done = false
-        for (let k = 0; k < 2; k++) {
-          const el = paths[R * 2 + k]
-          if (el) el.style.strokeDashoffset = 1 - easeOut(vp)
-        }
         for (let c = 0; c < o.verts; c++) {
-          const el = paths[R * 2 + 2 + c]
+          const el = paths[R * o.segments + c]
           if (el) el.style.strokeDashoffset = 1 - easeOut(vp)
         }
         if (done) for (const el of paths) if (el) el.style.strokeDasharray = 'none'
@@ -398,7 +282,7 @@ export default function Wireframe({
 
     raf = requestAnimationFrame(frame)
     return () => cancelAnimationFrame(raf)
-  }, [geo, verts, drawIn])
+  }, [geo, segments, verts, drawIn])
 
   // Drag to orbit. Releasing hands the yaw back to the autospin so it picks up
   // exactly where you let go instead of snapping.
@@ -434,7 +318,7 @@ export default function Wireframe({
     }
   }, [interactive])
 
-  const total = rings * 2 + 2 + verts
+  const total = rings * segments + verts
   pathsRef.current.length = total
 
   return (
