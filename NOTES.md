@@ -100,35 +100,48 @@ never reads the noindex and the bare URL can still get listed.
   trust the push.
 
 - **Wireframe — the fifth Playground piece.** `src/playground/wireframe/`. A
-  hand-rolled 3D pipeline into SVG: rotate points with a matrix, divide by
-  depth to project, write the result into a `d` attribute every frame. No
-  dependencies.
+  hand-rolled 3D pipeline into SVG: rotate points with a matrix, project, write
+  the result into a `d` attribute every frame. No dependencies.
 
-  The idea that makes it work is that every shape is the *same object* — a
-  stack of closed contour rings along Y — so all shapes share point-for-point
-  topology and morphing is a plain lerp. No path parser, no flubber. A shape is
-  a radius profile, a superellipse exponent, a lobe count and a twist function
-  (`shapes.js`); adding one is a row in a table, not a drawing.
+  Every shape is the *same object* — a stack of closed contour rings along Y —
+  so all shapes share point-for-point topology and morphing is a plain lerp. No
+  path parser, no flubber. A shape is a ring-placement function plus a
+  superellipse exponent (`shapes.js`); adding one is a row in a table.
 
-  Two tricks worth reusing. `pathLength="1"` normalises a path's length to 1,
-  so a single dashoffset number drives a stroke-draw even while `d` changes
-  every frame — that's what lets the draw-on entrance coexist with the loop.
-  And a morph also spends a half-turn of *extra* rotation on the same easing
-  curve, so the new shape turns into view instead of cross-fading in place.
+  **The brief is a finance illustration language,** not a geometry demo — the
+  reference is Robinhood Chain's line drawings. Three things carry that read,
+  and all three took a rewrite to find:
 
-  **Measured, don't re-litigate.** 0.28ms per frame at tile resolution
-  (48 paths), 0.57ms at full (120 paths) — 1.6% and 3.4% of a 60fps budget.
-  Against the whole page it's below noise: total rAF script time with the tile
-  and without it both land around 600ms/s in headless. It is by a wide margin
-  the cheapest live tile. Resolution is the only dial that matters; the presets
-  live at the top of `WireframePiece.jsx`.
+  1. *Orthographic at 35.26°* (`ISO_TILT`, `atan(1/√2)`). Parallel projection is
+     what makes it read as technical illustration; perspective read as a 3D
+     render. Perspective is still there behind `ortho={false}`.
+  2. *The far side is hidden, not faded.* The surface normal comes from the
+     contour's own tangent — assuming it runs radially is true for a circle and
+     wrong for anything squared off, where the front/back boundary sits at the
+     corner. On top of that, a ring only hides its far half if something above
+     it does the hiding, and that depends on the elevation angle; it reduces to
+     one suffix max over `radius + y/tan(pitch)`. That rule is why a coin has a
+     whole top rim but a half-arc base, and why a stepped pyramid tucks each
+     tread under the step above.
+  3. *Line count is part of the drawing.* A coin wants two contour lines; a
+     sphere wants thirteen. Feeding a coin thirteen evenly-spaced rings makes a
+     hatched band. Most shapes place their rings explicitly via `bands()` and
+     let the spares pile up coincidentally, which costs nothing and keeps every
+     shape morph-compatible. The silhouette outline then does most of the work.
 
-  Deliberately has no offscreen pause, per the entry below. It does take a
-  `paused` prop, unused, for the freeze-tiles-while-a-modal-is-open item.
+  **Measured, don't re-litigate.** 0.34ms per frame at tile resolution
+  (20 paths), 0.53ms at full (28), 0.95ms at a 25-ring stress test — 2%, 3% and
+  6% of a 60fps budget. Against the whole page it is below noise. It is by a
+  wide margin the cheapest live tile. Deliberately has no offscreen pause, per
+  the entry below; it does take an unused `paused` prop for the
+  freeze-tiles-while-a-modal-is-open item.
+
+  Shapes that were cut, and why, are listed at the bottom of `shapes.js` so
+  they don't get re-proposed.
 
   Tuning harness at `/lab.html` (`src/lab/`, dev-only, kept out of the build) —
-  live sliders for every parameter, plus `?shape=cube&auto=0&draw=0` for
-  landing a screenshot on a settled frame.
+  live sliders for every parameter, plus `?shape=vault&auto=0&draw=0&preset=Solid`
+  for landing a screenshot on a settled frame.
 
 - **Offscreen tile pausing.** Built, measured, reverted. Negligible saving on a
   page barely taller than the viewport.

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
-import Wireframe from '../playground/wireframe/Wireframe.jsx'
+import Wireframe, { ISO_TILT } from '../playground/wireframe/Wireframe.jsx'
 import { SHAPES } from '../playground/wireframe/shapes.js'
 import './lab.css'
 
 const PRESETS = {
-  Tile: { rings: 9, points: 72, segments: 8, verts: 8, spin: 0.28, tilt: 0.3, depth: 0.78, strokeWidth: 1.25, morphMs: 1500, revealTurn: Math.PI },
-  Dense: { rings: 17, points: 96, segments: 12, verts: 12, spin: 0.2, tilt: 0.35, depth: 0.85, strokeWidth: 1, morphMs: 1800, revealTurn: Math.PI },
-  Sparse: { rings: 5, points: 48, segments: 6, verts: 4, spin: 0.4, tilt: 0.22, depth: 0.6, strokeWidth: 2, morphMs: 1100, revealTurn: Math.PI * 2 },
-  Flat: { rings: 11, points: 72, segments: 4, verts: 0, spin: 0.32, tilt: 0, depth: 0, strokeWidth: 1.25, morphMs: 1400, revealTurn: Math.PI },
+  Piece: { rings: 13, points: 84, verts: 0, spin: 0.16, tilt: ISO_TILT, ortho: true, backface: 0.14, strokeWidth: 1.25, morphMs: 1700, revealTurn: Math.PI },
+  Solid: { rings: 13, points: 84, verts: 0, spin: 0.16, tilt: ISO_TILT, ortho: true, backface: 0, strokeWidth: 1.4, morphMs: 1700, revealTurn: Math.PI },
+  Mesh: { rings: 13, points: 84, verts: 14, spin: 0.16, tilt: ISO_TILT, ortho: true, backface: 1, strokeWidth: 1, morphMs: 1700, revealTurn: Math.PI },
+  Perspective: { rings: 13, points: 84, verts: 10, spin: 0.16, tilt: 0.3, ortho: false, backface: 0.3, strokeWidth: 1.25, morphMs: 1700, revealTurn: Math.PI },
 }
 
 function Slider({ label, value, min, max, step, onChange, fmt }) {
@@ -33,7 +33,7 @@ function Slider({ label, value, min, max, step, onChange, fmt }) {
 const Q = new URLSearchParams(location.search)
 
 export default function LabPage() {
-  const [p, setP] = useState(PRESETS[Q.get('preset')] ?? PRESETS.Tile)
+  const [p, setP] = useState(PRESETS[Q.get('preset')] ?? PRESETS.Piece)
   const [shape, setShape] = useState(Math.max(0, SHAPES.findIndex((s) => s.id === Q.get('shape'))))
   const [autoplay, setAutoplay] = useState(Q.get('auto') !== '0')
   const [hold, setHold] = useState(2400)
@@ -118,18 +118,22 @@ export default function LabPage() {
             <h2>Geometry</h2>
             <Slider label="Rings" value={p.rings} min={2} max={33} step={1} onChange={set('rings')} />
             <Slider label="Points" value={p.points} min={12} max={144} step={12} onChange={set('points')} />
-            <Slider label="Segments" value={p.segments} min={1} max={12} step={1} onChange={set('segments')} />
             <Slider label="Meridians" value={p.verts} min={0} max={24} step={1} onChange={set('verts')} />
           </section>
 
           <section>
             <h2>Look</h2>
-            <Slider label="Depth fade" value={p.depth} min={0} max={1} step={0.01} onChange={set('depth')} />
+            <Slider label="Backface" value={p.backface} min={0} max={1} step={0.01} onChange={set('backface')} />
+            <div className="lab-chips">
+              <button className={p.ortho ? 'on' : ''} onClick={() => setP((s) => ({ ...s, ortho: !s.ortho }))}>
+                {p.ortho ? 'Orthographic' : 'Perspective'}
+              </button>
+            </div>
             <Slider label="Stroke" value={p.strokeWidth} min={0.5} max={4} step={0.05} onChange={set('strokeWidth')} />
           </section>
 
           <p className="lab-note">
-            {p.rings * p.segments + p.verts} paths · {p.rings * p.points} points/frame
+            {p.rings * 2 + 2 + p.verts} paths · {p.rings * p.points} points/frame
           </p>
         </aside>
       </div>

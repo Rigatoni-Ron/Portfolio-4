@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import Wireframe from './Wireframe.jsx'
+import Wireframe, { ISO_TILT } from './Wireframe.jsx'
 import { SHAPES } from './shapes.js'
 import './wf.css'
 
@@ -16,17 +16,18 @@ import './wf.css'
  * Tuned in the lab harness at /lab.html (dev only).
  */
 
-// The tile runs at about a third of the full piece's point count. It's small
-// on screen, so the resolution isn't missed.
+// Ring counts are odd on purpose: the stepped forms want 1 + 2n rings so the
+// treads land exactly. `backface` is nudged just off zero — fully solid loses
+// the sense that you're looking at a drawn object rather than a filled one.
 const TILE = {
-  rings: 7, points: 48, segments: 6, verts: 6,
-  spin: 0.2, tilt: 0.3, depth: 0.8, strokeWidth: 1.1,
+  rings: 9, points: 48, verts: 0,
+  spin: 0.2, tilt: ISO_TILT, ortho: true, backface: 0.16, strokeWidth: 1.1,
   morphMs: 1600, revealTurn: Math.PI,
 }
 
 const FULL = {
-  rings: 11, points: 84, segments: 10, verts: 10,
-  spin: 0.16, tilt: 0.3, depth: 0.82, strokeWidth: 1.25,
+  rings: 13, points: 84, verts: 0,
+  spin: 0.16, tilt: ISO_TILT, ortho: true, backface: 0.14, strokeWidth: 1.25,
   morphMs: 1700, revealTurn: Math.PI,
 }
 
