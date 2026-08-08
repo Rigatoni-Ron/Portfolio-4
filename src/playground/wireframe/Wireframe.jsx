@@ -48,6 +48,11 @@ export default function Wireframe({
   depth = 0.8, // how hard the far side fades. 0 = flat wireframe
   backface = 0.06, // floor on that fade, so the far side never fully vanishes
   strokeWidth = 1.25,
+  // Optional per-segment painter, for the colour prototype at /colour.html.
+  // Called with the element and a reused info object; when absent the default
+  // depth fade runs exactly as before. Kept as a hook rather than a copy of
+  // the engine so the two can't drift.
+  paint = null,
   className,
 }) {
   const svgRef = useRef(null)
@@ -60,7 +65,7 @@ export default function Wireframe({
   // Live tunables the loop reads. Mirrored into a ref so dragging a slider
   // doesn't tear down and restart the animation.
   const opts = useRef({})
-  opts.current = { spin, tilt, morphMs, revealTurn, ortho, depth, backface, strokeWidth, rings, points, segments, verts, size, paused }
+  opts.current = { spin, tilt, morphMs, revealTurn, ortho, depth, backface, strokeWidth, rings, points, segments, verts, size, paused, paint }
 
   // Mutable animation state, all outside React.
   const st = useRef({
@@ -217,6 +222,12 @@ export default function Wireframe({
       const per = P / o.segments
       const fadeK = o.depth / (Z_RANGE * 2)
       const dim = (z) => Math.max(o.backface, 1 - (z + Z_RANGE) * fadeK)
+      // One reused object; a fresh literal per path per frame would be pure
+      // garbage for the collector.
+      const info = s.info || (s.info = {})
+      info.t = now / 1000
+      info.rings = R
+      info.segs = o.segments
       let n = 0
 
       for (let i = 0; i < R; i++) {
@@ -234,7 +245,20 @@ export default function Wireframe({
             zSum += proj[o3 + 2]
           }
           el.setAttribute('d', d)
-          el.style.opacity = dim(zSum / (end - start + 1))
+          const zAvg = zSum / (end - start + 1)
+          if (o.paint) {
+            info.kind = 'ring'
+            info.z = zAvg
+            info.zNorm = Math.min(1, Math.max(0, (zAvg + Z_RANGE) / (Z_RANGE * 2)))
+            info.ring = i
+            info.vNorm = R > 1 ? i / (R - 1) : 0.5
+            info.seg = sIdx
+            info.angle = ((start + end) / 2 / P) % 1
+            info.dim = dim(zAvg)
+            o.paint(el, info)
+          } else {
+            el.style.opacity = dim(zAvg)
+          }
         }
       }
 
@@ -252,7 +276,20 @@ export default function Wireframe({
           zSum += proj[o3 + 2]
         }
         el.setAttribute('d', d)
-        el.style.opacity = dim(zSum / R) * 0.72
+        const zAvg = zSum / R
+        if (o.paint) {
+          info.kind = 'meridian'
+          info.z = zAvg
+          info.zNorm = Math.min(1, Math.max(0, (zAvg + Z_RANGE) / (Z_RANGE * 2)))
+          info.ring = -1
+          info.vNorm = 0.5
+          info.seg = c
+          info.angle = col / P
+          info.dim = dim(zAvg) * 0.72
+          o.paint(el, info)
+        } else {
+          el.style.opacity = dim(zAvg) * 0.72
+        }
       }
 
       // --- draw-on entrance -------------------------------------------------

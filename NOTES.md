@@ -57,6 +57,19 @@ never reads the noindex and the bare URL can still get listed.
 
 ### Experiments
 
+- **Colour for the Wireframe piece.** Throwaway at `/colour.html` (dev only,
+  `src/lab/ColourLab.jsx`). Eight treatments of the same geometry in a palette
+  measured out of a reference photo — `src/lab/palette.js` records the method
+  and the one hand adjustment. The engine gained an optional `paint(el, info)`
+  prop for it; with `paint` null the default depth fade runs untouched, so the
+  shipped piece *renders* identically — verified on the live tile: no inline
+  strokes, 96 paths, 96 distinct opacities. The chunk hash does change, since
+  the engine file itself gained the hook.
+
+  Undecided. `Depth + sweep` and `Two-tone` are the two that could plausibly
+  ship — the first keeps the mono version's dimensionality, the second is the
+  only one legible at tile size. Everything else is a full-size-only look.
+
 - Dark-brown tint for the Nested Menu piece.
 - Where to link the inspo garden (`inspo-canvas-v2.vercel.app`). Rejected as a
   Playground tile — too light, pulled focus on the dark page.
