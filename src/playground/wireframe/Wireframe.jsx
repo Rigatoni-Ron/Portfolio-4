@@ -331,6 +331,12 @@ export default function Wireframe({
       width={size}
       height={size}
       viewBox={`0 0 ${size} ${size}`}
+      // Blooms the site cursor into its corner brackets, the same as any other
+      // interactive element — and pressing then tightens them. This shape is a
+      // drag target with no affordance of its own, so the cursor is the only
+      // thing telling you it can be grabbed. The whole SVG box is the drag
+      // area, so the whole box opts in, not just the drawn lines.
+      data-cursor={interactive ? 'hover' : undefined}
       style={{ touchAction: 'none', cursor: interactive ? 'grab' : 'inherit', overflow: 'visible', display: 'block' }}
     >
       <g fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
