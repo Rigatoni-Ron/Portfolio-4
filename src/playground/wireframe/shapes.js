@@ -72,6 +72,19 @@ function coinStack(radius = 0.92, span = 1.9) {
   }
 }
 
+// A body with a stepped lid. Rings spread through the body, then one lands at
+// the shoulder — same height as the last body ring but a smaller radius, which
+// makes a flat annulus — and the rest run up the lid. That shared height is
+// what turns the shoulder into a crisp step instead of a taper.
+function canister({ body = 0.84, lid = 0.58, shoulder = 0.28, base = -0.86, top = 0.72, lidRings = 3 } = {}) {
+  return (i, R) => {
+    const bodyRings = Math.max(2, R - lidRings - 1)
+    if (i < bodyRings) return { y: base + (shoulder - base) * (i / (bodyRings - 1)), r: body }
+    if (i === bodyRings) return { y: shoulder, r: lid }
+    return { y: shoulder + (top - shoulder) * ((i - bodyRings) / lidRings), r: lid }
+  }
+}
+
 // A stepped pyramid. Every step is two rings sharing one height: the outer
 // radius arriving, then the inner radius leaving. That shared height is the
 // tread, and it's why the corner comes out crisp instead of ramped.
@@ -106,8 +119,10 @@ export const SHAPES = [
   // Staking — tiers locking up. The reference's own staking illustration.
   { id: 'tiers', label: 'Staking', n: 14, at: steppedPyramid() },
 
-  // Custody. A closed cylinder.
-  { id: 'vault', label: 'Vault', n: 2, height: 1.55, profile: () => 0.82 },
+  // Custody. Was a plain cylinder, which read as the same object as Deposits —
+  // both just a ribbed tube. Now squared off and given a stepped lid, so it
+  // differs from the stack in silhouette and not only in ring rhythm.
+  { id: 'vault', label: 'Vault', n: 8, at: canister() },
 
   // A bar of metal, squared off and drafted the way one is actually cast.
   { id: 'ingot', label: 'Ingot', n: 14, height: 0.78, profile: (v) => 1 - 0.19 * v },
