@@ -15,9 +15,9 @@ import { SHAPES, buildShape } from './shapes.js'
 // much the far side of the shape shrinks. Wider gap = flatter, more isometric.
 const CAM_D = 7.5
 const CAM_F = 5.1
-// True isometric elevation: atan(1/sqrt(2)). The angle every axonometric
-// technical drawing is set at, and what makes these read as illustration
-// rather than as a 3D render.
+// True isometric elevation: atan(1/sqrt(2)) — the angle every axonometric
+// technical drawing is set at. Kept as the camera's elevation even though the
+// projection is perspective, because it's the angle that reads as a drawing.
 export const ISO_TILT = Math.atan(1 / Math.SQRT2)
 // Reference range for the depth fade. Fixed rather than measured per frame so
 // the gradient doesn't re-normalise (and visibly pump) mid-morph.
@@ -44,7 +44,7 @@ export default function Wireframe({
   interactive = true, // drag to orbit
   paused = false, // for the backlog item: freeze the tiles while a modal is open
   // look
-  ortho = true, // parallel projection; false restores the perspective divide
+  ortho = false, // true switches to a parallel (isometric) projection
   depth = 0.8, // how hard the far side fades. 0 = flat wireframe
   backface = 0.06, // floor on that fade, so the far side never fully vanishes
   strokeWidth = 1.25,
@@ -192,8 +192,11 @@ export default function Wireframe({
           const y2 = y0 * cx + z1 * sx
           const z2 = z1 * cx - y0 * sx
 
-          // Orthographic keeps parallel lines parallel — the projection every
-          // technical illustration uses. Perspective is kept as an option.
+          // Perspective. Orthographic is the more literal match for technical
+          // illustration, but with the far side already dimmed by the depth
+          // fade, the size falloff is what makes the form feel like it has
+          // volume rather than being a flat pattern. `ortho` keeps the
+          // parallel projection available.
           const k = o.ortho ? scale : (CAM_F / (CAM_D + z2)) * scale
           const o3 = (i * P + j) * 3
           proj[o3] = half + x1 * k

@@ -111,9 +111,12 @@ never reads the noindex and the bare URL can still get listed.
   **The brief is a finance illustration language,** not a geometry demo — the
   reference is Robinhood Chain's line drawings. What carries that read:
 
-  1. *Orthographic at 35.26°* (`ISO_TILT`, `atan(1/√2)`). Parallel projection is
-     what makes it read as technical illustration; perspective read as a 3D
-     render. Perspective is still there behind `ortho={false}`.
+  1. *The camera sits at 35.26°* (`ISO_TILT`, `atan(1/√2)`) — the isometric
+     elevation, which is the angle that reads as a technical drawing. The
+     projection itself is **perspective**: orthographic is the more literal
+     match for the reference, but paired with the depth fade it read flat, and
+     the size falloff is what gives the forms volume. `ortho={true}` restores
+     the parallel projection.
   2. *A depth gradient, not a hard front/back split.* Each ring is cut into
      `segments` pieces and each piece is dimmed by its own depth.
 
@@ -133,9 +136,10 @@ never reads the noindex and the bare URL can still get listed.
   Same story for collapsing shapes onto two or three key rings: a tighter
   diagram, but the set stopped reading as one material. Rings spread evenly now.
 
-  **Measured, don't re-litigate.** 0.45ms per frame at tile resolution
-  (96 paths), 0.71ms at full (192), 1.2ms at a 318-path stress test — 3%, 4%
-  and 7% of a 60fps budget. Against the whole page it is below noise.
+  **Measured, don't re-litigate.** 0.40ms per frame at tile resolution
+  (96 paths), 1.03ms at full (192), 1.9ms at a 318-path stress test — 2%, 6%
+  and 11% of a 60fps budget. Only the tile figure runs five-up — there is
+  never more than one opened piece. Against the whole page it is below noise.
   Deliberately has no offscreen pause, per the entry below; it does take an
   unused `paused` prop for the freeze-tiles-while-a-modal-is-open item.
 
