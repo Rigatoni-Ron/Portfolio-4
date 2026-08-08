@@ -92,6 +92,8 @@ export default function Wireframe({
       s.buf = src.map((ring) => ring.map((p) => [...p]))
       s.from = src.map((ring) => ring.map((p) => [...p]))
       s.to = src
+      s.toIdx = shape
+      s.fromIdx = shape
       s.morphT = 1
       s.pending = false
       s.born = performance.now()
@@ -108,7 +110,9 @@ export default function Wireframe({
           s.from[i][j][2] = s.buf[i][j][2]
         }
       }
+      s.fromIdx = s.toIdx
       s.to = src
+      s.toIdx = shape
       s.morphT = 0
       s.pending = true
     }
@@ -264,10 +268,36 @@ export default function Wireframe({
 
       // Meridians. A meridian sits at one angle, so its whole length shares a
       // depth — one average decides it.
+      //
+      // Count and angle are per-shape, which sounds like it should be blocked by
+      // the morph needing identical topology — but topology only constrains the
+      // *rings*; meridians are a drawing choice. Slots are allocated for the
+      // largest count any shape asks for, and a shape wanting fewer just leaves
+      // the extras empty. Across a morph the count blends as a weight (so
+      // meridians fade rather than pop) and the angle takes the short way round.
+      // This is what lets the stepped forms carry four lines on their corners
+      // while the round ones keep ten evenly spread.
+      const shFrom = SHAPES[s.fromIdx] ?? SHAPES[0]
+      const shTo = SHAPES[s.toIdx] ?? SHAPES[0]
+      const vF = shFrom.verts ?? o.verts
+      const vT = shTo.verts ?? o.verts
+      const phF = shFrom.vertPhase ?? 0
+      const phT = shTo.vertPhase ?? 0
+
       for (let c = 0; c < o.verts; c++) {
         const el = paths[n++]
         if (!el) continue
-        const col = Math.round((c * P) / o.verts) % P
+        const w = (c < vF ? 1 : 0) + ((c < vT ? 1 : 0) - (c < vF ? 1 : 0)) * mp
+        if (w < 0.01) {
+          el.setAttribute('d', '')
+          continue
+        }
+        const aF = (phF + c / vF) % 1
+        const aT = (phT + c / vT) % 1
+        let da = aT - aF
+        if (da > 0.5) da -= 1
+        if (da < -0.5) da += 1
+        const col = Math.round((((aF + da * mp) % 1) + 1) % 1 * P) % P
         let d = ''
         let zSum = 0
         for (let i = 0; i < R; i++) {
@@ -285,10 +315,11 @@ export default function Wireframe({
           info.vNorm = 0.5
           info.seg = c
           info.angle = col / P
-          info.dim = dim(zAvg) * 0.72
+          info.dim = dim(zAvg) * 0.72 * w
           o.paint(el, info)
+          if (w < 1) el.style.opacity = (parseFloat(el.style.opacity) || 1) * w
         } else {
-          el.style.opacity = dim(zAvg) * 0.72
+          el.style.opacity = dim(zAvg) * 0.72 * w
         }
       }
 

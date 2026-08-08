@@ -1,5 +1,6 @@
 /*
- * Palette pulled out of the reference photograph, not eyeballed.
+ * Palette pulled out of the reference photograph, not eyeballed. Lives here
+ * rather than in the lab because the shipped piece now uses it.
  *
  * Method: downscale to 200×133, convert to HSL, bucket by hue, and take the
  * most vivid mid-lightness pixel in each bucket. A plain k-means over the
@@ -55,4 +56,18 @@ export function ramp(name, t) {
   const a = stops[i]
   const b = stops[i + 1]
   return `rgb(${Math.round(a[0] + (b[0] - a[0]) * f)},${Math.round(a[1] + (b[1] - a[1]) * f)},${Math.round(a[2] + (b[2] - a[2]) * f)})`
+}
+
+/*
+ * The shipped treatment: depth sets brightness, a slow sweep sets hue.
+ *
+ * Chosen over the seven alternatives in the /colour.html study because it's the
+ * only one that keeps the monochrome version's depth reading — every other
+ * treatment spends the brightness channel on colour and the form goes flat.
+ * `stretch` is doing real work here: without it the ramp only ever visits its
+ * middle and the whole object comes out one hue.
+ */
+export function depthSweep(el, i) {
+  el.style.stroke = ramp('loop', (i.angle * 0.8 + i.vNorm * 0.25 + i.t * 0.06) % 1)
+  el.style.opacity = 0.18 + stretch(1 - i.zNorm) * 0.82
 }

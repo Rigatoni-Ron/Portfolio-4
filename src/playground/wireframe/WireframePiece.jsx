@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Wireframe, { ISO_TILT } from './Wireframe.jsx'
+import { depthSweep } from './palette.js'
 import { SHAPES } from './shapes.js'
 import './wf.css'
 
@@ -22,13 +23,15 @@ import './wf.css'
 // camera sits at the isometric elevation but projects in perspective: the
 // size falloff plus the fade is what gives the forms volume.
 const TILE = {
-  rings: 9, points: 60, segments: 10, verts: 6,
+  // Points is a multiple of 8 so a corner-phased meridian lands on a real
+  // sample rather than half a step off it.
+  rings: 9, points: 48, segments: 12, verts: 8,
   spin: 0.2, tilt: ISO_TILT, ortho: false, depth: 0.82, backface: 0.06,
   strokeWidth: 1.1, morphMs: 1600, revealTurn: Math.PI,
 }
 
 const FULL = {
-  rings: 13, points: 84, segments: 14, verts: 10,
+  rings: 13, points: 96, segments: 16, verts: 12,
   spin: 0.16, tilt: ISO_TILT, ortho: false, depth: 0.82, backface: 0.06,
   strokeWidth: 1.25, morphMs: 1700, revealTurn: Math.PI,
 }
@@ -50,7 +53,7 @@ function WireframeTile() {
   const [shape] = useCycle(true, TILE_HOLD + TILE.morphMs)
   return (
     <div className="wf-tile" aria-hidden="true" inert>
-      <Wireframe shape={shape} size={190} interactive={false} {...TILE} />
+      <Wireframe shape={shape} size={190} interactive={false} paint={depthSweep} {...TILE} />
     </div>
   )
 }
@@ -67,7 +70,7 @@ function WireframeFull() {
   return (
     <div className="wf-full">
       <div className="wf-stage">
-        <Wireframe shape={shape} size={620} {...FULL} />
+        <Wireframe shape={shape} size={620} paint={depthSweep} {...FULL} />
       </div>
       <div className="wf-controls">
         {SHAPES.map((s, i) => (

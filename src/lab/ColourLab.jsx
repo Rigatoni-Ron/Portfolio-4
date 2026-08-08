@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Wireframe, { ISO_TILT } from '../playground/wireframe/Wireframe.jsx'
 import { SHAPES } from '../playground/wireframe/shapes.js'
-import { PALETTE, RAMPS, ramp, stretch } from './palette.js'
+import { PALETTE, RAMPS, ramp, stretch } from '../playground/wireframe/palette.js'
 import './colour.css'
 
 /*

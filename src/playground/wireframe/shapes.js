@@ -12,6 +12,8 @@
 //   n           superellipse exponent — 1 diamond, 2 circle, 14+ square
 //   lobes/amp   modulation around the contour
 //   height      total Y extent, when using `profile`
+//   verts       how many meridians this shape wants (default: the prop)
+//   vertPhase   where the first meridian sits, 0..1 around the contour
 //
 // Nearly every form here is a smooth `profile`, sampled at every ring. That
 // even spread is deliberate: the renderer fades each ring segment by its own
@@ -85,18 +87,41 @@ function canister({ body = 0.84, lid = 0.58, shoulder = 0.28, base = -0.86, top 
   }
 }
 
-// A stepped pyramid. Every step is two rings sharing one height: the outer
-// radius arriving, then the inner radius leaving. That shared height is the
-// tread, and it's why the corner comes out crisp instead of ramped.
-function steppedPyramid(base = 1, top = 0.22, span = 1.8) {
+// A stack of slabs. Each boundary between slabs is two rings sharing one
+// height — the outer radius arriving, then the inner radius leaving — and that
+// shared height is what makes the corner crisp instead of ramped.
+//
+// This replaced a stepped pyramid that used every ring for a step and tapered
+// hard, which read as a ziggurat rather than as blocks. The fixes were fewer,
+// chunkier slabs and much less taper: enough that each one is legible as its
+// own block, not enough to make a cone out of them. Spare rings pile up
+// coincidentally, which costs nothing.
+function slabStack({ slabs = 4, base = 1, top = 0.7, span = 1.72 } = {}) {
+  const h = span / slabs
+  const rOf = (k) => base + (top - base) * (k / slabs)
+  const keys = [[-span / 2, rOf(0)]]
+  for (let k = 1; k <= slabs; k++) {
+    keys.push([-span / 2 + k * h, rOf(k - 1)]) // top of the wall below
+    if (k < slabs) keys.push([-span / 2 + k * h, rOf(k)]) // tread stepping in
+  }
   return (i, R) => {
-    const steps = Math.max(1, (R - 1) >> 1)
-    const h = span / steps
-    const rOf = (s) => base + (top - base) * (s / steps)
-    if (i === 0) return { y: -span / 2, r: rOf(0) }
-    const s = ((i - 1) >> 1) + 1
-    const tread = (i - 1) & 1
-    return { y: -span / 2 + s * h, r: rOf(tread ? s : s - 1) }
+    const k = Math.min(keys.length - 1, Math.round((i / Math.max(1, R - 1)) * (keys.length - 1)))
+    return { y: keys[k][0], r: keys[k][1] }
+  }
+}
+
+// A globe. Two things separate this from the `sin(pi v)` profile it replaced,
+// which came out visibly pointed at the poles:
+//
+//   - the radius is the actual circle, sqrt(1 - y^2). `sin` is not that: at a
+//     quarter height it gives 0.71 where a sphere is 0.87, and the difference
+//     is exactly the pinch that showed.
+//   - rings step by equal *latitude* rather than equal height, which is how a
+//     graticule is drawn — so they bunch toward the poles the way a globe's do.
+function globe() {
+  return (i, R) => {
+    const lat = (i / Math.max(1, R - 1) - 0.5) * Math.PI
+    return { y: Math.sin(lat), r: Math.cos(lat) }
   }
 }
 
@@ -116,16 +141,19 @@ export const SHAPES = [
   // Deposits — value accumulating.
   { id: 'stack', label: 'Deposits', n: 2, at: coinStack() },
 
-  // Staking — tiers locking up. The reference's own staking illustration.
-  { id: 'tiers', label: 'Staking', n: 14, at: steppedPyramid() },
+  // Staking — value locked up in blocks. Four meridians, phased onto the
+  // corners: on a squared form the default even spread lands lines up the
+  // middle of each face, which read as arbitrary cuts rather than as edges.
+  { id: 'tiers', label: 'Staking', n: 14, at: slabStack(), verts: 4, vertPhase: 0.125 },
 
   // Custody. Was a plain cylinder, which read as the same object as Deposits —
   // both just a ribbed tube. Now squared off and given a stepped lid, so it
   // differs from the stack in silhouette and not only in ring rhythm.
-  { id: 'vault', label: 'Vault', n: 8, at: canister() },
+  { id: 'vault', label: 'Vault', n: 8, at: canister(), verts: 8, vertPhase: 0.0625 },
 
   // A bar of metal, squared off and drafted the way one is actually cast.
-  { id: 'ingot', label: 'Ingot', n: 14, height: 0.78, profile: (v) => 1 - 0.19 * v },
+  // Squared, so its meridians go on the corners too.
+  { id: 'ingot', label: 'Ingot', n: 14, height: 0.78, profile: (v) => 1 - 0.19 * v, verts: 4, vertPhase: 0.125 },
 
   // Order flow, routing, aggregation.
   { id: 'funnel', label: 'Funnel', n: 2, profile: (v) => 0.08 + v * 0.95 },
@@ -134,7 +162,7 @@ export const SHAPES = [
   { id: 'term', label: 'Term', n: 2, profile: (v) => 0.14 + Math.abs(v - 0.5) * 1.62 },
 
   // Global markets.
-  { id: 'globe', label: 'Markets', n: 2, profile: (v) => Math.sin(Math.PI * v) },
+  { id: 'globe', label: 'Markets', n: 2, at: globe(), verts: 12 },
 ]
 
 /*

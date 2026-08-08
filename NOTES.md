@@ -57,18 +57,10 @@ never reads the noindex and the bare URL can still get listed.
 
 ### Experiments
 
-- **Colour for the Wireframe piece.** Throwaway at `/colour.html` (dev only,
-  `src/lab/ColourLab.jsx`). Eight treatments of the same geometry in a palette
-  measured out of a reference photo — `src/lab/palette.js` records the method
-  and the one hand adjustment. The engine gained an optional `paint(el, info)`
-  prop for it; with `paint` null the default depth fade runs untouched, so the
-  shipped piece *renders* identically — verified on the live tile: no inline
-  strokes, 96 paths, 96 distinct opacities. The chunk hash does change, since
-  the engine file itself gained the hook.
-
-  Undecided. `Depth + sweep` and `Two-tone` are the two that could plausibly
-  ship — the first keeps the mono version's dimensionality, the second is the
-  only one legible at tile size. Everything else is a full-size-only look.
+- **Other colour treatments for the Wireframe piece.** The study is still at
+  `/colour.html` (dev only). `Depth + sweep` shipped; the other seven are
+  parked there, and `Two-tone` is the one to reach for if the piece ever needs
+  to read at a smaller size than the tile.
 
 - Dark-brown tint for the Nested Menu piece.
 - Where to link the inspo garden (`inspo-canvas-v2.vercel.app`). Rejected as a
@@ -132,6 +124,21 @@ never reads the noindex and the bare URL can still get listed.
      the parallel projection.
   2. *A depth gradient, not a hard front/back split.* Each ring is cut into
      `segments` pieces and each piece is dimmed by its own depth.
+  3. *Colour from a reference photo* — `palette.js`, which records how the
+     palette was measured and why a k-means over the pixels was the wrong tool
+     for it. The shipped treatment is `depthSweep`: depth drives brightness, a
+     slow sweep drives hue. It won over seven alternatives (kept in the study at
+     `/colour.html`) because it's the only one that leaves the brightness
+     channel to depth — the others spend it on colour and the form goes flat.
+  4. *Meridians are per-shape.* Count and phase come off the shape, not the
+     prop. That sounds like it should conflict with the morph needing identical
+     topology, but topology only constrains the **rings** — meridians are a
+     drawing choice. Slots are allocated for the largest count any shape wants;
+     shapes wanting fewer leave the rest empty, the count blends as a weight so
+     they fade rather than pop, and the angle takes the short way round. This is
+     what lets the squared forms carry four lines on their corners while the
+     round ones keep twelve evenly spread. `points` is a multiple of 8 so a
+     corner-phased meridian lands on a real sample instead of half a step off.
 
   **Hidden-line removal was built and reverted — don't rebuild it.** Drawing
   one front arc and one back arc per ring, split at the silhouette, gives a
@@ -149,10 +156,10 @@ never reads the noindex and the bare URL can still get listed.
   Same story for collapsing shapes onto two or three key rings: a tighter
   diagram, but the set stopped reading as one material. Rings spread evenly now.
 
-  **Measured, don't re-litigate.** 0.40ms per frame at tile resolution
-  (96 paths), 1.03ms at full (192), 1.9ms at a 318-path stress test — 2%, 6%
-  and 11% of a 60fps budget. Only the tile figure runs five-up — there is
-  never more than one opened piece. Against the whole page it is below noise.
+  **Measured, don't re-litigate.** 0.43ms per frame at tile resolution
+  (116 paths) and 0.57ms at full (220) — 3% and 3% of a 60fps budget. Only the
+  tile figure runs five-up; there is never more than one opened piece. Against
+  the whole page it is below noise, and adding colour did not move it.
   Deliberately has no offscreen pause, per the entry below; it does take an
   unused `paused` prop for the freeze-tiles-while-a-modal-is-open item.
 
